@@ -2,6 +2,7 @@ import { DbContext } from "./managed/database";
 import { DbClient, RunContext } from "vlquery";
 import { registerInterface } from "./interface";
 import { join } from "path";
+import { importArea } from "./importer";
 
 const express = require('express');
 const webSockets = require('express-ws');
@@ -14,6 +15,8 @@ DbClient.connectedClient.connect().then(async () => {
 	webSockets(app);
 
 	const database = new DbContext(new RunContext());
+
+	importArea(database);
 
 	registerInterface(app, database);
 
