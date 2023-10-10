@@ -41,8 +41,8 @@ export class CreateGameComponent extends Component {
 					},
 					body: JSON.stringify({
 						center: {
-							latitude: this.parameters.latitude,
-							longitude: this.parameters.longitude
+							latitude: +this.parameters.latitude,
+							longitude: +this.parameters.longitude
 						},
 						radius: this.radius
 					})

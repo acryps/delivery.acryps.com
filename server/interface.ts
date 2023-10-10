@@ -1,10 +1,7 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
-<<<<<<< HEAD
 import { DbContext } from "./managed/database";
-=======
 import { Point } from "./game/point";
->>>>>>> e5bac7f24e220e41c6b7b06802cf361ac89d22b1
 
 export interface GameReceiveMessage {
 	start?: boolean;
@@ -56,7 +53,7 @@ export function registerInterface(app, database: DbContext) {
 		});
 	});
 
-	app.ws('/join/:token', (socket: WebSocket, request) => {
+	app.ws('/join/:token', (socket, request) => {
 		const game = games.find(game => game.token == request.params.token.toLowerCase());
 
 		if (!game) {
@@ -67,15 +64,20 @@ export function registerInterface(app, database: DbContext) {
 
 		game.join(player);
 
-		socket.onmessage = message => (gameMessage: GameReceiveMessage = message.data) => {
+		socket.send(player.id);
+
+		socket.on('message', data => {
+			const gameMessage: GameReceiveMessage = JSON.parse(data);
+			console.log(gameMessage);
+
 			if (gameMessage.start) {
 				game.start(player);
 			}
 
-			if (gameMessage.moveAngle != null) {
+			if ('moveAngle' in gameMessage) {
 				player.moveAngle = gameMessage.moveAngle;
 			}
-		}
+		});
 
 		socket.onclose = () => game.leave(player);
 	});

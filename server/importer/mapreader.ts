@@ -39,7 +39,7 @@ export class MapReader {
 	}
 
 
-    getHouses() {
+    async getHouses() {
         let buildings: Element[];
         // get building ways
 
@@ -50,7 +50,9 @@ export class MapReader {
 
 		// calculate center point
 
-        const xmlDoc = this.readMap();
+		/*
+
+        const xmlDoc = await this.readMap();
 
         const ways = xmlDoc.getElementsByTagName('ways');
 
@@ -76,7 +78,7 @@ export class MapReader {
                     }
                 }
             }
-        }
+        }*/
     }
 
     getNode(nodeReference: string) {

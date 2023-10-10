@@ -29,7 +29,6 @@ export class MapComponent extends Component {
 	direction = 0.2;
 
 	renderedRotation = 0;
-	renderTime = new Date();
 
 	async onload() {
 		const objects = await fetch(`/map/${this.parent.parameters.token}`).then(response => response.json());
@@ -78,11 +77,11 @@ export class MapComponent extends Component {
 					this.height * this.playerViewLocation.y - endTouchPosition.y
 				)// - startTouch.angle;
 
-				console.log(this.direction);
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
 			};
 
 			mapCanvas.ontouchend = mapCanvas.ontouchcancel = () => {
-				// send stop roate to server
+				this.parent.socket.send(JSON.stringify({ moveAngle: null }));
 			};
 
 			const context = mapCanvas.getContext('2d');
@@ -99,10 +98,6 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
-		const now = new Date();
-		console.log(`${+now - +this.renderTime}ms`);
-		this.renderTime = now;
-
 		// set context rotation
 		context.rotate(this.direction - this.renderedRotation);
 		this.renderedRotation = this.direction;
