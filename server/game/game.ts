@@ -33,6 +33,10 @@ export class Game {
 	leave(player: Player) {
 		this.players.splice(this.players.indexOf(player), 1);
 
+		this.broadcast({
+			leave: player
+		});
+
 		if (!this.players.length) {
 			this.stop();
 		}
@@ -51,23 +55,19 @@ export class Game {
 
 		while (this.isRunning) {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
-				const deltaTime = Date.now() - lastTick;
+				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
 					player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
 					player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
 				}
 
-				for (const player of this.players) {
-					const message: GameSendMessage = {
-						move: this.players.map(player => ({
-							id: player.id,
-							position: player.position
-						}))
-					}
-
-					player.socket.send(JSON.stringify(message));
-				}
+				this.broadcast({
+					move: this.players.map(player => ({
+						id: player.id,
+						position: player.position
+					}))
+				});
 
 				lastTick = Date.now();
 			}
@@ -83,5 +83,11 @@ export class Game {
 	private isHost(player: Player) {
 		// first player is always the host
 		return this.players.indexOf(player) == 0;
+	}
+
+	private broadcast(message: GameSendMessage) {
+		for (const player of this.players) {
+			player.socket.send(JSON.stringify(message));
+		}
 	}
 }

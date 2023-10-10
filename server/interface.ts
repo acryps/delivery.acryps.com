@@ -11,7 +11,9 @@ export interface GameSendMessage {
 	move?: {
 		id: string;
 		position: Point;
-	}[]
+	}[];
+
+	leave?: Player
 }
 
 export function registerInterface(app, database) {
