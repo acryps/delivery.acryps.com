@@ -14,6 +14,8 @@ export class HomeComponent extends Component {
 				if ('geolocation' in navigator) {
 					navigator.geolocation.getCurrentPosition(position => {
 						this.navigate(`/create/${position.coords.latitude}/${position.coords.longitude}`);
+					}, () => {
+						this.navigate(`/create/${this.default.latitude}/${this.default.longitude}`);
 					});
 				} else {
 					this.navigate(`/create/${this.default.latitude}/${this.default.longitude}`);
