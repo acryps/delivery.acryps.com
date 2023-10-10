@@ -1,20 +1,25 @@
 const file = 'map.osm';
 
 export class MapReader {
-    async readMap() {
-        const toChange = await fetch(file).then(res => res.text());
-    }
+	async readMap() {
+		const toChange = await fetch(file).then(res => res.text());
+	}
 
 
-    getHouses() {
-        // get building ways
+	getHouses() {
+		// get building ways
 
-        // get corner points of buildings
-        // convert corner points into polygon string
+		// get corner points of buildings
+		// convert corner points into polygon string
 
-        // get address
+		// get address
 
-        // calculate center point
+		// calculate center point
 
-    }
+	}
+
+
+	getStreets() {
+		
+	}
 }
