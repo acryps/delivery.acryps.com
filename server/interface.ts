@@ -1,5 +1,23 @@
+import { Game } from "./game/game";
+import { Player } from "./game/player";
+import { Point } from "./game/point";
+
+export interface GameReceiveMessage {
+	start?: boolean;
+	moveAngle?: number;
+}
+
+export interface GameSendMessage {
+	move?: {
+		id: string;
+		position: Point;
+	}[];
+
+	leave?: Player
+}
+
 export function registerInterface(app, database) {
-	const games = {};
+	const games: Game[] = [];
 
 	app.post('/game', (request, response) => {
 		const center = {
@@ -8,38 +26,34 @@ export function registerInterface(app, database) {
 		};
 
 		const radius = request.body.radius;
-		const token = Math.random().toString(36).substring(2);
 
-		games[token] = {
-			// create game
+		const game = new Game(center, radius);
+		games.push(game);
 
-			creatorKey: request.body.key
-		}
-
-		response.json(token);
+		response.json(game.token);
 	});
 
-	app.post('/start', (request, response) => {
-		const game = games[request.body.token];
-
-		if (game.creatorKey == request.body.key) {
-			// start game
-
-			return response.json(true);
-		}
-
-		response.json(false);
-	});
-
-	app.ws('/join/:token', (socket, request) => {
-		const game = games[request.query.token];
+	app.ws('/join/:token', (socket: WebSocket, request) => {
+		const game = games.find(game => game.token == request.query.token.toLowerCase());
 
 		if (!game) {
 			return socket.close();
 		}
 
-		// send buildings
+		const player = new Player(socket, game.map.center);
 
-		// add player to game, send events etc
+		game.join(player);
+
+		socket.onmessage = message => (gameMessage: GameReceiveMessage = message.data) => {
+			if (gameMessage.start) {
+				game.start(player);
+			}
+
+			if (gameMessage.moveAngle != null) {
+				player.moveAngle = gameMessage.moveAngle;
+			}
+		}
+
+		socket.onclose = () => game.leave(player);
 	});
 }

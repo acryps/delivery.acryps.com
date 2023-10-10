@@ -1,0 +1,32 @@
+ui-game {
+	position: fixed;
+	inset: 1rem;
+
+	ui-lobby {
+		position: fixed;
+		inset: 1rem;
+
+		background: var(--page-background);
+		border: 1px solid var(--page-color);
+
+		ui-join {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			padding: 1rem;
+
+			background: var(--page-color);
+			color: var(--page-background);
+			font-size: 2rem;
+
+			ui-token {
+				text-transform: uppercase;
+			}
+
+			img { 
+				height: 4rem;
+			}
+		}
+	}
+}

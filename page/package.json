@@ -10,6 +10,7 @@
 	"dependencies": {
 		"@acryps/page": "^1.2.0",
 		"@acryps/page-default-directives": "^1.0.3",
-		"@acryps/parcel-transformer-page": "^1.0.1"
+		"@acryps/parcel-transformer-page": "^1.0.1",
+		"qrcode": "^1.5.3"
 	}
 }
