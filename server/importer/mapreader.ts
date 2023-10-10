@@ -6,7 +6,6 @@ const fileName = 'map';
 const cwd = process.cwd() + "/importer";
 
 export class MapReader {
-	
 
 	async readMap() {
 
@@ -85,24 +84,25 @@ export class MapReader {
 
         //get node with the node reference as ID to get latitude and longitude
     }
+
+	getStreets() {
+		// todo: figure out what types of streets there are and bundle them
+		// bridges, highways, paths, streets, mainstreets, ... => streets
+	
+		// get street names
+	
+		// get corner points
+	
+		// calculate center
+	
+	}
+	
+	calculateCenter(coordinates: Coordinates[]): Coordinates {
+		let center: Coordinates = null;
+		// todo: implement center calculations
+	
+		return center;
+	}
 }
 
 
-getStreets() {
-	// todo: figure out what types of streets there are and bundle them
-	// bridges, highways, paths, streets, mainstreets, ... => streets
-
-	// get street names
-
-	// get corner points
-
-	// calculate center
-
-}
-
-calculateCenter(coordinates: Coordinates[]): Coordinates {
-	let center: Coordinates = null;
-	// todo: implement center calculations
-
-	return center;
-}
