@@ -10,7 +10,8 @@ export class GameComponent extends Component {
 		const mapCanvas = document.createElement('canvas');
 
 		requestAnimationFrame(() => {
-			const size = mapCanvas.width = mapCanvas.height = this.resolution / (this.radius * 2);
+			const size = mapCanvas.width = mapCanvas.height = Math.round((this.radius * 2) / this.resolution);
+			console.debug(size)
 			
 			const context = mapCanvas.getContext('2d');
 			context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);

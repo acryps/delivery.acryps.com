@@ -1,8 +1,8 @@
 {
 	"name": "server",
 	"scripts": {
-		"build": "npx vlserver compile && tsc && vlquery compile",
-		"start": "npx vlserver compile && tsc && vlquery compile && environment node built/index.js",
+		"build": "tsc && vlquery compile",
+		"start": "tsc && vlquery compile && environment node built/index.js",
 		"database:update": "environment vlquery create-context"
 	},
 	"environment": {
@@ -13,8 +13,9 @@
 	},
 	"dependencies": {
 		"@acryps/environment": "^2.0.1",
-		"vlquery": "^7.0.8",
-		"vlserver": "^4.6.21"
+		"express": "^4.18.2",
+		"express-ws": "^5.0.2",
+		"vlquery": "^7.0.8"
 	},
 	"devDependencies": {
 		"@types/node": "^18.11.15",

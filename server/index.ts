@@ -1,27 +1,26 @@
-import { Inject, StaticFileRoute, ViewModel } from "vlserver";
-import { ManagedServer } from "./managed/server";
 import { DbContext } from "./managed/database";
-import { join } from "path";
 import { DbClient, RunContext } from "vlquery";
+import { registerInterface } from "./interface";
+import { join } from "path";
+
+const express = require('express');
+const webSockets = require('express-ws');
 
 DbClient.connectedClient = new DbClient({});
 
 DbClient.connectedClient.connect().then(async () => {
-	const app = new ManagedServer();
+	const app = express();
+	webSockets(app);
+
 	const database = new DbContext(new RunContext());
-	
-	app.createInjector = context => new Inject({
-		Context: context,
-		DbContext: database
+
+	registerInterface(app, database);
+
+	app.use(express.static(join(process.cwd(), '..', 'page', 'built')));
+
+	app.get('*', (req, res) => {
+		res.sendFile(join(process.cwd(), '..', 'page', 'built', 'index.html'));
 	});
 
-	app.use(new StaticFileRoute('/', join(process.cwd(), '..', 'page', 'built')));
-	app.use(new StaticFileRoute('/assets', join(process.cwd(), '..', 'page', 'assets')));
-
-	app.prepareRoutes();
-	app.use(new StaticFileRoute('*', join(process.cwd(), '..', 'page', 'built', 'index.html')));
-
-	ViewModel.globalFetchingContext = database;
-
-	app.start(+process.env.PORT! || 5407);
+	app.listen(+process.env.PORT! || 5407);
 });
