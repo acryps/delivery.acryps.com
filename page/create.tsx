@@ -10,20 +10,28 @@ export class CreateGameComponent extends Component {
 	radius = this.radii[1];
 
 	render() {
-		return <ui-lobby>
+		return <ui-create-game>
 			<ui-location>
+				<ui-title>
+					Location
+				</ui-title>
+
 				{this.parameters.latitude} {this.parameters.longitude}
 			</ui-location>
 
-			<ui-ranges>
-				{this.radii.map(radius => <ui-range ui-active={radius == this.radius} ui-click={() => {
+			<ui-radii>
+				<ui-title>
+					Radius
+				</ui-title>
+
+				{this.radii.map(radius => <ui-radius ui-active={radius == this.radius} ui-click={() => {
 					this.radius = radius;
 
 					this.update();
 				}}>
 					+/- {radius}
-				</ui-range>)}
-			</ui-ranges>
+				</ui-radius>)}
+			</ui-radii>
 
 			<ui-action ui-start ui-click={async () => {
 				const token = await fetch('/game', {
@@ -44,6 +52,6 @@ export class CreateGameComponent extends Component {
 			}}>
 				Start Game
 			</ui-action>
-		</ui-lobby>;
+		</ui-create-game>;
 	}
 }

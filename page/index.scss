@@ -1,9 +1,92 @@
+@import './assets/font/index.scss';
+@import './game/index.scss';
+
+:root {
+	--page-color: #fff;
+	--page-background: #000;
+}
+
 body {
 	margin: 0;
 	padding: 0;
+
+	font-family: var(--font-family);
+
+	color: var(--page-color);
+	background: var(--page-background);
 }
 
 ui-page {
 	display: block;
-	
+}
+
+ui-home {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	position: fixed;
+	inset: 0;
+
+	ui-action {
+		display: block;
+		padding: 1rem;
+		margin: 1rem;
+
+		border: 2px solid var(--page-color);
+
+		cursor: pointer;
+
+		&:hover {
+			background: var(--page-color);
+			color: var(--page-background);
+		}
+	}
+}
+
+ui-create-game {
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+
+	position: fixed;
+	inset: 1rem;
+
+	border: 1px solid var(--page-color);
+
+	ui-location ui-title,
+	ui-radii ui-title {
+		display: block;
+		margin-bottom: 0.25rem;
+
+		font-size: 0.8rem;
+	}
+
+	ui-location {
+		display: block;
+		margin-bottom: 1rem;
+	}
+
+	ui-radii {
+		ui-radius {
+			margin-right: 1rem;
+
+			&[ui-active] {
+				color: var(--page-background);
+				background: var(--page-color);
+			}
+		}
+	}
+
+	ui-action {
+		margin-top: auto;
+
+		display: block;
+		padding: 1rem;
+
+		text-align: center;
+		color: var(--page-background);
+		background: var(--page-color);
+	}
 }
