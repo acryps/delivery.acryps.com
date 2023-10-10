@@ -1,5 +1,5 @@
 {
-    "name": "{{APPLICATION}}",
+    "name": "delivery",
     "version": "1.0.0",
     "scripts": {
         "build": "cd page; npm run build; cd ..; cd server; npm run build; cd .."

@@ -1,4 +1,4 @@
-# {{APPLICATION}}
+# Delivery
 
 # TEMPLATE
 1. Create project directory
