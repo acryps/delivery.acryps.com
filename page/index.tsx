@@ -4,7 +4,7 @@ import { PageComponent } from './page';
 import { HomeComponent } from './home';
 import { GameComponent } from './game';
 import { JoinComponent } from './join';
-import { CreateComponent } from './create';
+import { CreateGameComponent } from './create';
 
 export class Application {
 	static router: Router;
@@ -13,9 +13,9 @@ export class Application {
 		this.router = new PathRouter(PageComponent
 			.route('/', HomeComponent)
 			.route('/join', JoinComponent)
-			.route('/create/:latitude/:longitude', CreateComponent)
+			.route('/create/:latitude/:longitude', CreateGameComponent)
 
-			.route('/:token', GameComponent)
+			.route('/play/:token', GameComponent)
 		);
 		
 		registerDirectives(Component, this.router);

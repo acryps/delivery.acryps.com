@@ -10,6 +10,7 @@ DbClient.connectedClient = new DbClient({});
 
 DbClient.connectedClient.connect().then(async () => {
 	const app = express();
+	app.use(express.json());
 	webSockets(app);
 
 	const database = new DbContext(new RunContext());
