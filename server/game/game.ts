@@ -51,7 +51,7 @@ export class Game {
 
 		while (this.isRunning) {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
-				const deltaTime = Date.now() - lastTick;
+				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
 					player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
