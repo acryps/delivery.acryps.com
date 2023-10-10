@@ -1,14 +1,17 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
+import { Point } from "./game/point";
 
-type SocketMessage = {
-	type: SocketMessageType;
-	data: any;
+export interface GameReceiveMessage {
+	start?: boolean;
+	moveAngle?: number;
 }
 
-enum SocketMessageType {
-	Start,
-	Move
+export interface GameSendMessage {
+	move?: {
+		id: string;
+		position: Point;
+	}[]
 }
 
 export function registerInterface(app, database) {
@@ -29,7 +32,7 @@ export function registerInterface(app, database) {
 	});
 
 	app.ws('/join/:token', (socket: WebSocket, request) => {
-		const game = games.find(game => game.token == request.query.token);
+		const game = games.find(game => game.token == request.query.token.toLowerCase());
 
 		if (!game) {
 			return socket.close();
@@ -39,22 +42,13 @@ export function registerInterface(app, database) {
 
 		game.join(player);
 
-		socket.onmessage = message => (socketMessage: SocketMessage = message.data) => {
-			switch (socketMessage.type) {
-				case SocketMessageType.Start:
-					game.start(player);
+		socket.onmessage = message => (gameMessage: GameReceiveMessage = message.data) => {
+			if (gameMessage.start) {
+				game.start(player);
+			}
 
-					break;
-
-				case SocketMessageType.Move:
-					player.moveDirection = socketMessage.data;
-
-					break;
-
-				default:
-					console.error('Event not implemented');
-
-					break;
+			if (gameMessage.moveAngle != null) {
+				player.moveAngle = gameMessage.moveAngle;
 			}
 		}
 

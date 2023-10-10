@@ -1,3 +1,4 @@
+import { GameSendMessage } from "../interface";
 import { Map } from "./map";
 import { Player } from "./player";
 import { Point } from "./point";
@@ -5,15 +6,16 @@ import { Point } from "./point";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
+	readonly playerSpeed = 5;
 
-	token: string;
+	readonly token = Math.random().toString(36).substring(2, 8);
+
 	players: Player[] = [];
 	map: Map;
 
 	private isRunning: boolean;
 
 	constructor(center: Point, radius: number) {
-		this.token = this.createToken();
 		this.players = [];
 		this.map = new Map(center, radius);
 		this.isRunning = false;
@@ -52,12 +54,19 @@ export class Game {
 				const deltaTime = Date.now() - lastTick;
 
 				for (const player of this.players) {
-					player.position.latitude += player.moveDirection.y * deltaTime;
-					player.position.longitude += player.moveDirection.x * deltaTime;
+					player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
+					player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
+				}
 
-					for (const player of this.players) {
-						// TODO send position update
+				for (const player of this.players) {
+					const message: GameSendMessage = {
+						move: this.players.map(player => ({
+							id: player.id,
+							position: player.position
+						}))
 					}
+
+					player.socket.send(JSON.stringify(message));
 				}
 
 				lastTick = Date.now();
@@ -74,9 +83,5 @@ export class Game {
 	private isHost(player: Player) {
 		// first player is always the host
 		return this.players.indexOf(player) == 0;
-	}
-
-	private createToken() {
-		return Array(4).fill('').map(() => Math.random().toString(36).substring(2)).join('-');
 	}
 }
