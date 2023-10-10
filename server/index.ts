@@ -9,7 +9,7 @@ DbClient.connectedClient = new DbClient({});
 DbClient.connectedClient.connect().then(async () => {
 	const app = new ManagedServer();
 	const database = new DbContext(new RunContext());
-	
+
 	app.createInjector = context => new Inject({
 		Context: context,
 		DbContext: database
