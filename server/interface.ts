@@ -1,5 +1,6 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
+import { DbContext } from "./managed/database";
 
 type SocketMessage = {
 	type: SocketMessageType;
@@ -11,7 +12,7 @@ enum SocketMessageType {
 	Move
 }
 
-export function registerInterface(app, database) {
+export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
 
 	app.post('/game', (request, response) => {
@@ -28,8 +29,27 @@ export function registerInterface(app, database) {
 		response.json(game.token);
 	});
 
+	app.get('/map/:token', async (request, response) => {
+		const game = games.find(game => game.token == request.params.token);
+
+		if (!game) {
+			return response.json({});
+		}
+
+		const buildings = await database.building.toArray();
+
+		response.json({
+			center: game.map.center,
+			radius: game.map.radius,
+
+			buildings: buildings.map(building => ({
+				geometry: building.polygon.split(';')
+			}))
+		});
+	});
+
 	app.ws('/join/:token', (socket: WebSocket, request) => {
-		const game = games.find(game => game.token == request.query.token);
+		const game = games.find(game => game.token == request.params.token);
 
 		if (!game) {
 			return socket.close();

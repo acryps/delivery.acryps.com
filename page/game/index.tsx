@@ -15,7 +15,7 @@ export class GameComponent extends Component {
 	}
 
 	render() {
-		this.map = new MapComponent(new Point(0, 0), new Point(0, 0), 0.01);
+		this.map = new MapComponent(new Point(0, 0), new Point(0.001, 0.001), 0.01);
 
 		return <ui-game>
 			{this.lobby}
