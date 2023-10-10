@@ -1,15 +1,23 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
+<<<<<<< HEAD
 import { DbContext } from "./managed/database";
+=======
+import { Point } from "./game/point";
+>>>>>>> e5bac7f24e220e41c6b7b06802cf361ac89d22b1
 
-type SocketMessage = {
-	type: SocketMessageType;
-	data: any;
+export interface GameReceiveMessage {
+	start?: boolean;
+	moveAngle?: number;
 }
 
-enum SocketMessageType {
-	Start,
-	Move
+export interface GameSendMessage {
+	move?: {
+		id: string;
+		position: Point;
+	}[];
+
+	leave?: Player
 }
 
 export function registerInterface(app, database: DbContext) {
@@ -49,7 +57,7 @@ export function registerInterface(app, database: DbContext) {
 	});
 
 	app.ws('/join/:token', (socket: WebSocket, request) => {
-		const game = games.find(game => game.token == request.params.token);
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
 
 		if (!game) {
 			return socket.close();
@@ -59,22 +67,13 @@ export function registerInterface(app, database: DbContext) {
 
 		game.join(player);
 
-		socket.onmessage = message => (socketMessage: SocketMessage = message.data) => {
-			switch (socketMessage.type) {
-				case SocketMessageType.Start:
-					game.start(player);
+		socket.onmessage = message => (gameMessage: GameReceiveMessage = message.data) => {
+			if (gameMessage.start) {
+				game.start(player);
+			}
 
-					break;
-
-				case SocketMessageType.Move:
-					player.moveDirection = socketMessage.data;
-
-					break;
-
-				default:
-					console.error('Event not implemented');
-
-					break;
+			if (gameMessage.moveAngle != null) {
+				player.moveAngle = gameMessage.moveAngle;
 			}
 		}
 

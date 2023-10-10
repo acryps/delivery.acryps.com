@@ -1,8 +1,8 @@
 import { Point } from "./point";
-import { Vector } from "./vector";
 
 export class Player {
-	moveDirection: Vector;
+	readonly id = Math.random().toString(36).substring(2, 8);
+	moveAngle: number;
 
 	constructor (
 		public socket: WebSocket,
