@@ -13,16 +13,15 @@ export class Game {
 	players: Player[] = [];
 	map: Map;
 
-	private isRunning: boolean;
+	private gameLoop: NodeJS.Timeout;
 
 	constructor(center: Point, radius: number) {
 		this.players = [];
 		this.map = new Map(center, radius);
-		this.isRunning = false;
 	}
 
 	join(player: Player) {
-		if (this.isRunning) {
+		if (this.gameLoop) {
 			console.warn(`User ${player.socket} tried to join running game ${this.token}`);
 			throw new Error('Can\'t join running game');
 		}
@@ -54,10 +53,9 @@ export class Game {
 
 		console.log(`Started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
 
-		this.isRunning = true;
 		let lastTick = Date.now();
 
-		setInterval(() => {
+		this.gameLoop = setInterval(() => {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
@@ -75,12 +73,11 @@ export class Game {
 				lastTick = Date.now();
 			}
 		});
-
-		console.log(`Stopped game ${this.token}`);
 	}
 
 	stop() {
-		this.isRunning = false;
+		clearInterval(this.gameLoop);
+		console.log(`Stopped game ${this.token}`);
 	}
 
 	private isHost(player: Player) {
