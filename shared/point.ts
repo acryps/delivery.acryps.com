@@ -4,9 +4,7 @@ export class Point {
 		public longitude: number
 	) {}
 
-	static from(packed: string) {
-		const components = packed.split(',');
-
-		return new Point(+components[0], +components[1]);
+	static from(points) {
+		return new Point(points.latitude, points.longitude);
 	}
 }

@@ -22,7 +22,6 @@ export class MapComponent extends Component {
 	center: Point;
 	radius: number;
 
-	position: Point;
 	direction = 0.2;
 
 	renderedRotation = 0;
@@ -38,8 +37,10 @@ export class MapComponent extends Component {
 
 		this.center = new Point(objects.center.latitude, objects.center.longitude);
 		this.radius = objects.radius;
+	}
 
-		this.position = new Point(this.center.latitude, this.center.longitude);
+	get position() {
+		return this.parent.player?.position ?? this.center;
 	}
 
 	render() {
@@ -130,12 +131,15 @@ export class MapComponent extends Component {
 
 		// render player
 		const playerSize = 25;
-		const playerPosition = this.transform(this.position);
 
-		context.fillStyle = '#f00';
-		context.beginPath();
-		context.arc(playerPosition[0], playerPosition[1], playerSize / 2, 0, Math.PI * 2);
-		context.fill();
+		for (let player of this.parent.players) {
+			const playerPosition = this.transform(player.position);
+
+			context.fillStyle = player.color;
+			context.beginPath();
+			context.arc(...playerPosition, playerSize / 2, 0, Math.PI * 2);
+			context.fill();
+		}
 
 		requestAnimationFrame(() => {
 			if (this.parent.loaded) {

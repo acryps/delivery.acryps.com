@@ -2,7 +2,7 @@ import { Map } from "./map";
 import { Point } from "./point";
 import { Rectangle } from "./rectangle";
 
-export const playerSpeed = 0.00001;
+export const playerSpeed = 0.0001;
 
 export function move(map: Map, current: Point, angle: number, deltaTime: number) {
 	if (angle === null) {

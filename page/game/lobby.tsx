@@ -29,13 +29,9 @@ export class LobbyComponent extends Component {
 				</ui-player>)}
 			</ui-players>
 
-			<ui-action ui-start ui-click={() => {
-				this.parent.socket.send(JSON.stringify({
-					start: true
-				}));
-
-				this.remove();
-			}}>
+			<ui-action ui-start ui-click={() => this.parent.socket.send(JSON.stringify({
+				start: true
+			}))}>
 				Start Game
 			</ui-action>
 		</ui-lobby>;
