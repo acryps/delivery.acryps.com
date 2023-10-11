@@ -12,7 +12,26 @@ export class Map {
 	collides(point: Point) {
 		for (let building of this.buildings) {
 			if (Rectangle.fromPolygon(building.geometry).contains(point)) {
-				return true;
+				let insidePolygon = false;
+
+				for (let current = 0, previous = building.geometry.length - 1; current < building.geometry.length; previous = current++) {
+					const currentLongitude = building.geometry[current].longitude;
+					const currentLatitude = building.geometry[current].latitude;
+					const previousLongitude = building.geometry[previous].longitude;
+					const previousLatitude = building.geometry[previous].latitude;
+
+					const intersect =
+						currentLatitude > point.latitude !== previousLatitude > point.latitude &&
+						point.longitude < ((previousLongitude - currentLongitude) * (point.latitude - currentLatitude)) / (previousLatitude - currentLatitude) + currentLongitude;
+
+					if (intersect) {
+						insidePolygon = !insidePolygon;
+					}
+				}
+
+				if (insidePolygon) {
+					return true;
+				}
 			}
 		}
 
