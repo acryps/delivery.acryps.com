@@ -73,6 +73,8 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
+		this.parent.targetTracker.updatePosition();
+
 		const now = new Date();
 		const deltaTime = +now - +this.lastFrame;
 		this.lastFrame = now;

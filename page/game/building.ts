@@ -16,4 +16,19 @@ export class Building {
 
 		return building;
 	}
+
+	get center() {
+		let totalLatitude = 0;
+		let totalLongitude = 0;
+
+		for (let point of this.geometry) {
+			totalLatitude += point.latitude;
+			totalLongitude += point.longitude;
+		}
+
+		return new Point(
+			totalLatitude / this.geometry.length,
+			totalLongitude / this.geometry.length
+		);
+	}
 }
