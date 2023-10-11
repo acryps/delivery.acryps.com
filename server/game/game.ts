@@ -1,8 +1,8 @@
-import { GameSendMessage } from "../interface";
 import { Map } from "./map";
 import { Player } from "./player";
 import { Point } from "../../shared/point";
 import { move } from "../../shared/move";
+import { ServerMessage } from "../../shared/messages";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -52,6 +52,10 @@ export class Game {
 			throw new Error('Unauthorized to start game');
 		}
 
+		this.broadcast({
+			start: true
+		});
+
 		console.log(`Started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
 
 		this.isRunning = true;
@@ -88,7 +92,7 @@ export class Game {
 		return this.players.indexOf(player) == 0;
 	}
 
-	private broadcast(message: GameSendMessage) {
+	private broadcast(message: ServerMessage) {
 		console.log(JSON.stringify(message), this.players.length);
 
 		for (const player of this.players) {

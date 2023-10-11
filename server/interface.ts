@@ -2,21 +2,7 @@ import { Game } from "./game/game";
 import { Player } from "./game/player";
 import { DbContext } from "./managed/database";
 import { Point } from "../shared/point";
-
-export interface GameReceiveMessage {
-	start?: boolean;
-	moveAngle?: number;
-}
-
-export interface GameSendMessage {
-	move?: {
-		id: string;
-		position: Point;
-	}[];
-
-	leave?: Player,
-	join?: Player
-}
+import { ClientMessage } from "../shared/messages";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
@@ -72,7 +58,7 @@ export function registerInterface(app, database: DbContext) {
 		game.join(player);
 
 		socket.on('message', data => {
-			const gameMessage: GameReceiveMessage = JSON.parse(data);
+			const gameMessage: ClientMessage = JSON.parse(data);
 			console.log(gameMessage);
 
 			if (gameMessage.start) {
