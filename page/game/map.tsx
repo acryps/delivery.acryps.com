@@ -13,7 +13,7 @@ export class MapComponent extends Component {
 	width: number;
 	height: number;
 
-	scale = { x: 500000, y: 300000 };
+	scale = { x: 500000, y: 350000 };
 	
 	buildings: Building[];
 	waterBodies;
@@ -96,9 +96,6 @@ export class MapComponent extends Component {
 		const deltaTime = +now - +this.lastFrame;
 		this.lastFrame = now;
 
-		// apply client-calculated movement
-		// this.position = move(this.position, this.direction, deltaTime);
-
 		// set context rotation
 		context.rotate(this.direction - this.renderedRotation);
 		this.renderedRotation = this.direction;
@@ -128,7 +125,7 @@ export class MapComponent extends Component {
 		context.strokeStyle = 'white';
 		context.stroke();
 
-		context.fillStyle = '#222';
+		context.fillStyle = '#8884';
 		context.fill();
 
 		// render player
