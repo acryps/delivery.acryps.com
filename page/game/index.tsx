@@ -4,6 +4,8 @@ import { LobbyComponent } from "./lobby";
 import { DeliveryIndicator } from "./delivery";
 import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
+import { Point } from "../../shared/point";
+import { Building } from "./building";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -13,7 +15,18 @@ export class GameComponent extends Component {
 
 	map: MapComponent;
 	lobby = new LobbyComponent();
+
+	delivery;
 	deliveryIndicator = new DeliveryIndicator();
+
+	buildings: Building[];
+	waterBodies;
+	streets;
+
+	center: Point;
+	radius: number;
+
+	direction = 0.2;
 
 	socket: WebSocket;
 
@@ -22,6 +35,15 @@ export class GameComponent extends Component {
 	}
 
 	async onload() {
+		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
+
+		this.buildings = map.buildings.map(building => Building.from(building));
+		this.waterBodies = map.waterBodies;
+		this.streets = map.streets;
+
+		this.center = new Point(map.center.latitude, map.center.longitude);
+		this.radius = map.radius;
+
 		this.socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.host}/join/${this.parameters.token}`);
 		this.socket.onclose = () => this.navigate('/');
 
@@ -41,6 +63,15 @@ export class GameComponent extends Component {
 
 				if ('start' in data) {
 					this.lobby.remove();
+				}
+
+				if ('delivery' in data) {
+					this.delivery = {
+						source: this.buildings.find(building =>  building.id == data.delivery.source),
+						destination: this.buildings.find(building =>  building.id == data.delivery.source)
+					};
+
+					this.deliveryIndicator.update();
 				}
 
 				if ('move' in data) {

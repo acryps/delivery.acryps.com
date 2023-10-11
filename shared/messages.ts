@@ -16,6 +16,11 @@ export interface ServerMessage {
 		position: Point;
 	}[];
 
+	delivery?: {
+		source: string,
+		destination: string
+	}
+
 	start?: boolean,
 
 	leave?: PlayerMessage,

@@ -2,7 +2,12 @@ import { Point } from "./point";
 
 export class BuildingViewModel {
 	constructor (
-		private address: string,
-		private geometry: Point[]
+		public id: string,
+		public address: string,
+		public geometry: Point[]
 	) {}
+
+	get entrance() {
+		return this.geometry[0];
+	}
 }

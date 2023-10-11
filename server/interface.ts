@@ -10,14 +10,12 @@ export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
 
 	app.post('/game', async (request, response) => {
-		const center = {
-			latitude: request.body.center.latitude,
-			longitude: request.body.center.longitude
-		};
+		const center = new Point(request.body.center.latitude, request.body.center.longitude);
 
 		const radius = request.body.radius;
 
 		const buildings = (await database.building.toArray()).map(building => new BuildingViewModel(
+			building.id,
 			building.address,
 			building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
 		));

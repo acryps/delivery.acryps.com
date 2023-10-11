@@ -3,6 +3,7 @@ import { Player } from "./player";
 import { Point } from "../../shared/point";
 import { move } from "../../shared/move";
 import { ServerMessage } from "../../shared/messages";
+import { Package } from "./package";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -25,6 +26,8 @@ export class Game {
 			console.warn(`User ${player.socket} tried to join running game ${this.token}`);
 			throw new Error('Can\'t join running game');
 		}
+
+		player.assignPackage(this.map);
 
 		this.players.push(player);
 

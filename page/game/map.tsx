@@ -15,32 +15,12 @@ export class MapComponent extends Component {
 
 	scale = { x: 500000, y: 350000 };
 	
-	buildings: Building[];
-	waterBodies;
-	streets;
-
-	center: Point;
-	radius: number;
-
-	direction = 0.2;
-
 	renderedRotation = 0;
 
 	lastFrame = new Date();
 
-	async onload() {
-		const objects = await fetch(`/map/${this.parent.parameters.token}`).then(response => response.json());
-
-		this.buildings = objects.buildings.map(building => Building.from(building));
-		this.waterBodies = objects.waterBodies;
-		this.streets = objects.streets;
-
-		this.center = new Point(objects.center.latitude, objects.center.longitude);
-		this.radius = objects.radius;
-	}
-
 	get position() {
-		return this.parent.player?.position ?? this.center;
+		return this.parent.player?.position ?? this.parent.center;
 	}
 
 	render() {
@@ -54,25 +34,25 @@ export class MapComponent extends Component {
 			
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
-					direction: this.direction,
+					direction: this.parent.direction,
 					angle: Math.atan2(
 						this.width * this.playerViewLocation.x - event.touches[0].clientX, 
 						this.height * this.playerViewLocation.y - event.touches[0].clientY
 					)
 				};
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
 			};
 
 			mapCanvas.ontouchmove = event => {
 				event.preventDefault();
 
-				this.direction = startTouch.direction + startTouch.angle - Math.atan2(
+				this.parent.direction = startTouch.direction + startTouch.angle - Math.atan2(
 					this.width * this.playerViewLocation.x - event.touches[0].clientX, 
 					this.height * this.playerViewLocation.y - event.touches[0].clientY
 				);
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
 			};
 
 			mapCanvas.ontouchend = mapCanvas.ontouchcancel = () => {
@@ -98,8 +78,8 @@ export class MapComponent extends Component {
 		this.lastFrame = now;
 
 		// set context rotation
-		context.rotate(this.direction - this.renderedRotation);
-		this.renderedRotation = this.direction;
+		context.rotate(this.parent.direction - this.renderedRotation);
+		this.renderedRotation = this.parent.direction;
 
 		// prepare frame
 		context.beginPath();
@@ -154,7 +134,7 @@ export class MapComponent extends Component {
 
 	get visibleBuildings() {
 		const viewport = this.viewport;
-		const buildings = this.buildings.filter(building => viewport.touches(building.boundingBox));
+		const buildings = this.parent.buildings.filter(building => viewport.touches(building.boundingBox));
 
 		console.log('drew', buildings.length);
 
