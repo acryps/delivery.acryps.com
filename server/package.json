@@ -19,6 +19,7 @@
 		"xml-js": "^1.6.11"
 	},
 	"devDependencies": {
+		"@types/express-ws": "^3.0.2",
 		"@types/node": "^18.18.4",
 		"nodemon": "^3.0.1",
 		"ts-node": "^10.9.1",

@@ -6,7 +6,7 @@ import { Point } from "./point";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly playerSpeed = 5;
+	readonly playerSpeed = 0.0005;
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
@@ -53,13 +53,15 @@ export class Game {
 		this.isRunning = true;
 		let lastTick = Date.now();
 
-		while (this.isRunning) {
+		setInterval(() => {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
-					player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
-					player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
+					if (player.moveAngle !== null) {
+						player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
+						player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
+					}
 				}
 
 				this.broadcast({
@@ -71,7 +73,7 @@ export class Game {
 
 				lastTick = Date.now();
 			}
-		}
+		});
 
 		console.log(`Stopped game ${this.token}`);
 	}
