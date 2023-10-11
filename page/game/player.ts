@@ -8,7 +8,7 @@ export class Player {
 	static from(serialized) {
 		const player = new Player();
 		player.id = serialized.id;
-		player.position = new Point(serialized.position.latitude, serialized.position.longitude);
+		player.position = Point.from(serialized.position);
 
 		return player;
 	}
