@@ -11,4 +11,11 @@ export class Player {
 	) {
 		console.log('created player at', position);
 	}
+
+	toJSON() {
+		return {
+			id: this.id,
+			position: this.position
+		}
+	}
 }

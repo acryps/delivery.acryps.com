@@ -55,27 +55,22 @@ export class MapComponent extends Component {
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
 					direction: this.direction,
-					
-					//angle: -Math.atan2(
-					//	this.width * this.playerViewLocation.x - event.touches[0].clientX, 
-					//	this.height * this.playerViewLocation.y - event.touches[0].clientY
-					//)
-
-					// x: event.touches[0].clientX,
-					// y: event.touches[0].clientY
+					angle: Math.atan2(
+						this.width * this.playerViewLocation.x - event.touches[0].clientX, 
+						this.height * this.playerViewLocation.y - event.touches[0].clientY
+					)
 				};
+
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
 			};
 
 			mapCanvas.ontouchmove = event => {
-				const endTouchPosition = {
-					x: event.touches[0].clientX,
-					y: event.touches[0].clientY
-				};
+				event.preventDefault();
 
-				this.direction = -Math.atan2(
-					this.width * this.playerViewLocation.x - endTouchPosition.x, 
-					this.height * this.playerViewLocation.y - endTouchPosition.y
-				)// - startTouch.angle;
+				this.direction = startTouch.direction + startTouch.angle - Math.atan2(
+					this.width * this.playerViewLocation.x - event.touches[0].clientX, 
+					this.height * this.playerViewLocation.y - event.touches[0].clientY
+				);
 
 				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
 			};

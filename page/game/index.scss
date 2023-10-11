@@ -17,10 +17,15 @@ ui-game {
 		position: fixed;
 		inset: 1rem;
 
+		display: flex;
+		flex-direction: column;
+
 		background: var(--page-background);
 		border: 1px solid var(--page-color);
 
 		ui-join {
+			flex-shrink: 0;
+
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -38,6 +43,36 @@ ui-game {
 			img { 
 				height: 4rem;
 			}
+		}
+
+		ui-players {
+			flex-grow: 1;
+			flex-shrink: 0;
+
+			display: block;
+			overflow-x: hidden;
+			overflow-y: auto;
+
+			border-bottom: 1px solid var(--page-color);
+
+			ui-player {
+				display: block;
+				padding: 1rem;
+
+				border-bottom: 1px dotted var(--page-color);
+			}
+		}
+
+		ui-action[ui-start] {
+			flex-shrink: 0;
+
+			display: block;
+			margin: 1rem;
+			padding: 1rem;
+
+			background: var(--page-color);
+			color: var(--page-background);
+			text-align: center;
 		}
 	}
 }

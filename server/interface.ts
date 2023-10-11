@@ -14,7 +14,8 @@ export interface GameSendMessage {
 		position: Point;
 	}[];
 
-	leave?: Player
+	leave?: Player,
+	join?: Player
 }
 
 export function registerInterface(app, database: DbContext) {
@@ -61,10 +62,14 @@ export function registerInterface(app, database: DbContext) {
 		}
 
 		const player = new Player(socket, game.map.center);
+		console.log(`player '${player.id}' joined game '${game.token}'`);
+
+		socket.send(JSON.stringify({
+			id: player.id,
+			peers: game.players
+		}));
 
 		game.join(player);
-
-		socket.send(player.id);
 
 		socket.on('message', data => {
 			const gameMessage: GameReceiveMessage = JSON.parse(data);

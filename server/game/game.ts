@@ -6,7 +6,7 @@ import { Point } from "./point";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly playerSpeed = 0.0005;
+	readonly playerSpeed = 0.0001;
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
@@ -28,6 +28,10 @@ export class Game {
 		}
 
 		this.players.push(player);
+
+		this.broadcast({
+			join: player
+		});
 	}
 
 	leave(player: Player) {
@@ -59,8 +63,8 @@ export class Game {
 
 				for (const player of this.players) {
 					if (player.moveAngle !== null) {
-						player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
-						player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
+						player.position.latitude -= Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
+						player.position.longitude -= Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
 					}
 				}
 
@@ -88,6 +92,8 @@ export class Game {
 	}
 
 	private broadcast(message: GameSendMessage) {
+		console.log(JSON.stringify(message), this.players.length);
+
 		for (const player of this.players) {
 			player.socket.send(JSON.stringify(message));
 		}
