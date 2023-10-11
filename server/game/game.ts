@@ -1,5 +1,5 @@
 import { GameSendMessage } from "../interface";
-import { Map } from "./map";
+import { Map } from "../../shared/map";
 import { Player } from "./player";
 import { Point } from "../../shared/point";
 import { move } from "../../shared/move";
@@ -15,9 +15,9 @@ export class Game {
 
 	private gameLoop: NodeJS.Timeout;
 
-	constructor(center: Point, radius: number) {
+	constructor(map: Map) {
 		this.players = [];
-		this.map = new Map(center, radius);
+		this.map = map;
 	}
 
 	join(player: Player) {
