@@ -1,26 +1,40 @@
 import { Coordinates } from "./coordinates";
 import * as convert from "xml-js";
 import * as fs from 'fs';
-import { DbContext } from "../managed/database";
+import { Building, DbContext } from "../managed/database";
+import { BoundingBox } from "./boundingbox";
 
-const fileName = 'oberarth';
+const fileName = 'zurich-tiny';
 const cwd = process.cwd() + "/importer";
 
 export class MapReader {
-	jsonData;
 	nodes;
 	ways;
 	relations;
-
 	db;
 
 	constructor(db: DbContext) {
 		this.db = db;
-		this.jsonData = this.readMap();
+		let jsonData = this.readMap();
 
-		this.nodes = this.jsonData.osm.node;
-		this.ways = this.jsonData.osm.way;
-		this.relations = this.jsonData.osm.relation;
+		this.nodes = jsonData.osm.node;
+		this.ways = jsonData.osm.way;
+		this.relations = jsonData.osm.relation;
+
+		console.debug("sizes: " + this.nodes.length + " " + this.ways.length + " " + this.relations.length);
+	}
+
+
+	calculateBoundingBox(startLocation: Coordinates) {
+		let loadedArea: Coordinates;
+
+		let toLoadBoundingBoxes: Coordinates[];
+
+		// todo: load the boundingBoxes
+	}
+
+	getXML(boundingBox: BoundingBox) {
+		// todo: fetch xml using boundingbox
 	}
 
 	readMap() {
@@ -37,27 +51,54 @@ export class MapReader {
 		return jsonData;
 	}
 
-	getBuildings() {
+	async loadBuildings() {
 		let buildings = this.filterWaysByAttribute("building");
+		let buildingsDB: Building[] = [];
 
-		buildings.forEach(building => {
+		buildings.forEach(async building => {
 			let polygonString = this.constructPolygonString(building);
 
 			let address = this.extractAddress(building);
 
 			let center = this.calculateCenter(this.getCoordinates(building));
 
+			let osmId = building._attributes.id;
+
+			let buildingDB = new Building();
+			buildingDB.address = address;
+			buildingDB.centerlatitude = center.latitude;
+			buildingDB.centerlongitude = center.longitude;
+			buildingDB.polygon = polygonString;
+
+			buildingsDB.push(buildingDB);
+
+			//console.debug(building)
+
+			await buildingDB.create();
 		});
+
+		//console.debug(buildingsDB.length);
+		// for(let i: number = 0; i < 100; i++) {
+		// 	//console.debug(buildingsDB[i]);
+		// 	await buildingsDB[i].create();
+		// }		
 
 		return buildings;
 	}
 
 	getStreets() {
 		let highways = this.filterWaysByAttribute("highway");
-		// todo:
-		// get street names
-		// get corner points
-		// calculate center
+
+		highways.forEach(highway => {
+			let coordinates: Coordinates[] = this.getCoordinates(highway);
+
+			//console.debug(highway);
+
+			coordinates.forEach(coord => {
+				//console.debug(coord.toString());
+			});
+
+		});
 
 		return highways;
 	}
@@ -110,23 +151,23 @@ export class MapReader {
 	}
 
 	/**
-	 * returns the coordinates, which form the polygon of the given building
-	 * @param building 
+	 * returns the coordinates, which form the polygon of the given "way" object
+	 * @param way 
 	 * @returns 
 	 */
-	getCoordinates(building): Coordinates[] {
+	getCoordinates(way): Coordinates[] {
 		let coordinates: Coordinates[] = [];
-		let buildingNodes = building.nd;
+		let nodes = way.nd;
 
-		if(buildingNodes) {
-			if(buildingNodes.length > 1) {
-				buildingNodes.forEach(buildingNode => {
+		if(nodes) {
+			if(nodes.length > 1) {
+				nodes.forEach(buildingNode => {
 					let nodeRef = buildingNode._attributes.ref;
 					coordinates.push(this.getCoordinatesOfNode(nodeRef));
 				});
 			}
 			else {
-				let nodeRef = buildingNodes._attributes.ref;
+				let nodeRef = nodes._attributes.ref;
 				coordinates.push(this.getCoordinatesOfNode(nodeRef));
 			}
 		}
