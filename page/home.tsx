@@ -1,5 +1,5 @@
 import { Component } from "@acryps/page";
-import { Point } from "./game/map";
+import { Point } from "../shared/point";
 
 export class HomeComponent extends Component {
 	default = new Point(47.3731429, 8.5239003);

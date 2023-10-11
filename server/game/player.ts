@@ -1,4 +1,4 @@
-import { Point } from "./point";
+import { Point } from "../../shared/point";
 
 export class Player {
 	readonly id = Math.random().toString(36).substring(2, 8);

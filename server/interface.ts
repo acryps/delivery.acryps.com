@@ -1,7 +1,7 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
 import { DbContext } from "./managed/database";
-import { Point } from "./game/point";
+import { Point } from "../shared/point";
 
 export interface GameReceiveMessage {
 	start?: boolean;

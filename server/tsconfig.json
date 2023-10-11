@@ -4,5 +4,9 @@
 		"module": "CommonJS",
 		"moduleResolution": "node",
 		"target": "es6"
-	}
+	},
+	"include": [
+		".",
+		"../shared"
+	]
 }

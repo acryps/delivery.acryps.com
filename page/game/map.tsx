@@ -1,12 +1,9 @@
 import { Component } from "@acryps/page";
 import { GameComponent } from ".";
-
-export class Point {
-	constructor(
-		public latitude: number,
-		public longitude: number
-	) {}
-}
+import { Point } from "../../shared/point";
+import { move } from "../../shared/move";
+import { Building } from "./building";
+import { Rectangle } from "../../shared/rectangle";
 
 export class MapComponent extends Component {
 	declare parent: GameComponent;
@@ -18,7 +15,7 @@ export class MapComponent extends Component {
 
 	scale = { x: 500000, y: 300000 };
 	
-	buildings;
+	buildings: Building[];
 	waterBodies;
 	streets;
 
@@ -30,10 +27,12 @@ export class MapComponent extends Component {
 
 	renderedRotation = 0;
 
+	lastFrame = new Date();
+
 	async onload() {
 		const objects = await fetch(`/map/${this.parent.parameters.token}`).then(response => response.json());
 
-		this.buildings = objects.buildings;
+		this.buildings = objects.buildings.map(building => Building.from(building));
 		this.waterBodies = objects.waterBodies;
 		this.streets = objects.streets;
 
@@ -93,6 +92,13 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
+		const now = new Date();
+		const deltaTime = +now - +this.lastFrame;
+		this.lastFrame = now;
+
+		// apply client-calculated movement
+		// this.position = move(this.position, this.direction, deltaTime);
+
 		// set context rotation
 		context.rotate(this.direction - this.renderedRotation);
 		this.renderedRotation = this.direction;
@@ -100,16 +106,12 @@ export class MapComponent extends Component {
 		// prepare frame
 		context.beginPath();
 
-		for (let building of this.buildings) {
+		for (let building of this.visibleBuildings) {
 			for (let pointIndex = 0; pointIndex < building.geometry.length; pointIndex++) {
-				const components = building.geometry[pointIndex].split(',');
-
-				const point = new Point(+components[0], +components[1]);
-
 				if (pointIndex == 0) {
-					context.moveTo(...this.transform(point));
+					context.moveTo(...this.transform(building.geometry[pointIndex]));
 				} else {
-					context.lineTo(...this.transform(point));
+					context.lineTo(...this.transform(building.geometry[pointIndex]));
 				}
 			}
 
@@ -143,6 +145,19 @@ export class MapComponent extends Component {
 				this.renderFrame(context);
 			}
 		});
+	}
+
+	get viewport() {
+		return Rectangle.fromCenter(this.position, 0.0025, 0.0025);
+	}
+
+	get visibleBuildings() {
+		const viewport = this.viewport;
+		const buildings = this.buildings.filter(building => viewport.touches(building.boundingBox));
+
+		console.log('drew', buildings.length);
+
+		return buildings;
 	}
 
 	transform(point: Point): [number, number] {

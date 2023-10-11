@@ -1,12 +1,12 @@
 import { GameSendMessage } from "../interface";
 import { Map } from "./map";
 import { Player } from "./player";
-import { Point } from "./point";
+import { Point } from "../../shared/point";
+import { move } from "../../shared/move";
 
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly playerSpeed = 0.0001;
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
@@ -62,10 +62,7 @@ export class Game {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
-					if (player.moveAngle !== null) {
-						player.position.latitude -= Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
-						player.position.longitude -= Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
-					}
+					player.position = move(player.position, player.moveAngle, deltaTime);
 				}
 
 				this.broadcast({

@@ -1,5 +1,5 @@
 import { Component } from "@acryps/page";
-import { MapComponent, Point } from "./map";
+import { MapComponent } from "./map";
 import { LobbyComponent } from "./lobby";
 
 export class GameComponent extends Component {
@@ -24,8 +24,6 @@ export class GameComponent extends Component {
 
 			this.socket.onmessage = event => {
 				const data = JSON.parse(event.data);
-
-				console.log(this);
 
 				if ('join' in data) {
 					this.players.push(data.join);

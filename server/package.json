@@ -2,7 +2,7 @@
 	"name": "server",
 	"scripts": {
 		"build": "tsc && vlquery compile",
-		"start": "tsc && vlquery compile && environment node built/index.js",
+		"start": "tsc && vlquery compile && environment node built/server/index.js",
 		"database:update": "environment vlquery create-context"
 	},
 	"environment": {
