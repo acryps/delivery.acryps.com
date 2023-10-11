@@ -96,16 +96,41 @@ export class WaterBody extends Entity<WaterBodyQueryProxy> {
 	};
 }
 			
+export class BoundingBoxesQueryProxy extends QueryProxy {
+	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+}
+
+export class BoundingBoxes extends Entity<BoundingBoxesQueryProxy> {
+	declare id: string;
+	polygon: string;
+	
+
+	$$meta = {
+		source: "bounding_boxes",
+
+		columns: {
+			id: { type: "uuid", name: "id" },
+			polygon: { type: "text", name: "polygon" }
+		},
+
+		get set(): DbSet<BoundingBoxes, BoundingBoxesQueryProxy> { 
+			return new DbSet<BoundingBoxes, BoundingBoxesQueryProxy>(BoundingBoxes, null);
+		}
+	};
+}
+			
 
 export class DbContext {
 	building: DbSet<Building, BuildingQueryProxy>;
 	street: DbSet<Street, StreetQueryProxy>;
 	waterBody: DbSet<WaterBody, WaterBodyQueryProxy>;
+	boundingBoxes: DbSet<BoundingBoxes, BoundingBoxesQueryProxy>;
 
 	constructor(private runContext: RunContext) {
 		this.building = new DbSet<Building, BuildingQueryProxy>(Building, this.runContext);
 		this.street = new DbSet<Street, StreetQueryProxy>(Street, this.runContext);
 		this.waterBody = new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, this.runContext);
+		this.boundingBoxes = new DbSet<BoundingBoxes, BoundingBoxesQueryProxy>(BoundingBoxes, this.runContext);
 	}
 
 	findSet(modelType) {
