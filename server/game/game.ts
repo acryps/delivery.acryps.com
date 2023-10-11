@@ -60,7 +60,7 @@ export class Game {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
-					player.position = move(player.position, player.moveAngle, deltaTime);
+					player.position = move(this.map, player.position, player.moveAngle, deltaTime);
 				}
 
 				this.broadcast({

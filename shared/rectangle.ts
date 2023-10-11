@@ -36,6 +36,16 @@ export class Rectangle {
 		);
 	}
 
+	contains(point: Point) {
+		if (point.latitude >= this.minLatitude && point.latitude <= this.maxLatitude) {
+			if (point.longitude >= this.minLongitude && point.longitude <= this.maxLongitude) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	touches(smaller: Rectangle) {
 		if (smaller.minLatitude >= this.minLatitude && smaller.minLatitude <= this.maxLatitude) {
 			if (smaller.minLongitude >= this.minLongitude && smaller.minLongitude <= this.maxLongitude) {
