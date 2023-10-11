@@ -1,6 +1,7 @@
 import { Component } from "@acryps/page";
 import { MapComponent } from "./map";
 import { LobbyComponent } from "./lobby";
+import { DeliveryIndicator } from "./delivery";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -10,8 +11,10 @@ export class GameComponent extends Component {
 
 	map: MapComponent;
 	lobby = new LobbyComponent();
+	deliveryIndicator = new DeliveryIndicator();
 
 	socket: WebSocket;
+
 
 	async onload() {
 		this.socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.host}/join/${this.parameters.token}`);
@@ -46,9 +49,11 @@ export class GameComponent extends Component {
 		this.map = new MapComponent();
 
 		return <ui-game>
-			{this.lobby}
-
 			{this.map}
+
+			{this.deliveryIndicator}
+
+			{this.lobby}
 		</ui-game>;
 	}
 }
