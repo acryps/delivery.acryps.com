@@ -68,7 +68,7 @@ export class GameComponent extends Component {
 				if ('delivery' in data) {
 					this.delivery = {
 						source: this.buildings.find(building =>  building.id == data.delivery.source),
-						destination: this.buildings.find(building =>  building.id == data.delivery.source)
+						destination: this.buildings.find(building =>  building.id == data.delivery.destination)
 					};
 
 					this.deliveryIndicator.update();

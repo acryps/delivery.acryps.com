@@ -1,4 +1,5 @@
 import { Map } from "../../shared/map";
+import { playerSpeed } from "../../shared/move";
 import { Point } from "../../shared/point";
 import { Package } from "./package";
 
@@ -24,7 +25,10 @@ export class Player {
 		// move away form the pickup location
 		this.position = delivery.source.entrance.walk(offsetDirection, this.pickupOffsetRadius);
 
-		// TODO walk away in the same direction until we are not intersecting any houses anymore
+		// walk away in the same direction until we are not intersecting any houses anymore
+		while (map.collides(this.position)) {
+			this.position = this.position.walk(offsetDirection, playerSpeed);
+		}
 
 		this.socket.send(JSON.stringify({ delivery }));
 

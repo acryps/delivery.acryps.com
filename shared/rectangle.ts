@@ -37,13 +37,23 @@ export class Rectangle {
 	}
 
 	contains(point: Point) {
-		if (point.latitude >= this.minLatitude && point.latitude <= this.maxLatitude) {
-			if (point.longitude >= this.minLongitude && point.longitude <= this.maxLongitude) {
-				return true;
-			}
+		if (point.latitude < this.minLatitude) {
+			return false;
+		}
+		
+		if (point.latitude > this.maxLatitude) {
+			return false;
 		}
 
-		return false;
+		if (point.longitude < this.minLongitude) {
+			return false;
+		}
+		
+		if (point.longitude > this.maxLongitude) {
+			return false;
+		}
+
+		return true;
 	}
 
 	touches(smaller: Rectangle) {

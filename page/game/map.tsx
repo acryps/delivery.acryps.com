@@ -82,14 +82,17 @@ export class MapComponent extends Component {
 		this.renderedRotation = this.parent.direction;
 
 		// prepare frame
-		context.beginPath();
+		const buildingsPath = new Path2D();
+		const packageSourcePath = new Path2D();
 
 		for (let building of this.visibleBuildings) {
+			const path = building == this.parent.delivery?.source ? packageSourcePath : buildingsPath;
+
 			for (let pointIndex = 0; pointIndex < building.geometry.length; pointIndex++) {
 				if (pointIndex == 0) {
-					context.moveTo(...this.transform(building.geometry[pointIndex]));
+					path.moveTo(...this.transform(building.geometry[pointIndex]));
 				} else {
-					context.lineTo(...this.transform(building.geometry[pointIndex]));
+					path.lineTo(...this.transform(building.geometry[pointIndex]));
 				}
 			}
 
@@ -104,10 +107,14 @@ export class MapComponent extends Component {
 
 		// draw frame
 		context.strokeStyle = 'white';
-		context.stroke();
+		context.stroke(buildingsPath);
 
 		context.fillStyle = '#8884';
-		context.fill();
+		context.fill(buildingsPath);
+
+		context.fillStyle = '#f00';
+		context.stroke(packageSourcePath);
+		context.fill(packageSourcePath);
 
 		// render player
 		const playerSize = 25;
