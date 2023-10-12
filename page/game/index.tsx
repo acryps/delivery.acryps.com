@@ -6,6 +6,7 @@ import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { Point } from "../../shared/point";
 import { Building } from "./building";
+import { TargetTracker } from "./target";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -18,6 +19,8 @@ export class GameComponent extends Component {
 
 	delivery;
 	deliveryIndicator = new DeliveryIndicator();
+
+	targetTracker = new TargetTracker();
 
 	buildings: Building[];
 	waterBodies;
@@ -71,6 +74,8 @@ export class GameComponent extends Component {
 						destination: this.buildings.find(building =>  building.id == data.delivery.destination)
 					};
 
+					this.targetTracker.target = this.delivery.source.center;
+
 					this.deliveryIndicator.update();
 				}
 
@@ -90,6 +95,7 @@ export class GameComponent extends Component {
 
 		return <ui-game>
 			{this.map}
+			{this.targetTracker}
 
 			{this.deliveryIndicator}
 
