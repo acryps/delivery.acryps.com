@@ -10,4 +10,8 @@ export class BoundingBox {
         this.longitudeMax = longitudeMax;
         this.longitudeMin = longitudeMin;
     }
+
+    get() {
+        return `${this.latitudeMax}, ${this.latitudeMin}, ${this.longitudeMax}, ${this.longitudeMin}`;
+    }
 }
