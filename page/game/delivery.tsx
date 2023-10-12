@@ -6,19 +6,33 @@ export class DeliveryIndicator extends Component {
 
 	render() {
 		if (this.parent.delivery) {
-			return <ui-delivery>
-				<ui-source>
-					{this.parent.delivery.source.address.trim()}
-				</ui-source>
+			if (this.parent.delivery.carrier) {
+				return <ui-delivery>
+					<ui-prompt>
+						Deliver Your Package To
+					</ui-prompt>
 
-				<ui-destination>
-					{this.parent.delivery.destination.address.trim()}
-				</ui-destination>
+					<ui-location>
+						{this.parent.delivery.destination.address.trim()}
+					</ui-location>
+				</ui-delivery>;
+			}
+
+			return <ui-delivery>
+				<ui-prompt>
+					Pick up your package from
+				</ui-prompt>
+
+				<ui-location>
+					{this.parent.delivery.source.address.trim()}
+				</ui-location>
 			</ui-delivery>
 		}
 
-		return <ui-delivery ui-pick-up>
-			Pick up Package
-		</ui-delivery>
+		return <ui-delivery>
+			<ui-prompt>
+				No delivery assigned
+			</ui-prompt>
+		</ui-delivery>;
 	}
 }
