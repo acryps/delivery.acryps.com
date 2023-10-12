@@ -145,8 +145,6 @@ export class MapComponent extends Component {
 		const viewport = this.viewport;
 		const buildings = this.parent.buildings.filter(building => viewport.touches(building.boundingBox));
 
-		console.log('drew', buildings.length);
-
 		return buildings;
 	}
 
