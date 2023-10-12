@@ -50,7 +50,7 @@ export class CreateGameComponent extends Component {
 
 				this.navigate(`/play/${token}`);
 			}}>
-				Start Game
+				Create Game
 			</ui-action>
 		</ui-create-game>;
 	}

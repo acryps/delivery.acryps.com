@@ -1,9 +1,7 @@
 import { Map } from "../../shared/map";
 import { Player } from "./player";
-import { Point } from "../../shared/point";
 import { move } from "../../shared/move";
 import { ServerMessage } from "../../shared/messages";
-import { Package } from "./package";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -23,17 +21,18 @@ export class Game {
 
 	join(player: Player) {
 		if (this.gameLoop) {
-			console.warn(`User ${player.socket} tried to join running game ${this.token}`);
-			throw new Error('Can\'t join running game');
+			console.warn(`user ${player.id} tried to join running game ${this.token}`);
+			throw new Error('can\'t join running game');
 		}
 
 		player.assignPackage(this.map);
-
 		this.players.push(player);
-
+		
 		this.broadcast({
 			join: player
 		});
+
+		console.log(`player '${player.id}' joined game '${this.token}'`);
 	}
 
 	leave(player: Player) {
@@ -50,15 +49,15 @@ export class Game {
 
 	start(player: Player) {
 		if (!this.isHost(player)) {
-			console.warn(`Non host user ${player.socket} tried to start the game ${this.token}`);
-			throw new Error('Unauthorized to start game');
+			console.warn(`non host user ${player.id} tried to start the game ${this.token}`);
+			throw new Error('unauthorized to start game');
 		}
 
 		this.broadcast({
 			start: true
 		});
 
-		console.log(`Started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
+		console.log(`started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
 
 		let lastTick = Date.now();
 
@@ -84,7 +83,7 @@ export class Game {
 
 	stop() {
 		clearInterval(this.gameLoop);
-		console.log(`Stopped game ${this.token}`);
+		console.log(`stopped game ${this.token}`);
 	}
 
 	private isHost(player: Player) {
@@ -93,8 +92,6 @@ export class Game {
 	}
 
 	private broadcast(message: ServerMessage) {
-		console.log(JSON.stringify(message), this.players.length);
-
 		for (const player of this.players) {
 			player.socket.send(JSON.stringify(message));
 		}
