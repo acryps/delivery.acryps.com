@@ -2,7 +2,6 @@ import { Coordinates } from "./coordinates";
 import * as convert from "xml-js";
 import * as fs from 'fs';
 import { Building, DbContext } from "../managed/database";
-import { BoundingBox } from "./boundingbox";
 
 const fileName = 'zurich-tiny';
 const cwd = process.cwd() + "/importer";
@@ -33,8 +32,28 @@ export class MapReader {
 		// todo: load the boundingBoxes
 	}
 
-	getXML(boundingBox: BoundingBox) {
-		// todo: fetch xml using boundingbox
+	async getXML() {
+		const mapURL = `http://overpass.openstreetmap.ru/cgi/xapi_meta?*[bbox=8.2827,47.0316,8.3425,47.0598]`;
+		
+		try {
+			var map = await fetch(mapURL).then(response => response.text())
+		} catch (error) {
+			console.error(error);
+		}
+
+		return map;
+	}
+
+	async readMapFromXml() {
+		try {
+			let xmlData = await this.getXML();
+			let jsonString = convert.xml2json(xmlData, {compact: true, spaces: 4});
+			var jsonData = JSON.parse(jsonString);
+		} catch (error) {
+			console.error(error);
+		}
+
+		return jsonData;
 	}
 
 	readMap() {

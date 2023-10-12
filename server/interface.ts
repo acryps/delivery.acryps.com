@@ -1,6 +1,6 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
-import { Building, DbContext } from "./managed/database";
+import { DbContext } from "./managed/database";
 import { Point } from "../shared/point";
 import { ClientMessage } from "../shared/messages";
 import { BuildingViewModel } from "../shared/building";
@@ -44,7 +44,6 @@ export function registerInterface(app, database: DbContext) {
 		}
 
 		const player = new Player(socket, game.map.center);
-		console.log(`player '${player.id}' joined game '${game.token}'`);
 
 		socket.send(JSON.stringify({
 			id: player.id,
@@ -55,7 +54,6 @@ export function registerInterface(app, database: DbContext) {
 
 		socket.on('message', data => {
 			const gameMessage: ClientMessage = JSON.parse(data);
-			console.log(gameMessage);
 
 			if (gameMessage.start) {
 				game.start(player);

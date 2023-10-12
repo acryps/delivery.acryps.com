@@ -96,16 +96,56 @@ export class WaterBody extends Entity<WaterBodyQueryProxy> {
 	};
 }
 			
+export class ImportQueryProxy extends QueryProxy {
+	get created(): Partial<QueryTimeStamp> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get center(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get minLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get maxLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get minLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get maxLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+}
+
+export class Import extends Entity<ImportQueryProxy> {
+	declare id: string;
+	created: Date;
+	center: number;
+	minLatitude: number;
+	maxLatitude: number;
+	minLongitude: number;
+	maxLongitude: number;
+	
+
+	$$meta = {
+		source: "import",
+
+		columns: {
+			id: { type: "uuid", name: "id" },
+			created: { type: "timestamp", name: "created" },
+			center: { type: "float4", name: "center" },
+			minLatitude: { type: "float4", name: "min_latitude" },
+			maxLatitude: { type: "float4", name: "max_latitude" },
+			minLongitude: { type: "float4", name: "min_longitude" },
+			maxLongitude: { type: "float4", name: "max_longitude" }
+		},
+
+		get set(): DbSet<Import, ImportQueryProxy> { 
+			return new DbSet<Import, ImportQueryProxy>(Import, null);
+		}
+	};
+}
+			
 
 export class DbContext {
 	building: DbSet<Building, BuildingQueryProxy>;
 	street: DbSet<Street, StreetQueryProxy>;
 	waterBody: DbSet<WaterBody, WaterBodyQueryProxy>;
+	import: DbSet<Import, ImportQueryProxy>;
 
 	constructor(private runContext: RunContext) {
 		this.building = new DbSet<Building, BuildingQueryProxy>(Building, this.runContext);
 		this.street = new DbSet<Street, StreetQueryProxy>(Street, this.runContext);
 		this.waterBody = new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, this.runContext);
+		this.import = new DbSet<Import, ImportQueryProxy>(Import, this.runContext);
 	}
 
 	findSet(modelType) {

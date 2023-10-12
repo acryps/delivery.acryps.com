@@ -21,7 +21,7 @@ export class HomeComponent extends Component {
 					this.navigate(`/create/${this.default.latitude}/${this.default.longitude}`);
 				}
 			}}>
-				Create Game
+				Host Game
 			</ui-action>
 		</ui-home>
 	}
