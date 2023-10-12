@@ -23,15 +23,15 @@ export class LobbyComponent extends Component {
 				{qrCodeImage}
 			</ui-join>
 
-			<ui-players></ui-players>
+			<ui-players>
+				{this.parent.players.map(player => <ui-player>
+					{player.id}
+				</ui-player>)}
+			</ui-players>
 
-			<ui-action ui-start ui-click={() => {
-				this.parent.socket.send(JSON.stringify({
-					start: true
-				}));
-
-				this.remove();
-			}}>
+			<ui-action ui-start ui-click={() => this.parent.socket.send(JSON.stringify({
+				start: true
+			}))}>
 				Start Game
 			</ui-action>
 		</ui-lobby>;

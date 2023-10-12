@@ -2,6 +2,9 @@ ui-game {
 	position: fixed;
 	inset: 0;
 
+	user-select: none;
+	-webkit-touch-callout: none;
+
 	ui-map {
 		display: block;
 		width: 100%;
@@ -13,14 +16,45 @@ ui-game {
 		}
 	}
 
+	ui-delivery {
+		position: fixed;
+		inset-inline: 0;
+		top: 0;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		height: 5rem;
+		padding: 1rem;
+
+		border-bottom: 1px solid var(--page-color);
+		background: var(--page-background);
+
+		ui-source {
+			display: block;
+			margin-bottom: 0.5rem;
+		}
+
+		ui-destination {
+			display: block;
+			
+			font-size: 1.5rem;
+		}
+	}
+
 	ui-lobby {
 		position: fixed;
 		inset: 1rem;
+
+		display: flex;
+		flex-direction: column;
 
 		background: var(--page-background);
 		border: 1px solid var(--page-color);
 
 		ui-join {
+			flex-shrink: 0;
+
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -39,5 +73,47 @@ ui-game {
 				height: 4rem;
 			}
 		}
+
+		ui-players {
+			flex-grow: 1;
+			flex-shrink: 0;
+
+			display: block;
+			overflow-x: hidden;
+			overflow-y: auto;
+
+			border-bottom: 1px solid var(--page-color);
+
+			ui-player {
+				display: block;
+				padding: 1rem;
+
+				border-bottom: 1px dotted var(--page-color);
+			}
+		}
+
+		ui-action[ui-start] {
+			flex-shrink: 0;
+
+			display: block;
+			margin: 1rem;
+			padding: 1rem;
+
+			background: var(--page-color);
+			color: var(--page-background);
+			text-align: center;
+		}
+	}
+
+	ui-tracker {
+		background: linear-gradient(red, blue);
+
+		position: fixed;
+		width: 50px;
+		height: 50px;
+
+		transform-origin: center;
+		margin-top: -25px;
+		margin-left: -25px;
 	}
 }

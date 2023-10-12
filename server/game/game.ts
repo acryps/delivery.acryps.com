@@ -1,33 +1,39 @@
-import { GameSendMessage } from "../interface";
-import { Map } from "./map";
+import { Map } from "../../shared/map";
 import { Player } from "./player";
-import { Point } from "./point";
+import { Point } from "../../shared/point";
+import { move } from "../../shared/move";
+import { ServerMessage } from "../../shared/messages";
+import { Package } from "./package";
 
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly playerSpeed = 0.0005;
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
 	players: Player[] = [];
 	map: Map;
 
-	private isRunning: boolean;
+	private gameLoop: NodeJS.Timeout;
 
-	constructor(center: Point, radius: number) {
+	constructor(map: Map) {
 		this.players = [];
-		this.map = new Map(center, radius);
-		this.isRunning = false;
+		this.map = map;
 	}
 
 	join(player: Player) {
-		if (this.isRunning) {
+		if (this.gameLoop) {
 			console.warn(`User ${player.socket} tried to join running game ${this.token}`);
 			throw new Error('Can\'t join running game');
 		}
 
+		player.assignPackage(this.map);
+
 		this.players.push(player);
+
+		this.broadcast({
+			join: player
+		});
 	}
 
 	leave(player: Player) {
@@ -48,20 +54,20 @@ export class Game {
 			throw new Error('Unauthorized to start game');
 		}
 
+		this.broadcast({
+			start: true
+		});
+
 		console.log(`Started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
 
-		this.isRunning = true;
 		let lastTick = Date.now();
 
-		setInterval(() => {
+		this.gameLoop = setInterval(() => {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
-					if (player.moveAngle !== null) {
-						player.position.latitude += Math.sin(player.moveAngle) * this.playerSpeed * deltaTime;
-						player.position.longitude += Math.cos(player.moveAngle) * this.playerSpeed * deltaTime;
-					}
+					player.position = move(this.map, player.position, player.moveAngle, deltaTime);
 				}
 
 				this.broadcast({
@@ -74,12 +80,11 @@ export class Game {
 				lastTick = Date.now();
 			}
 		});
-
-		console.log(`Stopped game ${this.token}`);
 	}
 
 	stop() {
-		this.isRunning = false;
+		clearInterval(this.gameLoop);
+		console.log(`Stopped game ${this.token}`);
 	}
 
 	private isHost(player: Player) {
@@ -87,7 +92,9 @@ export class Game {
 		return this.players.indexOf(player) == 0;
 	}
 
-	private broadcast(message: GameSendMessage) {
+	private broadcast(message: ServerMessage) {
+		console.log(JSON.stringify(message), this.players.length);
+
 		for (const player of this.players) {
 			player.socket.send(JSON.stringify(message));
 		}

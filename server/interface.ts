@@ -1,34 +1,26 @@
 import { Game } from "./game/game";
 import { Player } from "./game/player";
-import { DbContext } from "./managed/database";
-import { Point } from "./game/point";
-
-export interface GameReceiveMessage {
-	start?: boolean;
-	moveAngle?: number;
-}
-
-export interface GameSendMessage {
-	move?: {
-		id: string;
-		position: Point;
-	}[];
-
-	leave?: Player
-}
+import { Building, DbContext } from "./managed/database";
+import { Point } from "../shared/point";
+import { ClientMessage } from "../shared/messages";
+import { BuildingViewModel } from "../shared/building";
+import { Map } from "../shared/map";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
 
-	app.post('/game', (request, response) => {
-		const center = {
-			latitude: request.body.center.latitude,
-			longitude: request.body.center.longitude
-		};
+	app.post('/game', async (request, response) => {
+		const center = new Point(request.body.center.latitude, request.body.center.longitude);
 
 		const radius = request.body.radius;
 
-		const game = new Game(center, radius);
+		const buildings = (await database.building.toArray()).map(building => new BuildingViewModel(
+			building.id,
+			building.address,
+			building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
+		));
+
+		const game = new Game(new Map(center, radius, buildings));
 		games.push(game);
 
 		response.json(game.token);
@@ -41,16 +33,7 @@ export function registerInterface(app, database: DbContext) {
 			return response.json({});
 		}
 
-		const buildings = await database.building.toArray();
-
-		response.json({
-			center: game.map.center,
-			radius: game.map.radius,
-
-			buildings: buildings.map(building => ({
-				geometry: building.polygon.split(';')
-			}))
-		});
+		response.json(game.map);
 	});
 
 	app.ws('/join/:token', (socket, request) => {
@@ -61,13 +44,17 @@ export function registerInterface(app, database: DbContext) {
 		}
 
 		const player = new Player(socket, game.map.center);
+		console.log(`player '${player.id}' joined game '${game.token}'`);
+
+		socket.send(JSON.stringify({
+			id: player.id,
+			peers: game.players
+		}));
 
 		game.join(player);
 
-		socket.send(player.id);
-
 		socket.on('message', data => {
-			const gameMessage: GameReceiveMessage = JSON.parse(data);
+			const gameMessage: ClientMessage = JSON.parse(data);
 			console.log(gameMessage);
 
 			if (gameMessage.start) {

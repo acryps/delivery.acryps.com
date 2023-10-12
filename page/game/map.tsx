@@ -1,12 +1,9 @@
 import { Component } from "@acryps/page";
 import { GameComponent } from ".";
-
-export class Point {
-	constructor(
-		public latitude: number,
-		public longitude: number
-	) {}
-}
+import { Point } from "../../shared/point";
+import { move } from "../../shared/move";
+import { Building } from "./building";
+import { Rectangle } from "../../shared/rectangle";
 
 export class MapComponent extends Component {
 	declare parent: GameComponent;
@@ -16,31 +13,14 @@ export class MapComponent extends Component {
 	width: number;
 	height: number;
 
-	scale = { x: 500000, y: 300000 };
+	scale = { x: 500000, y: 350000 };
 	
-	buildings;
-	waterBodies;
-	streets;
-
-	center: Point;
-	radius: number;
-
-	position: Point;
-	direction = 0.2;
-
 	renderedRotation = 0;
 
-	async onload() {
-		const objects = await fetch(`/map/${this.parent.parameters.token}`).then(response => response.json());
+	lastFrame = new Date();
 
-		this.buildings = objects.buildings;
-		this.waterBodies = objects.waterBodies;
-		this.streets = objects.streets;
-
-		this.center = new Point(objects.center.latitude, objects.center.longitude);
-		this.radius = objects.radius;
-
-		this.position = new Point(this.center.latitude, this.center.longitude);
+	get position() {
+		return this.parent.player?.position ?? this.parent.center;
 	}
 
 	render() {
@@ -54,30 +34,25 @@ export class MapComponent extends Component {
 			
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
-					direction: this.direction,
-					
-					//angle: -Math.atan2(
-					//	this.width * this.playerViewLocation.x - event.touches[0].clientX, 
-					//	this.height * this.playerViewLocation.y - event.touches[0].clientY
-					//)
-
-					// x: event.touches[0].clientX,
-					// y: event.touches[0].clientY
+					direction: this.parent.direction,
+					angle: Math.atan2(
+						this.width * this.playerViewLocation.x - event.touches[0].clientX, 
+						this.height * this.playerViewLocation.y - event.touches[0].clientY
+					)
 				};
+
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
 			};
 
 			mapCanvas.ontouchmove = event => {
-				const endTouchPosition = {
-					x: event.touches[0].clientX,
-					y: event.touches[0].clientY
-				};
+				event.preventDefault();
 
-				this.direction = -Math.atan2(
-					this.width * this.playerViewLocation.x - endTouchPosition.x, 
-					this.height * this.playerViewLocation.y - endTouchPosition.y
-				)// - startTouch.angle;
+				this.parent.direction = startTouch.direction + startTouch.angle - Math.atan2(
+					this.width * this.playerViewLocation.x - event.touches[0].clientX, 
+					this.height * this.playerViewLocation.y - event.touches[0].clientY
+				);
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: this.direction }));
+				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
 			};
 
 			mapCanvas.ontouchend = mapCanvas.ontouchcancel = () => {
@@ -98,23 +73,28 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
+		this.parent.targetTracker.updatePosition();
+
+		const now = new Date();
+		const deltaTime = +now - +this.lastFrame;
+		this.lastFrame = now;
+
 		// set context rotation
-		context.rotate(this.direction - this.renderedRotation);
-		this.renderedRotation = this.direction;
+		context.rotate(this.parent.direction - this.renderedRotation);
+		this.renderedRotation = this.parent.direction;
 
 		// prepare frame
-		context.beginPath();
+		const buildingsPath = new Path2D();
+		const packageSourcePath = new Path2D();
 
-		for (let building of this.buildings) {
+		for (let building of this.visibleBuildings) {
+			const path = building == this.parent.delivery?.source ? packageSourcePath : buildingsPath;
+
 			for (let pointIndex = 0; pointIndex < building.geometry.length; pointIndex++) {
-				const components = building.geometry[pointIndex].split(',');
-
-				const point = new Point(+components[0], +components[1]);
-
 				if (pointIndex == 0) {
-					context.moveTo(...this.transform(point));
+					path.moveTo(...this.transform(building.geometry[pointIndex]));
 				} else {
-					context.lineTo(...this.transform(point));
+					path.lineTo(...this.transform(building.geometry[pointIndex]));
 				}
 			}
 
@@ -129,25 +109,45 @@ export class MapComponent extends Component {
 
 		// draw frame
 		context.strokeStyle = 'white';
-		context.stroke();
+		context.stroke(buildingsPath);
 
-		context.fillStyle = '#222';
-		context.fill();
+		context.fillStyle = '#8884';
+		context.fill(buildingsPath);
+
+		context.fillStyle = '#f00';
+		context.stroke(packageSourcePath);
+		context.fill(packageSourcePath);
 
 		// render player
 		const playerSize = 25;
-		const playerPosition = this.transform(this.position);
 
-		context.fillStyle = '#f00';
-		context.beginPath();
-		context.arc(playerPosition[0], playerPosition[1], playerSize / 2, 0, Math.PI * 2);
-		context.fill();
+		for (let player of this.parent.players) {
+			const playerPosition = this.transform(player.position);
+
+			context.fillStyle = player.color;
+			context.beginPath();
+			context.arc(...playerPosition, playerSize / 2, 0, Math.PI * 2);
+			context.fill();
+		}
 
 		requestAnimationFrame(() => {
 			if (this.parent.loaded) {
 				this.renderFrame(context);
 			}
 		});
+	}
+
+	get viewport() {
+		return Rectangle.fromCenter(this.position, 0.0025, 0.0025);
+	}
+
+	get visibleBuildings() {
+		const viewport = this.viewport;
+		const buildings = this.parent.buildings.filter(building => viewport.touches(building.boundingBox));
+
+		console.log('drew', buildings.length);
+
+		return buildings;
 	}
 
 	transform(point: Point): [number, number] {
