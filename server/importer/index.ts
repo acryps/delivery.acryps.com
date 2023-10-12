@@ -4,10 +4,11 @@ import { MapReader } from "./mapreader";
 
 export function importArea(/*startLocation: Coordinates,*/ database: DbContext) {
 
-	let mapreader = new MapReader(database);
-	mapreader.readMap();
-
-	//mapreader.loadBuildings();
-	//mapreader.getStreets();
+	let mapReader = new MapReader(database);
+	mapReader.readMap();
+	
+	// mapReader.loadWater();
+	//mapReader.loadBuildings();
+	//mapReader.getStreets();
 
 }
