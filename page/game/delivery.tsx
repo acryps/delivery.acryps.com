@@ -8,11 +8,11 @@ export class DeliveryIndicator extends Component {
 		if (this.parent.delivery) {
 			return <ui-delivery>
 				<ui-source>
-					{this.parent.delivery.source.address}
+					{this.parent.delivery.source.address.trim()}
 				</ui-source>
 
 				<ui-destination>
-					{this.parent.delivery.destination.address}
+					{this.parent.delivery.destination.address.trim()}
 				</ui-destination>
 			</ui-delivery>
 		}
