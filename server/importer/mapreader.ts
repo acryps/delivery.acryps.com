@@ -122,6 +122,18 @@ export class MapReader {
 		return highways;
 	}
 
+	loadWater() {
+		let water = this.filterWaysByAttribute('water');
+
+		water.forEach(waterArea => {
+			let coordinates: Coordinates[];
+
+			coordinates = this.getCoordinates(waterArea);
+
+			console.debug('coordinates: ', coordinates);
+		})
+	}
+
 
 	getCoordinatesOfNode(id: string): Coordinates {
 		let filteredNodes = this.nodes.filter(element => element._attributes.id === id);
@@ -171,12 +183,12 @@ export class MapReader {
 
 	/**
 	 * returns the coordinates, which form the polygon of the given "way" object
-	 * @param way 
+	 * @param tag 
 	 * @returns 
 	 */
-	getCoordinates(way): Coordinates[] {
+	getCoordinates(tag): Coordinates[] {
 		let coordinates: Coordinates[] = [];
-		let nodes = way.nd;
+		let nodes = tag.nd;
 
 		if(nodes) {
 			if(nodes.length > 1) {
