@@ -33,8 +33,27 @@ export class MapReader {
 		// todo: load the boundingBoxes
 	}
 
-	getXML(boundingBox: BoundingBox) {
-		// todo: fetch xml using boundingbox
+	calculateBoundingBox2(startLocation: Coordinates, radius: number) {
+		let gameArea: BoundingBox;
+		let loadedArea: BoundingBox;
+
+		let toLoadBoundingBoxes: BoundingBox[];
+
+		gameArea = new BoundingBox(startLocation.latitude + radius, startLocation.latitude - radius, startLocation.longitude + radius, startLocation.longitude - radius);
+
+		// save bounding boxes to db
+
+		for (let boundingBoxesToLoad of toLoadBoundingBoxes) {
+			this.getXML(boundingBoxesToLoad);
+		}
+	}
+
+	async getXML(boundingBox: BoundingBox) {
+		const mapURL = `https://api.openstreetmap.org/api/0.6/map?bbox=${boundingBox.get()}`;
+		
+		const map = await fetch(mapURL).then(response => response.json());
+
+		console.debug('map: ', map);
 	}
 
 	readMap() {
