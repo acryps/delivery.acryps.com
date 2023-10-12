@@ -1,8 +1,16 @@
+import { Delivery } from "./delivery";
 import { Point } from "./point";
 
 export interface PlayerMessage {
 	id: string;
 	position: Point;
+}
+
+export interface DeliveryMessage {
+	id: string;
+	assignee: string;
+	source: string;
+	destination: string;
 }
 
 export interface ClientMessage {
@@ -16,13 +24,12 @@ export interface ServerMessage {
 		position: Point;
 	}[];
 
-	delivery?: {
-		source: string,
-		destination: string
-	}
-
 	start?: boolean,
 
 	leave?: PlayerMessage,
-	join?: PlayerMessage
+	join?: PlayerMessage,
+
+	assigned?: DeliveryMessage;
+	pickedUp?: string;
+	delivered?: string;
 }

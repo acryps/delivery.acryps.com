@@ -14,4 +14,8 @@ export class Point {
 			this.longitude - Math.cos(direction) * distance,
 		)
 	}
+
+	clone() {
+		return new Point(this.latitude, this.longitude);
+	}
 }

@@ -5,8 +5,9 @@ import { DeliveryIndicator } from "./delivery";
 import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { Point } from "../../shared/point";
-import { Building } from "./building";
 import { TargetTracker } from "./target";
+import { Delivery } from "../../shared/delivery";
+import { Map } from "../../shared/map";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -14,17 +15,15 @@ export class GameComponent extends Component {
 	id: string;
 	players: Player[] = [];
 
-	map: MapComponent;
+	mapRenderer: MapComponent;
 	lobby = new LobbyComponent();
 
-	delivery;
+	delivery: Delivery;
 	deliveryIndicator = new DeliveryIndicator();
 
 	targetTracker = new TargetTracker();
 
-	buildings: Building[];
-	waterBodies;
-	streets;
+	map: Map;
 
 	center: Point;
 	radius: number;
@@ -38,14 +37,10 @@ export class GameComponent extends Component {
 	}
 
 	async onload() {
-		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
+		this.map = Map.from(await fetch(`/map/${this.parameters.token}`).then(response => response.json()));
 
-		this.buildings = map.buildings.map(building => Building.from(building));
-		this.waterBodies = map.waterBodies;
-		this.streets = map.streets;
-
-		this.center = new Point(map.center.latitude, map.center.longitude);
-		this.radius = map.radius;
+		this.center = new Point(this.map.center.latitude, this.map.center.longitude);
+		this.radius = this.map.radius;
 
 		this.socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.host}/join/${this.parameters.token}`);
 		this.socket.onclose = () => this.navigate('/');
@@ -58,6 +53,10 @@ export class GameComponent extends Component {
 			this.socket.onmessage = event => {
 				const data = JSON.parse(event.data) as ServerMessage;
 
+				if (!('move' in data)) {
+					console.log(data);
+				}
+
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
 
@@ -68,15 +67,19 @@ export class GameComponent extends Component {
 					this.lobby.remove();
 				}
 
-				if ('delivery' in data) {
-					this.delivery = {
-						source: this.buildings.find(building =>  building.id == data.delivery.source),
-						destination: this.buildings.find(building =>  building.id == data.delivery.destination)
-					};
+				if ('assigned' in data) {
+					if (data.assigned.assignee == this.id) {
+						this.delivery = Delivery.from(data.assigned, this.players, this.map);
 
-					this.targetTracker.target = this.delivery.source.center;
+						this.targetTracker.target = this.delivery.source.center;
+						this.deliveryIndicator.update();
+					}
+				}
 
-					this.deliveryIndicator.update();
+				if ('pickedUp' in data) {
+					if (data.pickedUp == this.delivery.id) {
+						this.delivery.carrier = this.player;
+					}
 				}
 
 				if ('move' in data) {
@@ -91,10 +94,10 @@ export class GameComponent extends Component {
 	}
 
 	render() {
-		this.map = new MapComponent();
+		this.mapRenderer = new MapComponent();
 
 		return <ui-game>
-			{this.map}
+			{this.mapRenderer}
 			{this.targetTracker}
 
 			{this.deliveryIndicator}

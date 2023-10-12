@@ -1,7 +1,7 @@
 import { Map } from "../../shared/map";
-import { Player } from "./player";
-import { move } from "../../shared/move";
+import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
+import { playerSpeed } from "../../shared/move";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -9,7 +9,7 @@ export class Game {
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
-	players: Player[] = [];
+	players: PlayerController[] = [];
 	map: Map;
 
 	private gameLoop: NodeJS.Timeout;
@@ -19,14 +19,14 @@ export class Game {
 		this.map = map;
 	}
 
-	join(player: Player) {
+	join(player: PlayerController) {
 		if (this.gameLoop) {
 			console.warn(`user ${player.id} tried to join running game ${this.token}`);
 			throw new Error('can\'t join running game');
 		}
 
-		player.assignPackage(this.map);
 		this.players.push(player);
+		this.assignPackage(player);
 		
 		this.broadcast({
 			join: player
@@ -35,7 +35,29 @@ export class Game {
 		console.log(`player '${player.id}' joined game '${this.token}'`);
 	}
 
-	leave(player: Player) {
+	assignPackage(player: PlayerController) {
+		player.pickedUp = null;
+
+		const delivery = this.map.planDelivery();
+		player.assigned = delivery;
+		delivery.assignee = player;
+
+		const offsetDirection = Math.random() * Math.PI * 2;
+
+		// move away form the pickup location
+		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
+
+		// walk away in the same direction until we are not intersecting any houses anymore
+		while (this.map.collides(player.position)) {
+			player.position = player.position.walk(offsetDirection, playerSpeed);
+		}
+
+		this.broadcast({
+			assigned: delivery.toJSON()
+		});
+	}
+
+	leave(player: PlayerController) {
 		this.players.splice(this.players.indexOf(player), 1);
 
 		this.broadcast({
@@ -47,7 +69,7 @@ export class Game {
 		}
 	}
 
-	start(player: Player) {
+	start(player: PlayerController) {
 		if (!this.isHost(player)) {
 			console.warn(`non host user ${player.id} tried to start the game ${this.token}`);
 			throw new Error('unauthorized to start game');
@@ -66,7 +88,15 @@ export class Game {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
 				for (const player of this.players) {
-					player.position = move(this.map, player.position, player.moveAngle, deltaTime);
+					player.move(player.moveAngle, deltaTime * playerSpeed, this.map, delivery => {
+						this.broadcast({ pickedUp: delivery.id });
+
+						delivery.carrier = player;
+					}, delivery => {
+						this.broadcast({ delivered: delivery.id });
+
+						this.assignPackage(player);
+					});
 				}
 
 				this.broadcast({
@@ -86,7 +116,7 @@ export class Game {
 		console.log(`stopped game ${this.token}`);
 	}
 
-	private isHost(player: Player) {
+	private isHost(player: PlayerController) {
 		// first player is always the host
 		return this.players.indexOf(player) == 0;
 	}

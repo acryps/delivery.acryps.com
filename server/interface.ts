@@ -1,5 +1,5 @@
 import { Game } from "./game/game";
-import { Player } from "./game/player";
+import { PlayerController } from "./game/player";
 import { DbContext } from "./managed/database";
 import { Point } from "../shared/point";
 import { ClientMessage } from "../shared/messages";
@@ -43,7 +43,7 @@ export function registerInterface(app, database: DbContext) {
 			return socket.close();
 		}
 
-		const player = new Player(socket, game.map.center);
+		const player = new PlayerController(socket, game.map.center);
 
 		socket.send(JSON.stringify({
 			id: player.id,

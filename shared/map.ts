@@ -1,4 +1,5 @@
 import { BuildingViewModel } from "./building";
+import { Delivery } from "./delivery";
 import { Point } from "./point";
 import { Rectangle } from "./rectangle";
 
@@ -8,6 +9,14 @@ export class Map {
 		public radius: number,
 		public buildings: BuildingViewModel[]
 	) {}
+
+	static from(serialized) {
+		return new Map(
+			Point.from(serialized.center),
+			serialized.radius,
+			serialized.buildings.map(building => BuildingViewModel.from(building))
+		);
+	}
 
 	collides(point: Point) {
 		for (let building of this.buildings) {
@@ -30,12 +39,23 @@ export class Map {
 				}
 
 				if (insidePolygon) {
-					return true;
+					return building;
 				}
 			}
 		}
 
 		return false;
+	}
+
+	planDelivery() {
+		const angle = Math.random() * Math.PI * 2;
+		const distance = Math.random() * this.radius / 4 + this.radius / 2;
+
+		const delivery = new Delivery();
+		delivery.source = this.searchBuilding(angle, distance);
+		delivery.destination = this.searchBuilding(angle + Math.PI, distance);
+
+		return delivery;
 	}
 
 	searchBuilding(angle: number, distance: number, attempts = 0) {

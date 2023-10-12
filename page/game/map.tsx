@@ -1,8 +1,6 @@
 import { Component } from "@acryps/page";
 import { GameComponent } from ".";
 import { Point } from "../../shared/point";
-import { move } from "../../shared/move";
-import { Building } from "./building";
 import { Rectangle } from "../../shared/rectangle";
 
 export class MapComponent extends Component {
@@ -88,7 +86,19 @@ export class MapComponent extends Component {
 		const packageSourcePath = new Path2D();
 
 		for (let building of this.visibleBuildings) {
-			const path = building == this.parent.delivery?.source ? packageSourcePath : buildingsPath;
+			let path = buildingsPath;
+			
+			if (this.parent.delivery) {
+				if (building == this.parent.delivery.source) {
+					if (!this.parent.delivery.droppedLocation && !this.parent.delivery.carrier) {
+						path = packageSourcePath;
+					}
+				}
+
+				if (building == this.parent.delivery.destination) {
+					path = packageSourcePath;
+				}
+			}
 
 			for (let pointIndex = 0; pointIndex < building.geometry.length; pointIndex++) {
 				if (pointIndex == 0) {
@@ -143,7 +153,7 @@ export class MapComponent extends Component {
 
 	get visibleBuildings() {
 		const viewport = this.viewport;
-		const buildings = this.parent.buildings.filter(building => viewport.touches(building.boundingBox));
+		const buildings = this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
 
 		return buildings;
 	}
