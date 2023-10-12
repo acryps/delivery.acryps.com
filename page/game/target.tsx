@@ -27,6 +27,6 @@ export class TargetTracker extends Component {
 	}
 
 	render() {
-		return <ui-tracker></ui-tracker>;
+		return <ui-void></ui-void> // <ui-tracker></ui-tracker>;
 	}
 }

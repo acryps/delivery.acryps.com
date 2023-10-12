@@ -79,6 +79,7 @@ export class GameComponent extends Component {
 				if ('pickedUp' in data) {
 					if (data.pickedUp == this.delivery.id) {
 						this.delivery.carrier = this.player;
+						this.deliveryIndicator.update();
 					}
 				}
 
