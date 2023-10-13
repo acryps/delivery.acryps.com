@@ -11,7 +11,7 @@ export class PlayerController {
 	readonly name = randomNameGenerator().spaced;
 
 	readonly speed = 150;
-	readonly packageSlownessFactor = 0.95;
+	readonly deliverySlownessFactor = 0.95;
 
 	moveAngle: number | null = null;
 
@@ -33,7 +33,7 @@ export class PlayerController {
 		let speed = this.speed * deltaTime;
 
 		if (this.pickedUp) {
-			speed *= this.packageSlownessFactor;
+			speed *= this.deliverySlownessFactor;
 		}
 
 		const targetPoint = this.position.walk(angle, speed);
