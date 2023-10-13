@@ -4,6 +4,7 @@
 :root {
 	--page-color: #fff;
 	--page-background: #000;
+	--page-error: #ff5a5a;
 }
 
 body {
@@ -114,6 +115,11 @@ ui-join {
 		color: var(--page-color);
 
 		text-transform: uppercase;
+
+		&[ui-error] {
+			border-color: var(--page-error);
+			animation: shake 0.3s;
+		}
 	}
 
 	ui-action {
@@ -130,5 +136,23 @@ ui-join {
 			background: var(--page-color);
 			color: var(--page-background);
 		}
+	}
+}
+
+@keyframes shake {
+	0% {
+		transform: translate(0px, 0px)
+	}
+
+	25% {
+		transform: translate(5px, 0px)
+	}
+
+	50% {
+		transform: translate(-5px, 0px)
+	}
+
+	75% {
+		transform: translate(5px, 0px)
 	}
 }
