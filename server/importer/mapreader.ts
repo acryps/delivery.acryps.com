@@ -13,7 +13,7 @@ export class MapReader {
 		private loadingArea: LoadingArea
 	) {}
 
-	async loadMap() {
+	async loadMap(): Promise<boolean> {
 		let jsonData = await this.readMapFromXml();
 
 		this.nodes = jsonData.osm.node;
@@ -23,13 +23,15 @@ export class MapReader {
 		console.debug("loading map for loading area around: lat:" + this.loadingArea.center.latitude + ", long:" + this.loadingArea.center.longitude);
 
 		if(this.nodes.length > 1 && this.ways.length > 1) {
+
 			// todo: uncomment, when rest ist tested!!
-			this.loadBuildings();
-			// this.loadStreets();
-			// this.loadWater();
+			if(await this.loadBuildings() /*&& this.loadStreets() && this.loadWater()*/) {
+				return true;
+			}
+			return false;
 		}
 		else {
-			console.warn("MAP-READER: loaded map with no data");
+			return false;
 		}
 	}
 
@@ -68,26 +70,32 @@ export class MapReader {
 		return map;
 	}
 
-	async loadBuildings() {
-		let buildings = this.filterWaysByAttribute("building");
+	async loadBuildings(): Promise<boolean> {
+		try {
+			let buildings = this.filterWaysByAttribute("building");
 
-		buildings.forEach(async building => {
-			let polygonString = this.constructPolygonString(building);
+			buildings.forEach(async building => {
+				let polygonString = this.constructPolygonString(building);
+	
+				let address = this.extractAddress(building);
+	
+				let center = this.calculateCenter(this.getPoints(building));
+	
+				let buildingDB = new Building();
+				buildingDB.address = address;
+				buildingDB.centerLatitude = center.latitude;
+				buildingDB.centerLongitude = center.longitude;
+				buildingDB.polygon = polygonString;
+				buildingDB.importerId = building._attributes.id;
+				buildingDB.addressReal = true;
+	
+				await buildingDB.create();
+			});
 
-			let address = this.extractAddress(building);
-
-			let center = this.calculateCenter(this.getPoints(building));
-
-			let buildingDB = new Building();
-			buildingDB.address = address;
-			buildingDB.centerLatitude = center.latitude;
-			buildingDB.centerLongitude = center.longitude;
-			buildingDB.polygon = polygonString;
-			buildingDB.importerId = building._attributes.id;
-			buildingDB.addressReal = true;
-
-			await buildingDB.create();
-		});
+			return true;
+		} catch (error) {
+			return false;
+		}	
 	}
 
 	async loadStreets() {
@@ -227,33 +235,33 @@ export class MapReader {
 
 		let address = '';
 
-		if (buildingTags._attributes.k == "addr:city"
-			&& buildingTags._attributes.k == "addr:postcode"
-			&& buildingTags._attributes.k == "addr:street"
-			&& buildingTags._attributes.k == "addr:housenumber"
-		) {
-			for (let tag of buildingTags) {
-				switch (tag._attributes.k) {
-					case "addr:city":
-						city = tag._attributes.v;
-						break;
-					case "addr:housenumber":
-						houseNumber = tag._attributes.v;
-						break;
-					case "addr:postcode":
-						postcode = tag._attributes.v;
-						break;
-					case "addr:street":
-						street = tag._attributes.v;
-						break;
-					default:
-						break;
+					if (buildingTags._attributes.k == "addr:city"
+				&& buildingTags._attributes.k == "addr:postcode"
+				&& buildingTags._attributes.k == "addr:street"
+				&& buildingTags._attributes.k == "addr:housenumber"
+			) {
+				for (let tag of buildingTags) {
+					switch (tag._attributes.k) {
+						case "addr:city":
+							city = tag._attributes.v;
+							break;
+						case "addr:housenumber":
+							houseNumber = tag._attributes.v;
+							break;
+						case "addr:postcode":
+							postcode = tag._attributes.v;
+							break;
+						case "addr:street":
+							street = tag._attributes.v;
+							break;
+						default:
+							break;
+					}
 				}
+			} else {
+				
 			}
-		} else {
-			
-		}
-
+		
 		for (let tag of buildingTags) {
 			if (tag._attributes.k == "addr:city") {
 				city = tag._attributes.v;

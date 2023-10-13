@@ -27,11 +27,16 @@ export class AreaLoader {
 
 		if(startArea === null || startArea === undefined) {
 			console.debug("AREA-LOADER: need to load start-area");
+
 			startArea = LoadingArea.defineNewArea(startLocation);
 			let startAreaLoader = new MapReader(this.database, startArea);
-			startAreaLoader.loadMap();
 
-			await this.database.import.create(startArea.toImport());
+			if(await startAreaLoader.loadMap()) {
+				await this.database.import.create(startArea.toImport());
+			}
+			else {
+				console.warn("AREA-LOADER: could not correctly load map");
+			}
 		}
 
 		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
@@ -40,9 +45,13 @@ export class AreaLoader {
 
 		await areasToLoad.forEach(async areaToLoad => {
 			let areaLoader = new MapReader(this.database, areaToLoad);
-			areaLoader.loadMap();
 
-			await this.database.import.create(areaToLoad.toImport());
+			if(await areaLoader.loadMap()) {
+				await this.database.import.create(areaToLoad.toImport());
+			}
+			else {
+				console.warn("AREA-LOADER: could not correctly load map");
+			}
 		});
 	}
 
