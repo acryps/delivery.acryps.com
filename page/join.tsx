@@ -1,8 +1,7 @@
 import { Component } from "@acryps/page";
+import { tokenLength } from "../shared/constants";
 
 export class JoinComponent extends Component {
-	private readonly tokenLength = 6;
-
 	private token: string = '';
 	private invalidToken: boolean = false;
 
@@ -20,11 +19,13 @@ export class JoinComponent extends Component {
 
 	render() {
 		return <ui-join>
-			<input $ui-value={this.token} maxlength={this.tokenLength} placeholder='Token' ui-error={this.invalidToken} />
+			<input $ui-value={this.token} maxlength={tokenLength} placeholder='Token' ui-error={this.invalidToken} />
 
-			<ui-action ui-create-game ui-click={() => this.join()}>
+			<ui-action ui-join ui-click={() => this.join()}>
 				Join
 			</ui-action>
+
+			<ui-action ui-back ui-click={() => this.navigate('/')}>Back</ui-action>
 		</ui-join>
 	}
 }
