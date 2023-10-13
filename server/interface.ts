@@ -23,14 +23,20 @@ export function registerInterface(app, database: DbContext) {
 		const game = new Game(new Map(center, radius, buildings));
 		games.push(game);
 
+		game.onStop = () => games.splice(games.indexOf(game), 1);
+
 		response.json(game.token);
 	});
 
+	app.get('/game/:token', async (request, response) => {
+		return response.json(games.some(game => game.token == request.params.token.toLowerCase()));
+	});
+
 	app.get('/map/:token', async (request, response) => {
-		const game = games.find(game => game.token == request.params.token);
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
 
 		if (!game) {
-			return response.json({});
+			return response.json(null);
 		}
 
 		response.json(game.map);

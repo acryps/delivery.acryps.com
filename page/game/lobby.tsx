@@ -15,13 +15,13 @@ export class LobbyComponent extends Component {
 		});
 
 		return <ui-lobby>
-			<ui-join>
+			<ui-invite>
 				<ui-token>
 					{this.parent.parameters.token}
 				</ui-token>
 
 				{qrCodeImage}
-			</ui-join>
+			</ui-invite>
 
 			<ui-players>
 				{this.parent.players.map(player => <ui-player>

@@ -36,8 +36,14 @@ export class GameComponent extends Component {
 	}
 
 	async onload() {
-		this.map = Map.from(await fetch(`/map/${this.parameters.token}`).then(response => response.json()));
+		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
 
+		if (!map) {
+			this.navigate('/');
+			return;
+		}
+
+		this.map = Map.from(map);
 		this.center = new Point(this.map.center.latitude, this.map.center.longitude);
 		this.radius = this.map.radius;
 

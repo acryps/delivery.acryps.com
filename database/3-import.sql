@@ -12,3 +12,6 @@ CREATE TABLE import (
 	min_longitude REAL,
 	max_longitude REAL
 );
+
+ALTER TABLE building ADD importer_id TEXT;
+ALTER TABLE building ADD address_real BOOLEAN;

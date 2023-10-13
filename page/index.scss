@@ -4,6 +4,7 @@
 :root {
 	--page-color: #fff;
 	--page-background: #000;
+	--page-error: #ff5a5a;
 }
 
 body {
@@ -88,5 +89,70 @@ ui-create-game {
 		text-align: center;
 		color: var(--page-background);
 		background: var(--page-color);
+	}
+}
+
+ui-join {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	position: fixed;
+	inset: 0;
+
+	text-align: center;
+
+	input {
+		all: unset;
+
+		display: block;
+		width: 8rem;
+		padding: 1rem;
+
+		border: 2px solid var(--page-color);
+		background: var(--page-background);
+		color: var(--page-color);
+
+		text-transform: uppercase;
+
+		&[ui-error] {
+			border-color: var(--page-error);
+			animation: shake 0.3s;
+		}
+	}
+
+	ui-action {
+		display: block;
+		width: 8rem;
+		padding: 1rem;
+		margin: 1rem;
+
+		border: 2px solid var(--page-color);
+
+		cursor: pointer;
+
+		&:hover {
+			background: var(--page-color);
+			color: var(--page-background);
+		}
+	}
+}
+
+@keyframes shake {
+	0% {
+		transform: translate(0px, 0px)
+	}
+
+	25% {
+		transform: translate(5px, 0px)
+	}
+
+	50% {
+		transform: translate(-5px, 0px)
+	}
+
+	75% {
+		transform: translate(5px, 0px)
 	}
 }

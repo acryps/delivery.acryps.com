@@ -1,5 +1,4 @@
 import { DbContext } from "../managed/database";
-import { Coordinates } from "./coordinates";
 import { MapReader } from "./mapreader";
 
 export function importArea(/*startLocation: Coordinates,*/ database: DbContext) {
