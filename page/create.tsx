@@ -6,7 +6,7 @@ export class CreateGameComponent extends Component {
 		longitude
 	}
 
-	radii = [0.005, 0.01, 0.025];
+	radii = [500, 1000, 2000];
 	radius = this.radii[1];
 
 	render() {

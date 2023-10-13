@@ -8,11 +8,39 @@ export class Point {
 		return new Point(points.latitude, points.longitude);
 	}
 
-	walk(direction: number, distance: number) {
-		return new Point(
-			this.latitude - Math.sin(direction) * distance,
-			this.longitude - Math.cos(direction) * distance,
-		)
+	walk(angle: number, distance: number) {
+		if (angle === null) {
+			return new Point(this.latitude, this.longitude);
+		}
+	
+		const earthRadius = 6371; // kilometers
+		const latitudeRadiants = this.latitude * (Math.PI / 180);
+		const longitudeRadiants = this.longitude * (Math.PI / 180);
+	
+		// convert latitude and longitude to cartesian coordinates
+		const x = earthRadius * Math.cos(latitudeRadiants) * longitudeRadiants;
+		const y = earthRadius * latitudeRadiants;
+	
+		// calculate the destination cartesian coordinates
+		const targetX = x - (distance / earthRadius) * Math.cos(angle);
+		const targetY = y - (distance / earthRadius) * Math.sin(angle);
+	
+		// convert destination cartesian coordinates back to latitude and longitude
+		const targetLatitude = (targetY / earthRadius) * (180 / Math.PI);
+		const targetLongitude = (targetX / (earthRadius * Math.cos(latitudeRadiants))) * (180 / Math.PI);
+	
+		return new Point(targetLatitude, targetLongitude);
+	}
+
+	distance(point: Point) {
+		return Math.sqrt(
+			(this.latitude - point.latitude) ** 2 +
+			(this.longitude - point.longitude) ** 2
+		);
+	}
+
+	clone() {
+		return new Point(this.latitude, this.longitude);
 	}
 
 	toString() {

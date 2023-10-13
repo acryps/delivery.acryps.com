@@ -1,8 +1,6 @@
 import { Component } from "@acryps/page";
 import { GameComponent } from ".";
 import { Point } from "../../shared/point";
-import { move } from "../../shared/move";
-import { Building } from "./building";
 import { Rectangle } from "../../shared/rectangle";
 
 export class MapComponent extends Component {
@@ -88,7 +86,19 @@ export class MapComponent extends Component {
 		const packageSourcePath = new Path2D();
 
 		for (let building of this.visibleBuildings) {
-			const path = building == this.parent.delivery?.source ? packageSourcePath : buildingsPath;
+			let path = buildingsPath;
+			
+			if (this.parent.player?.delivery) {
+				if (building == this.parent.player.delivery.source) {
+					if (!this.parent.player.delivery.droppedLocation && !this.parent.player.delivery.carrier) {
+						path = packageSourcePath;
+					}
+				}
+
+				if (building == this.parent.player.delivery.destination) {
+					path = packageSourcePath;
+				}
+			}
 
 			for (let pointIndex = 0; pointIndex < building.geometry.length; pointIndex++) {
 				if (pointIndex == 0) {
@@ -108,6 +118,8 @@ export class MapComponent extends Component {
 		context.restore();
 
 		// draw frame
+		context.lineWidth = 1;
+
 		context.strokeStyle = 'white';
 		context.stroke(buildingsPath);
 
@@ -119,7 +131,8 @@ export class MapComponent extends Component {
 		context.fill(packageSourcePath);
 
 		// render player
-		const playerSize = 25;
+		const playerSize = 20;
+		context.lineWidth = 5;
 
 		for (let player of this.parent.players) {
 			const playerPosition = this.transform(player.position);
@@ -128,6 +141,10 @@ export class MapComponent extends Component {
 			context.beginPath();
 			context.arc(...playerPosition, playerSize / 2, 0, Math.PI * 2);
 			context.fill();
+
+			if (player.delivery && player.delivery.carrier) {
+				context.stroke();
+			}
 		}
 
 		requestAnimationFrame(() => {
@@ -143,7 +160,7 @@ export class MapComponent extends Component {
 
 	get visibleBuildings() {
 		const viewport = this.viewport;
-		const buildings = this.parent.buildings.filter(building => viewport.touches(building.boundingBox));
+		const buildings = this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
 
 		return buildings;
 	}

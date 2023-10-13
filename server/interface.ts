@@ -1,5 +1,5 @@
 import { Game } from "./game/game";
-import { Player } from "./game/player";
+import { PlayerController } from "./game/player";
 import { DbContext } from "./managed/database";
 import { Point } from "../shared/point";
 import { ClientMessage } from "../shared/messages";
@@ -23,14 +23,20 @@ export function registerInterface(app, database: DbContext) {
 		const game = new Game(new Map(center, radius, buildings));
 		games.push(game);
 
+		game.onStop = () => games.splice(games.indexOf(game), 1);
+
 		response.json(game.token);
 	});
 
+	app.get('/game/:token', async (request, response) => {
+		return response.json(games.some(game => game.token == request.params.token.toLowerCase()));
+	});
+
 	app.get('/map/:token', async (request, response) => {
-		const game = games.find(game => game.token == request.params.token);
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
 
 		if (!game) {
-			return response.json({});
+			return response.json(null);
 		}
 
 		response.json(game.map);
@@ -43,7 +49,7 @@ export function registerInterface(app, database: DbContext) {
 			return socket.close();
 		}
 
-		const player = new Player(socket, game.map.center);
+		const player = new PlayerController(socket, game.map.center);
 
 		socket.send(JSON.stringify({
 			id: player.id,

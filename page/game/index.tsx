@@ -5,8 +5,9 @@ import { DeliveryIndicator } from "./delivery";
 import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { Point } from "../../shared/point";
-import { Building } from "./building";
 import { TargetTracker } from "./target";
+import { Delivery } from "../../shared/delivery";
+import { Map } from "../../shared/map";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -14,17 +15,14 @@ export class GameComponent extends Component {
 	id: string;
 	players: Player[] = [];
 
-	map: MapComponent;
+	mapRenderer: MapComponent;
 	lobby = new LobbyComponent();
 
-	delivery;
 	deliveryIndicator = new DeliveryIndicator();
 
 	targetTracker = new TargetTracker();
 
-	buildings: Building[];
-	waterBodies;
-	streets;
+	map: Map;
 
 	center: Point;
 	radius: number;
@@ -40,12 +38,14 @@ export class GameComponent extends Component {
 	async onload() {
 		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
 
-		this.buildings = map.buildings.map(building => Building.from(building));
-		this.waterBodies = map.waterBodies;
-		this.streets = map.streets;
+		if (!map) {
+			this.navigate('/');
+			return;
+		}
 
-		this.center = new Point(map.center.latitude, map.center.longitude);
-		this.radius = map.radius;
+		this.map = Map.from(map);
+		this.center = new Point(this.map.center.latitude, this.map.center.longitude);
+		this.radius = this.map.radius;
 
 		this.socket = new WebSocket(`${location.protocol.replace('http', 'ws')}//${location.host}/join/${this.parameters.token}`);
 		this.socket.onclose = () => this.navigate('/');
@@ -58,6 +58,10 @@ export class GameComponent extends Component {
 			this.socket.onmessage = event => {
 				const data = JSON.parse(event.data) as ServerMessage;
 
+				if (!('move' in data)) {
+					console.log(data);
+				}
+
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
 
@@ -68,13 +72,21 @@ export class GameComponent extends Component {
 					this.lobby.remove();
 				}
 
-				if ('delivery' in data) {
-					this.delivery = {
-						source: this.buildings.find(building =>  building.id == data.delivery.source),
-						destination: this.buildings.find(building =>  building.id == data.delivery.destination)
-					};
+				if ('assigned' in data) {
+					const player = this.players.find(player => player.id == data.assigned.assignee);
 
-					this.targetTracker.target = this.delivery.source.center;
+					player.delivery = Delivery.from(data.assigned, this.players, this.map);
+
+					if (player == this.player) {
+						this.targetTracker.target = this.player.delivery.source.center;
+					}
+
+					this.deliveryIndicator.update();
+				}
+
+				if ('pickedUp' in data) {
+					const delivery = this.players.find(player => player.delivery?.id == data.pickedUp).delivery;
+					delivery.carrier = delivery.assignee;
 
 					this.deliveryIndicator.update();
 				}
@@ -86,15 +98,23 @@ export class GameComponent extends Component {
 						player.position = update.position;
 					}
 				}
+
+				if ('steal' in data) {
+					const thief = this.players.find(player => player.id == data.steal.thief);
+					const victim = this.players.find(player => player.id == data.steal.victim);
+
+					thief.delivery = victim.delivery;
+					this.deliveryIndicator.update();
+				}
 			};
 		};
 	}
 
 	render() {
-		this.map = new MapComponent();
+		this.mapRenderer = new MapComponent();
 
 		return <ui-game>
-			{this.map}
+			{this.mapRenderer}
 			{this.targetTracker}
 
 			{this.deliveryIndicator}

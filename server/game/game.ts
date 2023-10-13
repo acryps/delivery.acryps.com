@@ -1,31 +1,36 @@
 import { Map } from "../../shared/map";
-import { Player } from "./player";
-import { move } from "../../shared/move";
+import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
+import { BuildingViewModel } from "../../shared/building";
 
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
+	readonly stealingDistance = 0.00005;
 
-	readonly token = Math.random().toString(36).substring(2, 8);
+	readonly token: string;
 
-	players: Player[] = [];
+	players: PlayerController[] = [];
 	map: Map;
+
+	onStop: () => void;
 
 	private gameLoop: NodeJS.Timeout;
 
 	constructor(map: Map) {
 		this.players = [];
 		this.map = map;
+		this.token = Math.random().toString(36).substring(2, 8);
+
+		console.log(`game '${this.token}' created`);
 	}
 
-	join(player: Player) {
+	join(player: PlayerController) {
 		if (this.gameLoop) {
 			console.warn(`user ${player.id} tried to join running game ${this.token}`);
-			throw new Error('can\'t join running game');
+			return;
 		}
 
-		player.assignPackage(this.map);
 		this.players.push(player);
 		
 		this.broadcast({
@@ -35,7 +40,37 @@ export class Game {
 		console.log(`player '${player.id}' joined game '${this.token}'`);
 	}
 
-	leave(player: Player) {
+	assignPackage(player: PlayerController) {
+		player.pickedUp = null;
+
+		const usedBuildings: BuildingViewModel[] = []; 
+
+		for (let player of this.players) {
+			if (player.assigned) {
+				usedBuildings.push(player.assigned.source, player.assigned.destination);
+			}
+		}
+
+		const delivery = this.map.planDelivery(usedBuildings);
+		player.assigned = delivery;
+		delivery.assignee = player;
+
+		const offsetDirection = Math.random() * Math.PI * 2;
+
+		// move away form the pickup location
+		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
+
+		// walk away in the same direction until we are not intersecting any houses anymore
+		while (this.map.collides(player.position)) {
+			player.position = player.position.walk(offsetDirection, player.speed);
+		}
+
+		this.broadcast({
+			assigned: delivery.toJSON()
+		});
+	}
+
+	leave(player: PlayerController) {
 		this.players.splice(this.players.indexOf(player), 1);
 
 		this.broadcast({
@@ -47,10 +82,14 @@ export class Game {
 		}
 	}
 
-	start(player: Player) {
+	start(player: PlayerController) {
 		if (!this.isHost(player)) {
 			console.warn(`non host user ${player.id} tried to start the game ${this.token}`);
-			throw new Error('unauthorized to start game');
+			return;
+		}
+
+		for (let player of this.players) {
+			this.assignPackage(player);
 		}
 
 		this.broadcast({
@@ -65,10 +104,50 @@ export class Game {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
+				// move players
 				for (const player of this.players) {
-					player.position = move(this.map, player.position, player.moveAngle, deltaTime);
+					player.move(player.moveAngle, deltaTime, this.map, delivery => {
+						this.broadcast({ pickedUp: delivery.id });
+
+						delivery.carrier = player;
+					}, delivery => {
+						this.broadcast({ delivered: delivery.id });
+
+						this.assignPackage(player);
+					});
 				}
 
+				// check if any player stole a package
+				for (const thief of this.players) {
+					// you cannot be carrying a package and steal one!
+					if (!thief.pickedUp) {
+						for (const victim of this.players) {
+							// don't eat yourself
+							if (thief != victim) {
+								// you can only steal if there is something to be stolen!
+								if (victim.pickedUp) {
+									const distance = thief.position.distance(victim.position);
+									console.log(distance);
+
+									if (distance < this.stealingDistance) {
+										thief.pickedUp = victim.pickedUp;
+
+										this.broadcast({ 
+											steal: {
+												thief: thief.id,
+												victim: victim.id
+											}
+										});
+
+										this.assignPackage(victim);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// send updated locations
 				this.broadcast({
 					move: this.players.map(player => ({
 						id: player.id,
@@ -81,12 +160,14 @@ export class Game {
 		});
 	}
 
-	stop() {
+	private stop() {
 		clearInterval(this.gameLoop);
 		console.log(`stopped game ${this.token}`);
+
+		this.onStop();
 	}
 
-	private isHost(player: Player) {
+	private isHost(player: PlayerController) {
 		// first player is always the host
 		return this.players.indexOf(player) == 0;
 	}

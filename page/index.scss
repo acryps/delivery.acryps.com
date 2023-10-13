@@ -90,3 +90,45 @@ ui-create-game {
 		background: var(--page-color);
 	}
 }
+
+ui-join {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	position: fixed;
+	inset: 0;
+
+	text-align: center;
+
+	input {
+		all: unset;
+
+		display: block;
+		width: 8rem;
+		padding: 1rem;
+
+		border: 2px solid var(--page-color);
+		background: var(--page-background);
+		color: var(--page-color);
+
+		text-transform: uppercase;
+	}
+
+	ui-action {
+		display: block;
+		width: 8rem;
+		padding: 1rem;
+		margin: 1rem;
+
+		border: 2px solid var(--page-color);
+
+		cursor: pointer;
+
+		&:hover {
+			background: var(--page-color);
+			color: var(--page-background);
+		}
+	}
+}
