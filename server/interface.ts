@@ -28,11 +28,15 @@ export function registerInterface(app, database: DbContext) {
 		response.json(game.token);
 	});
 
+	app.get('/game/:token', async (request, response) => {
+		return response.json(games.some(game => game.token == request.params.token.toLowerCase()));
+	});
+
 	app.get('/map/:token', async (request, response) => {
-		const game = games.find(game => game.token == request.params.token);
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
 
 		if (!game) {
-			return response.json({});
+			return response.json(null);
 		}
 
 		response.json(game.map);
