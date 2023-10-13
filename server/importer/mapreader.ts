@@ -87,8 +87,8 @@ export class MapReader {
 
 			let buildingDB = new Building();
 			buildingDB.address = address;
-			buildingDB.centerlatitude = center.latitude;
-			buildingDB.centerlongitude = center.longitude;
+			buildingDB.centerLatitude = center.latitude;
+			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
 
 			buildingsDB.push(buildingDB);
@@ -125,8 +125,8 @@ export class MapReader {
 				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
-				waterDB.centerlatitude = center.latitude;
-				waterDB.centerlongitude = center.longitude;
+				waterDB.centerLatitude = center.latitude;
+				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
 				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
 
@@ -142,8 +142,8 @@ export class MapReader {
 				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
-				waterDB.centerlatitude = center.latitude;
-				waterDB.centerlongitude = center.longitude;
+				waterDB.centerLatitude = center.latitude;
+				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
 				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
 
