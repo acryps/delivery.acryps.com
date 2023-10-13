@@ -25,6 +25,10 @@ export class Map {
 	}
 
 	collides(point: Point) {
+		if (!this.boundingBox.contains(point)) {
+			return this.boundingBox;
+		}
+
 		for (let building of this.buildings) {
 			if (Rectangle.fromPolygon(building.geometry).contains(point)) {
 				let insidePolygon = false;
