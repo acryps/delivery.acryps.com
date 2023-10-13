@@ -26,7 +26,7 @@ export class Game {
 	join(player: PlayerController) {
 		if (this.gameLoop) {
 			console.warn(`user ${player.id} tried to join running game ${this.token}`);
-			throw new Error('can\'t join running game');
+			return;
 		}
 
 		this.players.push(player);
@@ -83,7 +83,7 @@ export class Game {
 	start(player: PlayerController) {
 		if (!this.isHost(player)) {
 			console.warn(`non host user ${player.id} tried to start the game ${this.token}`);
-			throw new Error('unauthorized to start game');
+			return;
 		}
 
 		for (let player of this.players) {
