@@ -33,7 +33,7 @@ export class CreateGameComponent extends Component {
 				</ui-radius>)}
 			</ui-radii>
 
-			<ui-action ui-start ui-click={async () => {
+			<ui-action ui-create ui-click={async () => {
 				const token = await fetch('/game', {
 					method: 'post',
 					headers: {
@@ -52,6 +52,8 @@ export class CreateGameComponent extends Component {
 			}}>
 				Create Game
 			</ui-action>
+
+			<ui-action ui-back ui-click={() => this.navigate('/')}>Back</ui-action>
 		</ui-create-game>;
 	}
 }

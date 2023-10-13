@@ -2,6 +2,7 @@ import { Map } from "../../shared/map";
 import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { BuildingViewModel } from "../../shared/building";
+import { tokenLength } from "../../shared/constants";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -20,14 +21,14 @@ export class Game {
 	constructor(map: Map) {
 		this.players = [];
 		this.map = map;
-		this.token = Math.random().toString(36).substring(2, 8);
+		this.token = Math.random().toString(36).substring(2, 2 + tokenLength);
 
 		console.log(`game '${this.token}' created`);
 	}
 
 	join(player: PlayerController) {
 		if (this.gameLoop) {
-			console.warn(`user ${player.id} tried to join running game ${this.token}`);
+			console.warn(`user ${player.name} tried to join running game ${this.token}`);
 			return;
 		}
 
@@ -37,37 +38,7 @@ export class Game {
 			join: player
 		});
 
-		console.log(`player '${player.id}' joined game '${this.token}'`);
-	}
-
-	assignPackage(player: PlayerController) {
-		player.pickedUp = null;
-
-		const usedBuildings: BuildingViewModel[] = []; 
-
-		for (let player of this.players) {
-			if (player.assigned) {
-				usedBuildings.push(player.assigned.source, player.assigned.destination);
-			}
-		}
-
-		const delivery = this.map.planDelivery(usedBuildings);
-		player.assigned = delivery;
-		delivery.assignee = player;
-
-		const offsetDirection = Math.random() * Math.PI * 2;
-
-		// move away form the pickup location
-		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
-
-		// walk away in the same direction until we are not intersecting any houses anymore
-		while (this.map.collides(player.position)) {
-			player.position = player.position.walk(offsetDirection, player.speed);
-		}
-
-		this.broadcast({
-			assigned: delivery.toJSON()
-		});
+		console.log(`player '${player.name}' joined game '${this.token}'`);
 	}
 
 	leave(player: PlayerController) {
@@ -77,6 +48,8 @@ export class Game {
 			leave: player
 		});
 
+		console.log(`player '${player.name}' left game '${this.token}'`);
+
 		if (!this.players.length) {
 			this.stop();
 		}
@@ -84,7 +57,7 @@ export class Game {
 
 	start(player: PlayerController) {
 		if (!this.isHost(player)) {
-			console.warn(`non host user ${player.id} tried to start the game ${this.token}`);
+			console.warn(`non host user ${player.name} tried to start the game ${this.token}`);
 			return;
 		}
 
@@ -96,7 +69,7 @@ export class Game {
 			start: true
 		});
 
-		console.log(`started game ${this.token} with ${this.ticksPerSecond} ticks per second`);
+		console.log(`started game ${this.token}`);
 
 		let lastTick = Date.now();
 
@@ -157,6 +130,36 @@ export class Game {
 
 				lastTick = Date.now();
 			}
+		});
+	}
+
+	private assignPackage(player: PlayerController) {
+		player.pickedUp = null;
+
+		const usedBuildings: BuildingViewModel[] = []; 
+
+		for (let player of this.players) {
+			if (player.assigned) {
+				usedBuildings.push(player.assigned.source, player.assigned.destination);
+			}
+		}
+
+		const delivery = this.map.planDelivery(usedBuildings);
+		player.assigned = delivery;
+		delivery.assignee = player;
+
+		const offsetDirection = Math.random() * Math.PI * 2;
+
+		// move away form the pickup location
+		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
+
+		// walk away in the same direction until we are not intersecting any houses anymore
+		while (this.map.collides(player.position)) {
+			player.position = player.position.walk(offsetDirection, player.speed);
+		}
+
+		this.broadcast({
+			assigned: delivery.toJSON()
 		});
 	}
 

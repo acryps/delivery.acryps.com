@@ -1,3 +1,4 @@
+import { tokenLength } from "../../shared/constants";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
 import { Point } from "../../shared/point";
@@ -6,7 +7,7 @@ import { generateName } from "./name";
 export class PlayerController {
 	static readonly pickupOffsetRadius = 50;
 
-	readonly id = Math.random().toString(36).substring(2, 8);
+	readonly id = Math.random().toString(36).substring(2, 2 + tokenLength);
 	readonly name = generateName();
 
 	readonly speed = 50 / 3.6;
@@ -20,9 +21,7 @@ export class PlayerController {
 	constructor (
 		public socket: WebSocket,
 		public position: Point
-	) {
-		console.log('created player at', position);
-	}
+	) {}
 
 	move(angle: number, deltaTime: number, map: Map, onPickUp: (delivery: Delivery) => void, onDeliver: (delivery: Delivery) => void) {
 		if (angle === null) {

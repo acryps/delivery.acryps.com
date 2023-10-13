@@ -1,8 +1,11 @@
+@import './components.scss';
+
 @import './assets/font/index.scss';
 @import './game/index.scss';
 
 :root {
 	--page-color: #fff;
+	--page-color-dimmed: #ddd;
 	--page-background: #000;
 	--page-error: #ff5a5a;
 }
@@ -31,18 +34,10 @@ ui-home {
 	inset: 0;
 
 	ui-action {
-		display: block;
-		padding: 1rem;
+		@include action;
+
 		margin: 1rem;
-
-		border: 2px solid var(--page-color);
-
-		cursor: pointer;
-
-		&:hover {
-			background: var(--page-color);
-			color: var(--page-background);
-		}
+		padding-block: 1rem;
 	}
 }
 
@@ -73,6 +68,8 @@ ui-create-game {
 		ui-radius {
 			margin-right: 1rem;
 
+			cursor: pointer;
+
 			&[ui-active] {
 				color: var(--page-background);
 				background: var(--page-color);
@@ -81,14 +78,17 @@ ui-create-game {
 	}
 
 	ui-action {
-		margin-top: auto;
+		&[ui-create] {
+			@include primary-action;
 
-		display: block;
-		padding: 1rem;
+			margin-top: auto;
+		}
 
-		text-align: center;
-		color: var(--page-background);
-		background: var(--page-color);
+		&[ui-back] {
+			@include action;
+
+			margin-top: 1rem;
+		}
 	}
 }
 
@@ -97,6 +97,7 @@ ui-join {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	row-gap: 1rem;
 
 	position: fixed;
 	inset: 0;
@@ -123,18 +124,16 @@ ui-join {
 	}
 
 	ui-action {
-		display: block;
 		width: 8rem;
-		padding: 1rem;
-		margin: 1rem;
+		
+		&[ui-join] {
+			@include primary-action;
 
-		border: 2px solid var(--page-color);
+			margin-bottom: 1rem;
+		}
 
-		cursor: pointer;
-
-		&:hover {
-			background: var(--page-color);
-			color: var(--page-background);
+		&[ui-back] {
+			@include action;
 		}
 	}
 }

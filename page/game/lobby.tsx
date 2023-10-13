@@ -24,7 +24,7 @@ export class LobbyComponent extends Component {
 			</ui-invite>
 
 			<ui-players>
-				{this.parent.players.map(player => <ui-player>
+				{this.parent.players.map(player => <ui-player style={`--color: ${player.color}`}>
 					{player.name}
 				</ui-player>)}
 			</ui-players>

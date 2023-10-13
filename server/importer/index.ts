@@ -1,7 +1,8 @@
 import { Point } from "../../shared/point";
 import { DbContext } from "../managed/database";
-import { MapReader } from "./mapreader";
+import { AreaLoader } from "./area-loader";
 
 export function importArea(startLocation: Point, database: DbContext) {
-	let mapReader = new MapReader(database);
+	let areaLoader = new AreaLoader(database);
+	areaLoader.loadArea(startLocation);
 }
