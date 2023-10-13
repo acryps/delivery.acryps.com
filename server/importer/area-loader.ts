@@ -1,7 +1,7 @@
 import { Point } from "../../shared/point";
 import { DbContext, Import } from "../managed/database";
 import { LoadingArea } from "./loading-area";
-import { MapReader } from "./mapreader";
+import { MapReader } from "./map-reader";
 
 export class AreaLoader {
 
