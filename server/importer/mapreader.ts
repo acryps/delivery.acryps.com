@@ -1,7 +1,9 @@
-import { Coordinates } from "./coordinates";
 import * as convert from "xml-js";
 import * as fs from 'fs';
+
 import { Building, DbContext, WaterBody } from "../managed/database";
+import { Rectangle } from "../../shared/rectangle";
+import { Point } from "../../shared/point";
 
 const fileName = 'zurich-tiny';
 const cwd = process.cwd() + "/importer";
@@ -24,10 +26,10 @@ export class MapReader {
 	}
 
 
-	calculateBoundingBox(startLocation: Coordinates) {
-		let loadedArea: Coordinates;
+	calculateBoundingBox(startLocation: Point) {
+		let loadedArea: Point;
 
-		let toLoadBoundingBoxes: Coordinates[];
+		let toLoadBoundingBoxes: Point[];
 
 		// todo: load the boundingBoxes
 	}
@@ -79,7 +81,7 @@ export class MapReader {
 
 			let address = this.extractAddress(building);
 
-			let center = this.calculateCenter(this.getCoordinates(building));
+			let center = this.calculateCenter(this.getPoint(building));
 
 			let osmId = building._attributes.id;
 
@@ -90,8 +92,6 @@ export class MapReader {
 			buildingDB.polygon = polygonString;
 
 			buildingsDB.push(buildingDB);
-
-			//console.debug(building)
 
 			await buildingDB.create();
 		});
@@ -117,12 +117,12 @@ export class MapReader {
 					const way = this.findMember(member);
 					
 					if (way) {
-						coordinates.push(...this.getCoordinates(way));
+						coordinates.push(...this.getPoint(way));
 					}
 				}
 
 				let center = this.calculateCenter(coordinates);
-				let polygonString = this.constructPolygonFromCoordinates(coordinates);
+				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
 				waterDB.centerlatitude = center.latitude;
@@ -136,10 +136,10 @@ export class MapReader {
 			} else {
 				let coordinates = [];
 
-				coordinates = this.getCoordinates(water);
+				coordinates = this.getPoint(water);
 
 				let center = this.calculateCenter(coordinates);
-				let polygonString = this.constructPolygonFromCoordinates(coordinates);
+				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
 				waterDB.centerlatitude = center.latitude;
@@ -160,7 +160,7 @@ export class MapReader {
 		let highways = this.findByTag("highway");
 
 		highways.forEach(highway => {
-			let coordinates: Coordinates[] = this.getCoordinates(highway);
+			let coordinates: Point[] = this.getPoint(highway);
 
 			//console.debug(highway);
 
@@ -186,7 +186,7 @@ export class MapReader {
 		return searchedWay;
 	}
 
-	constructPolygonFromCoordinates(coordinates: Coordinates[]) {
+	constructPolygonFromPoint(coordinates: Point[]) {
 		let polygonString = '';
 
 		for (let coordinate of coordinates) {
@@ -200,7 +200,7 @@ export class MapReader {
 		return polygonString;
 	}
 
-	getCoordinatesOfNode(id: string): Coordinates {
+	getPointOfNode(id: string): Point {
 		let filteredNodes = this.nodes.filter(element => element._attributes.id === id);
 
 		if(filteredNodes.length > 1) {
@@ -214,7 +214,7 @@ export class MapReader {
 		}
 
 		let node = filteredNodes[0];	
-		return new Coordinates(+node._attributes.lat, +node._attributes.lon);
+		return new Point(+node._attributes.lat, +node._attributes.lon);
 	}
 
 	getNode(id: string) {
@@ -257,20 +257,20 @@ export class MapReader {
 	 * @param way 
 	 * @returns 
 	 */
-	getCoordinates(way): Coordinates[] {
-		let coordinates: Coordinates[] = [];
+	getPoint(way): Point[] {
+		let coordinates: Point[] = [];
 		let nodes = way.nd;
 
 		if(nodes) {
 			if(nodes.length > 1) {
 				nodes.forEach(buildingNode => {
 					let nodeRef = buildingNode._attributes.ref;
-					coordinates.push(this.getCoordinatesOfNode(nodeRef));
+					coordinates.push(this.getPointOfNode(nodeRef));
 				});
 			}
 			else {
 				let nodeRef = nodes._attributes.ref;
-				coordinates.push(this.getCoordinatesOfNode(nodeRef));
+				coordinates.push(this.getPointOfNode(nodeRef));
 			}
 		}
 
@@ -291,13 +291,13 @@ export class MapReader {
 			if(buildingNodes.length > 1) {
 				buildingNodes.forEach(buildingNode => {
 					let nodeRef = buildingNode._attributes.ref;
-					let coordinates: Coordinates = this.getCoordinatesOfNode(nodeRef);
+					let coordinates: Point = this.getPointOfNode(nodeRef);
 					polygonString = coordinates.toString() + ";" + polygonString;
 				});
 			}
 			else {
 				let nodeRef = buildingNodes._attributes.ref;
-				let coordinates: Coordinates = this.getCoordinatesOfNode(nodeRef);
+				let coordinates: Point = this.getPointOfNode(nodeRef);
 				polygonString = coordinates.toString() + ";" + polygonString;
 			}
 		}
@@ -313,7 +313,7 @@ export class MapReader {
 	extractAddress(building): string {
 		let buildingTags = building.tag;
 		let city: string = "";
-		let housenumber: string = "";
+		let houseNumber: string = "";
 		let postcode: string = "";
 		let street: string = "";
 
@@ -324,7 +324,7 @@ export class MapReader {
 						city = tag._attributes.v;
 						break;
 					case "addr:housenumber":
-						housenumber = tag._attributes.v;
+						houseNumber = tag._attributes.v;
 						break;
 					case "addr:postcode":
 						postcode = tag._attributes.v;
@@ -341,26 +341,10 @@ export class MapReader {
 			console.warn("building has no address");
 		}
 
-		return street + " " + housenumber + " " + postcode + " " + city;
+		return `${street} ${houseNumber} ${postcode} ${city}`;
 	} 
-	
-	/**
-	 * calculates the approximate center of the given coordinates
-	 * @param coordinates 
-	 * @returns approximate center
-	 */
-	calculateCenter(coordinates: Coordinates[]): Coordinates {
-		let sumLatitude = 0;
-		let sumLongitude = 0;
 
-		coordinates.forEach(coordinate => {
-			sumLatitude += coordinate.latitude;
-			sumLongitude += coordinate.longitude;
-		});
-
-		let numberOfCoordinates = coordinates.length;
-		let center: Coordinates = new Coordinates(sumLatitude/numberOfCoordinates, sumLongitude/numberOfCoordinates);
-	
-		return center;
+	calculateCenter(points: Point[]) {
+		return Rectangle.fromPolygon(points).center;
 	}
 }
