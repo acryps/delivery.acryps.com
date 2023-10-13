@@ -13,6 +13,8 @@ export class Game {
 	players: PlayerController[] = [];
 	map: Map;
 
+	onStop: () => void;
+
 	private gameLoop: NodeJS.Timeout;
 
 	constructor(map: Map) {
@@ -158,9 +160,11 @@ export class Game {
 		});
 	}
 
-	stop() {
+	private stop() {
 		clearInterval(this.gameLoop);
 		console.log(`stopped game ${this.token}`);
+
+		this.onStop();
 	}
 
 	private isHost(player: PlayerController) {

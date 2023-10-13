@@ -23,6 +23,8 @@ export function registerInterface(app, database: DbContext) {
 		const game = new Game(new Map(center, radius, buildings));
 		games.push(game);
 
+		game.onStop = () => games.splice(games.indexOf(game), 1);
+
 		response.json(game.token);
 	});
 
