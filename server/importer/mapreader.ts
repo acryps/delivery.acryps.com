@@ -1,7 +1,7 @@
 import { Coordinates } from "./coordinates";
 import * as convert from "xml-js";
 import * as fs from 'fs';
-import { Building, DbContext } from "../managed/database";
+import { Building, DbContext, WaterBody } from "../managed/database";
 
 const fileName = 'zurich-tiny';
 const cwd = process.cwd() + "/importer";
@@ -71,7 +71,7 @@ export class MapReader {
 	}
 
 	async loadBuildings() {
-		let buildings = this.filterWaysByAttribute("building");
+		let buildings = this.findByTag("building");
 		let buildingsDB: Building[] = [];
 
 		buildings.forEach(async building => {
@@ -105,8 +105,59 @@ export class MapReader {
 		return buildings;
 	}
 
+	async loadWater() {
+		let waters =  this.findByTag('water');
+		let watersDB: WaterBody[] = [];
+
+		for (let water of waters) {
+			if (water.member) {
+				const coordinates = [];
+
+				for (let member of water.member) {
+					const way = this.findMember(member);
+					
+					if (way) {
+						coordinates.push(...this.getCoordinates(way));
+					}
+				}
+
+				let center = this.calculateCenter(coordinates);
+				let polygonString = this.constructPolygonFromCoordinates(coordinates);
+
+				let waterDB = new WaterBody();
+				waterDB.centerlatitude = center.latitude;
+				waterDB.centerlongitude = center.longitude;
+				waterDB.polygon = polygonString;
+				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+
+				watersDB.push(waterDB);
+
+				await waterDB.create();
+			} else {
+				let coordinates = [];
+
+				coordinates = this.getCoordinates(water);
+
+				let center = this.calculateCenter(coordinates);
+				let polygonString = this.constructPolygonFromCoordinates(coordinates);
+
+				let waterDB = new WaterBody();
+				waterDB.centerlatitude = center.latitude;
+				waterDB.centerlongitude = center.longitude;
+				waterDB.polygon = polygonString;
+				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+
+				watersDB.push(waterDB);
+
+				await waterDB.create();
+			}
+		}
+
+		return waters;
+	}
+
 	getStreets() {
-		let highways = this.filterWaysByAttribute("highway");
+		let highways = this.findByTag("highway");
 
 		highways.forEach(highway => {
 			let coordinates: Coordinates[] = this.getCoordinates(highway);
@@ -122,18 +173,32 @@ export class MapReader {
 		return highways;
 	}
 
-	loadWater() {
-		let water = this.filterWaysByAttribute('water');
+	findMember(member) {
+		let memberId = member._attributes.ref;
+		let searchedWay;
 
-		water.forEach(waterArea => {
-			let coordinates: Coordinates[];
+		this.ways.map(way => {
+			if (way._attributes.id == memberId) {
+				searchedWay = way;
+			}
+		});
 
-			coordinates = this.getCoordinates(waterArea);
-
-			console.debug('coordinates: ', coordinates);
-		})
+		return searchedWay;
 	}
 
+	constructPolygonFromCoordinates(coordinates: Coordinates[]) {
+		let polygonString = '';
+
+		for (let coordinate of coordinates) {
+			if (coordinate == coordinates[coordinates.length - 1]) {
+				polygonString += `${coordinate.latitude},${coordinate.longitude}`;
+			} else {
+				polygonString += `${coordinate.latitude},${coordinate.longitude};`;
+			}
+		}
+
+		return polygonString;
+	}
 
 	getCoordinatesOfNode(id: string): Coordinates {
 		let filteredNodes = this.nodes.filter(element => element._attributes.id === id);
@@ -142,6 +207,7 @@ export class MapReader {
 			console.error("didn't get unique element");
 			return null;
 		}
+
 		if(filteredNodes.length == 0) {
 			console.error("got no elements");
 			return null;
@@ -164,31 +230,36 @@ export class MapReader {
 	 * @param attribute 
 	 * @returns 
 	 */
-	filterWaysByAttribute(attribute: string) {
-		let filtered = [];
-		this.ways.forEach(way => {
-			if(way.tag) {
-				if(way.tag.length > 1) {
-					way.tag.forEach(wayTag => {
-						if(wayTag._attributes.k === attribute) filtered.push(way);
-					});
-				}
-				else {
-					if(way.tag._attributes.k === attribute) filtered.push(way);
+	findByTag(attribute: string) {
+		const filtered = [];
+
+		for (let item of [...this.ways, ...this.relations]) {
+			if (item.tag) {
+				if (Array.isArray(item.tag)) {
+					for (let tag of item.tag) {
+						if (tag._attributes.k == attribute) {
+							filtered.push(item);
+						}
+					}
+				} else {
+					if (item.tag._attributes.k == attribute) {
+						filtered.push(item);
+					}
 				}
 			}
-		});
+		}
+
 		return filtered;
 	}
 
 	/**
 	 * returns the coordinates, which form the polygon of the given "way" object
-	 * @param tag 
+	 * @param way 
 	 * @returns 
 	 */
-	getCoordinates(tag): Coordinates[] {
+	getCoordinates(way): Coordinates[] {
 		let coordinates: Coordinates[] = [];
-		let nodes = tag.nd;
+		let nodes = way.nd;
 
 		if(nodes) {
 			if(nodes.length > 1) {
