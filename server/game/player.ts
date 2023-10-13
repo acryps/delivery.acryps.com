@@ -3,9 +3,10 @@ import { Map } from "../../shared/map";
 import { Point } from "../../shared/point";
 
 export class PlayerController {
-	static readonly pickupOffsetRadius = 0.0001;
+	static readonly pickupOffsetRadius = 50;
 
 	readonly id = Math.random().toString(36).substring(2, 8);
+	readonly speed = 100;
 
 	moveAngle: number | null = null;
 
@@ -19,12 +20,12 @@ export class PlayerController {
 		console.log('created player at', position);
 	}
 
-	move(angle: number, distance: number, map: Map, onPickUp: (delivery: Delivery) => void, onDeliver: (delivery: Delivery) => void) {
+	move(angle: number, deltaTime: number, map: Map, onPickUp: (delivery: Delivery) => void, onDeliver: (delivery: Delivery) => void) {
 		if (angle === null) {
 			return;
 		}
 
-		const targetPoint = this.position.walk(angle, distance);
+		const targetPoint = this.position.walk(angle, this.speed * deltaTime);
 		const building = map.collides(targetPoint);
 
 		if (this.assigned?.source == building && !this.assigned.carrier) {

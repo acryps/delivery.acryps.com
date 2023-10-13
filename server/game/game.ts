@@ -1,14 +1,13 @@
 import { Map } from "../../shared/map";
 import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
-import { playerSpeed } from "../../shared/move";
 
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
 	readonly stealingDistance = 0.00001;
 
-	readonly token = Math.random().toString(36).substring(2, 8);
+	readonly token: string;
 
 	players: PlayerController[] = [];
 	map: Map;
@@ -18,6 +17,9 @@ export class Game {
 	constructor(map: Map) {
 		this.players = [];
 		this.map = map;
+		this.token = Math.random().toString(36).substring(2, 8);
+
+		console.log(`game '${this.token}' created`);
 	}
 
 	join(player: PlayerController) {
@@ -49,7 +51,7 @@ export class Game {
 
 		// walk away in the same direction until we are not intersecting any houses anymore
 		while (this.map.collides(player.position)) {
-			player.position = player.position.walk(offsetDirection, playerSpeed);
+			player.position = player.position.walk(offsetDirection, player.speed);
 		}
 
 		this.broadcast({
@@ -93,7 +95,7 @@ export class Game {
 
 				// move players
 				for (const player of this.players) {
-					player.move(player.moveAngle, deltaTime * playerSpeed, this.map, delivery => {
+					player.move(player.moveAngle, deltaTime, this.map, delivery => {
 						this.broadcast({ pickedUp: delivery.id });
 
 						delivery.carrier = player;
