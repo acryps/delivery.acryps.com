@@ -5,7 +5,8 @@ CREATE TABLE import (
     
 	created TIMESTAMP,
 	
-	center REAL,
+	center_latitude REAL,
+	center_longitude REAL,
 	
 	min_latitude REAL,
 	max_latitude REAL,
