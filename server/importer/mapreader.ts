@@ -85,8 +85,8 @@ export class MapReader {
 
 			let buildingDB = new Building();
 			buildingDB.address = address;
-			buildingDB.centerlatitude = center.latitude;
-			buildingDB.centerlongitude = center.longitude;
+			buildingDB.centerLatitude = center.latitude;
+			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
 
 			buildingsDB.push(buildingDB);
