@@ -6,6 +6,7 @@ import { ClientMessage } from "../shared/messages";
 import { BuildingViewModel } from "../shared/building";
 import { Map } from "../shared/map";
 import { Rectangle } from "../shared/rectangle";
+import { importArea } from "./importer";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
@@ -15,6 +16,8 @@ export function registerInterface(app, database: DbContext) {
 		const radius = request.body.radius;
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
+
+		// importArea(center, database);
 
 		const buildings = await database.building
 			.where(building => building.centerLatitude.valueOf() > boundingBox.minLatitude)
