@@ -6,6 +6,7 @@ import { playerSpeed } from "../../shared/move";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
+	readonly stealingDistance = 0.00001;
 
 	readonly token = Math.random().toString(36).substring(2, 8);
 
@@ -26,7 +27,6 @@ export class Game {
 		}
 
 		this.players.push(player);
-		this.assignPackage(player);
 		
 		this.broadcast({
 			join: player
@@ -75,6 +75,10 @@ export class Game {
 			throw new Error('unauthorized to start game');
 		}
 
+		for (let player of this.players) {
+			this.assignPackage(player);
+		}
+
 		this.broadcast({
 			start: true
 		});
@@ -87,6 +91,7 @@ export class Game {
 			if (Date.now() > lastTick + this.tickMillisecondsInterval) {
 				const deltaTime = (Date.now() - lastTick) / 1000;
 
+				// move players
 				for (const player of this.players) {
 					player.move(player.moveAngle, deltaTime * playerSpeed, this.map, delivery => {
 						this.broadcast({ pickedUp: delivery.id });
@@ -99,6 +104,37 @@ export class Game {
 					});
 				}
 
+				// check if any player stole a package
+				for (const thief of this.players) {
+					// you cannot be carrying a package and steal one!
+					if (!thief.pickedUp) {
+						for (const victim of this.players) {
+							// don't eat yourself
+							if (thief != victim) {
+								// you can only steal if there is something to be stolen!
+								if (victim.pickedUp) {
+									const distance = thief.position.distance(victim.position);
+									console.log(distance);
+
+									if (distance < this.stealingDistance) {
+										thief.pickedUp = victim.pickedUp;
+
+										this.broadcast({ 
+											steal: {
+												thief: thief.id,
+												victim: victim.id
+											}
+										});
+
+										this.assignPackage(victim);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// send updated locations
 				this.broadcast({
 					move: this.players.map(player => ({
 						id: player.id,

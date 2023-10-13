@@ -32,4 +32,9 @@ export interface ServerMessage {
 	assigned?: DeliveryMessage;
 	pickedUp?: string;
 	delivered?: string;
+
+	steal?: {
+		thief: string,
+		victim: string
+	}
 }

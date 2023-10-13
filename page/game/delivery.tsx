@@ -5,15 +5,15 @@ export class DeliveryIndicator extends Component {
 	declare parent: GameComponent;
 
 	render() {
-		if (this.parent.delivery) {
-			if (this.parent.delivery.carrier) {
+		if (this.parent.player?.delivery) {
+			if (this.parent.player.delivery.carrier) {
 				return <ui-delivery>
 					<ui-prompt>
 						Deliver Your Package To
 					</ui-prompt>
 
 					<ui-location>
-						{this.parent.delivery.destination.address.trim()}
+						{this.parent.player.delivery.destination.address.trim()}
 					</ui-location>
 				</ui-delivery>;
 			}
@@ -24,7 +24,7 @@ export class DeliveryIndicator extends Component {
 				</ui-prompt>
 
 				<ui-location>
-					{this.parent.delivery.source.address.trim()}
+					{this.parent.player.delivery.source.address.trim()}
 				</ui-location>
 			</ui-delivery>
 		}

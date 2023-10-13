@@ -18,7 +18,6 @@ export class GameComponent extends Component {
 	mapRenderer: MapComponent;
 	lobby = new LobbyComponent();
 
-	delivery: Delivery;
 	deliveryIndicator = new DeliveryIndicator();
 
 	targetTracker = new TargetTracker();
@@ -68,19 +67,22 @@ export class GameComponent extends Component {
 				}
 
 				if ('assigned' in data) {
-					if (data.assigned.assignee == this.id) {
-						this.delivery = Delivery.from(data.assigned, this.players, this.map);
+					const player = this.players.find(player => player.id == data.assigned.assignee);
 
-						this.targetTracker.target = this.delivery.source.center;
-						this.deliveryIndicator.update();
+					player.delivery = Delivery.from(data.assigned, this.players, this.map);
+
+					if (player == this.player) {
+						this.targetTracker.target = this.player.delivery.source.center;
 					}
+
+					this.deliveryIndicator.update();
 				}
 
 				if ('pickedUp' in data) {
-					if (data.pickedUp == this.delivery.id) {
-						this.delivery.carrier = this.player;
-						this.deliveryIndicator.update();
-					}
+					const delivery = this.players.find(player => player.delivery?.id == data.pickedUp).delivery;
+					delivery.carrier = delivery.assignee;
+
+					this.deliveryIndicator.update();
 				}
 
 				if ('move' in data) {
@@ -89,6 +91,14 @@ export class GameComponent extends Component {
 
 						player.position = update.position;
 					}
+				}
+
+				if ('steal' in data) {
+					const thief = this.players.find(player => player.id == data.steal.thief);
+					const victim = this.players.find(player => player.id == data.steal.victim);
+
+					thief.delivery = victim.delivery;
+					this.deliveryIndicator.update();
 				}
 			};
 		};

@@ -1,9 +1,12 @@
+import { Delivery } from "../../shared/delivery";
 import { Point } from "../../shared/point";
 
 
 export class Player {
 	id: string;
 	position: Point;
+
+	delivery: Delivery;
 
 	static from(serialized) {
 		const player = new Player();

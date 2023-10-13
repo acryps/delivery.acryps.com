@@ -88,14 +88,14 @@ export class MapComponent extends Component {
 		for (let building of this.visibleBuildings) {
 			let path = buildingsPath;
 			
-			if (this.parent.delivery) {
-				if (building == this.parent.delivery.source) {
-					if (!this.parent.delivery.droppedLocation && !this.parent.delivery.carrier) {
+			if (this.parent.player?.delivery) {
+				if (building == this.parent.player.delivery.source) {
+					if (!this.parent.player.delivery.droppedLocation && !this.parent.player.delivery.carrier) {
 						path = packageSourcePath;
 					}
 				}
 
-				if (building == this.parent.delivery.destination) {
+				if (building == this.parent.player.delivery.destination) {
 					path = packageSourcePath;
 				}
 			}
