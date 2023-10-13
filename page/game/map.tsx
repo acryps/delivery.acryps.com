@@ -120,6 +120,14 @@ export class MapComponent extends Component {
 		context.clearRect(0, 0, this.width, this.height);
 		context.restore();
 
+		// create playing field
+		context.fillStyle = '#f92';
+
+		const topLeft = this.transform(this.parent.map.boundingBox.topLeft);
+		const bottomRight = this.transform(this.parent.map.boundingBox.bottomRight);
+
+		context.fillRect(...topLeft, bottomRight[0] - topLeft[0], bottomRight[1] - topLeft[1]);
+
 		// draw frame
 		context.lineWidth = 1;
 

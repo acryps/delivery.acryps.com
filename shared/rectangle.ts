@@ -8,6 +8,14 @@ export class Rectangle {
 		public maxLongitude: number
 	) {}
 
+	get topLeft() {
+		return new Point(this.minLatitude, this.minLongitude);
+	}
+
+	get bottomRight() {
+		return new Point(this.maxLatitude, this.maxLongitude);
+	}
+
 	get center() {
 		return new Point(
 			this.minLatitude + (this.maxLatitude - this.minLatitude) / 2,

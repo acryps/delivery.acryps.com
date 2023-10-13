@@ -8,7 +8,7 @@ export class TargetTracker extends Component {
 	declare rootNode: HTMLElement;
 
 	get target() {
-		if (this.parent.player.delivery) {
+		if (this.parent.player?.delivery) {
 			if (this.parent.player.delivery.carrier == this.parent.player) {
 				return this.parent.player.delivery.destination.center;
 			}
@@ -20,7 +20,7 @@ export class TargetTracker extends Component {
 	}
 
 	updatePosition() {
-		this.rootNode.style.setProperty('--player-color', this.parent.player.color);
+		this.rootNode.style.setProperty('--player-color', this.parent.player?.color);
 
 		if (this.target) {
 			this.rootNode.setAttribute('ui-tracking', '');

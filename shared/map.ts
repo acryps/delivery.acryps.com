@@ -6,11 +6,15 @@ import { Rectangle } from "./rectangle";
 export class Map {
 	readonly maximalSearchedBuildingArea = 5e-7;
 
+	boundingBox: Rectangle;
+
 	constructor (
 		public center: Point,
 		public radius: number,
 		public buildings: BuildingViewModel[]
-	) {}
+	) {
+		this.boundingBox = Rectangle.fromCenterRadius(center, radius);
+	}
 
 	static from(serialized) {
 		return new Map(
