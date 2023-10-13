@@ -31,9 +31,13 @@ export class LobbyComponent extends Component {
 			</ui-players>
 
 			{this.parent.isHost
-			? <ui-action ui-start ui-click-text='Starting ...' ui-click={() => this.parent.socket.send(JSON.stringify({
-				start: true
-			}))}>
+			? <ui-action ui-start ui-click-text='Starting ...' ui-click={async () => {
+				this.parent.socket.send(JSON.stringify({
+					start: true
+				}));
+
+				await new Promise<void>(done => setTimeout(() => done(), 5 * 60 * 1000)); // awaiting socket start event from server
+			}}>
 				Start Game
 			</ui-action>
 			: <ui-action ui-info>Waiting for host ...</ui-action>}
