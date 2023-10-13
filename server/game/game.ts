@@ -155,12 +155,19 @@ export class Game {
 
 		// walk away in the same direction until we are not intersecting any houses anymore
 		let collider;
+		let iterations = 0;
 
 		while (collider = this.map.collides(player.position)) {
 			player.position = player.position.walk(offsetDirection, player.speed);
 
 			if (collider == this.map.boundingBox) {
 				offsetDirection -= Math.PI;
+			}
+
+			if (iterations == 100) {
+				offsetDirection = Math.random() * Math.PI * 2;
+
+				iterations = 0;
 			}
 		}
 
