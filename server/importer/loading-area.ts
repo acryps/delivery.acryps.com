@@ -3,25 +3,30 @@ import { Rectangle } from "../../shared/rectangle";
 import { Import } from "../managed/database";
 
 export class LoadingArea {
+	// defines the fixed size of the loading-areas
 	static size: number = 0.005;
-	center: Point;
+
+	// the centers of the 8 neighbors of a loading-area
 	neighborCenters: Point[];
 
-	constructor(center: Point) {
-		this.center = center;
-
+	constructor(public center: Point) {
 		this.neighborCenters = [
-			new Point(LoadingArea.scaler(this.center.latitude + (LoadingArea.size)), LoadingArea.scaler(this.center.longitude)),
-			new Point(LoadingArea.scaler(this.center.latitude - (LoadingArea.size)), LoadingArea.scaler(this.center.longitude)),
-			new Point(LoadingArea.scaler(this.center.latitude), LoadingArea.scaler(this.center.longitude + (LoadingArea.size))),
-			new Point(LoadingArea.scaler(this.center.latitude), LoadingArea.scaler(this.center.longitude - (LoadingArea.size))),
-			new Point(LoadingArea.scaler(this.center.latitude + (LoadingArea.size)), LoadingArea.scaler(this.center.longitude + (LoadingArea.size))),
-			new Point(LoadingArea.scaler(this.center.latitude - (LoadingArea.size)), LoadingArea.scaler(this.center.longitude + (LoadingArea.size))),
-			new Point(LoadingArea.scaler(this.center.latitude + (LoadingArea.size)), LoadingArea.scaler(this.center.longitude - (LoadingArea.size))),
-			new Point(LoadingArea.scaler(this.center.latitude - (LoadingArea.size)), LoadingArea.scaler(this.center.longitude - (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude + (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude)),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude - (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude)),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude), LoadingArea.toFixedFloat(this.center.longitude + (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude), LoadingArea.toFixedFloat(this.center.longitude - (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude + (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude + (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude - (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude + (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude + (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude - (LoadingArea.size))),
+			new Point(LoadingArea.toFixedFloat(this.center.latitude - (LoadingArea.size)), LoadingArea.toFixedFloat(this.center.longitude - (LoadingArea.size))),
 		]
 	}
 	
+	/**
+	 * returns all neighbors which are missing in the given set of loading-areas
+	 * @param loadingAreas 
+	 * @returns 
+	 */
 	missingNeighbors(loadingAreas: LoadingArea[]): LoadingArea[] {
 		let loadedLoadingAreas: boolean[] = new Array(8).fill(false);
 		let notLoadedNeighbors: LoadingArea[] = [];
@@ -48,13 +53,14 @@ export class LoadingArea {
 	}
 
 	static defineNewArea(startLocation: Point): LoadingArea {
+		//the central point must be a multiple of [this.size]
 		let roundedLatitude = Math.round((startLocation.latitude / this.size)) * this.size;
 		let roundedLongitude = Math.round((startLocation.longitude / this.size)) * this.size;
 
-		return new LoadingArea(new Point(this.scaler(roundedLatitude), this.scaler(roundedLongitude)));
+		return new LoadingArea(new Point(this.toFixedFloat(roundedLatitude), this.toFixedFloat(roundedLongitude)));
 	}
 
-	private static scaler(number: number): number {
+	private static toFixedFloat(number: number): number {
 		return parseFloat(number.toFixed(4));
 	}
 
