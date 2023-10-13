@@ -10,7 +10,7 @@ export class PlayerController {
 	readonly id = Math.random().toString(36).substring(2, 2 + tokenLength);
 	readonly name = generateName();
 
-	readonly speed = 150;
+	readonly speed = 50 / 3.6;
 	readonly deliverySlownessFactor = 0.95;
 
 	moveAngle: number | null = null;

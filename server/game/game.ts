@@ -3,11 +3,12 @@ import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { BuildingViewModel } from "../../shared/building";
 import { tokenLength } from "../../shared/constants";
+import { Rectangle } from "../../shared/rectangle";
 
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly stealingDistance = 0.00005;
+	readonly stealingDistance = 1;
 
 	readonly token: string;
 
@@ -100,7 +101,6 @@ export class Game {
 								// you can only steal if there is something to be stolen!
 								if (victim.pickedUp) {
 									const distance = thief.position.distance(victim.position);
-									console.log(distance);
 
 									if (distance < this.stealingDistance) {
 										thief.pickedUp = victim.pickedUp;
@@ -148,14 +148,20 @@ export class Game {
 		player.assigned = delivery;
 		delivery.assignee = player;
 
-		const offsetDirection = Math.random() * Math.PI * 2;
+		let offsetDirection = Math.random() * Math.PI * 2;
 
 		// move away form the pickup location
 		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
 
 		// walk away in the same direction until we are not intersecting any houses anymore
-		while (this.map.collides(player.position)) {
+		let collider;
+
+		while (collider = this.map.collides(player.position)) {
 			player.position = player.position.walk(offsetDirection, player.speed);
+
+			if (collider == this.map.boundingBox) {
+				offsetDirection -= Math.PI;
+			}
 		}
 
 		this.broadcast({

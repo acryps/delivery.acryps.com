@@ -6,11 +6,15 @@ import { Rectangle } from "./rectangle";
 export class Map {
 	readonly maximalSearchedBuildingArea = 5e-7;
 
+	boundingBox: Rectangle;
+
 	constructor (
 		public center: Point,
 		public radius: number,
 		public buildings: BuildingViewModel[]
-	) {}
+	) {
+		this.boundingBox = Rectangle.fromCenterRadius(center, radius);
+	}
 
 	static from(serialized) {
 		return new Map(
@@ -21,6 +25,10 @@ export class Map {
 	}
 
 	collides(point: Point) {
+		if (!this.boundingBox.contains(point)) {
+			return this.boundingBox;
+		}
+
 		for (let building of this.buildings) {
 			if (Rectangle.fromPolygon(building.geometry).contains(point)) {
 				let insidePolygon = false;

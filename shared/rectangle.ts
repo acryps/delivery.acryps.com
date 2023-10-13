@@ -8,6 +8,14 @@ export class Rectangle {
 		public maxLongitude: number
 	) {}
 
+	get topLeft() {
+		return new Point(this.minLatitude, this.minLongitude);
+	}
+
+	get bottomRight() {
+		return new Point(this.maxLatitude, this.maxLongitude);
+	}
+
 	get center() {
 		return new Point(
 			this.minLatitude + (this.maxLatitude - this.minLatitude) / 2,
@@ -21,6 +29,20 @@ export class Rectangle {
 			center.latitude + latitude / 2,
 			center.longitude - longitude / 2,
 			center.longitude + longitude / 2
+		);
+	}
+
+	static fromCenterRadius(center: Point, radius: number) {
+		const centerLatRad = (center.latitude * Math.PI) / 180;
+		
+		// Calculate the angular distance in radians
+		const angularDistance = radius / Point.earthRadius;
+		
+		// Calculate the bounding box coordinates
+		return this.fromCenter(
+			center, 
+			(angularDistance * 180) / Math.PI,
+			(angularDistance * 180) / (Math.PI * Math.cos(centerLatRad))
 		);
 	}
 

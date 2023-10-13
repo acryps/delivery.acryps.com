@@ -5,6 +5,7 @@ import { HomeComponent } from './home';
 import { GameComponent } from './game';
 import { JoinComponent } from './join';
 import { CreateGameComponent } from './create';
+import { Point } from '../shared/point';
 
 export class Application {
 	static router: Router;
