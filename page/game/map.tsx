@@ -42,7 +42,7 @@ export class MapComponent extends Component {
 					)
 				};
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
+				this.parent.socket.send(JSON.stringify({ moveAngle: Math.PI - this.parent.direction }));
 			};
 
 			mapCanvas.ontouchmove = event => {
@@ -53,7 +53,7 @@ export class MapComponent extends Component {
 					this.height * this.playerViewLocation.y - event.touches[0].clientY
 				);
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: this.parent.direction }));
+				this.parent.socket.send(JSON.stringify({ moveAngle: Math.PI - this.parent.direction }));
 			};
 
 			mapCanvas.ontouchend = mapCanvas.ontouchcancel = () => {
