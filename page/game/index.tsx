@@ -85,12 +85,7 @@ export class GameComponent extends Component {
 
 				if ('assigned' in data) {
 					const player = this.players.find(player => player.id == data.assigned.assignee);
-
 					player.delivery = Delivery.from(data.assigned, this.players, this.map);
-
-					if (player == this.player) {
-						this.targetTracker.target = this.player.delivery.source.center;
-					}
 
 					this.deliveryIndicator.update();
 				}
