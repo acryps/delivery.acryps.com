@@ -14,4 +14,8 @@ export class Point {
 			this.longitude - Math.cos(direction) * distance,
 		)
 	}
+
+	toString() {
+		return `${this.latitude},${this.longitude}`;
+	}
 }
