@@ -6,7 +6,7 @@ import { BuildingViewModel } from "../../shared/building";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly stealingDistance = 0.00001;
+	readonly stealingDistance = 0.00005;
 
 	readonly token: string;
 

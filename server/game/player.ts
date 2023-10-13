@@ -9,7 +9,8 @@ export class PlayerController {
 	readonly id = Math.random().toString(36).substring(2, 8);
 	readonly name = generateName();
 
-	readonly speed = 100;
+	readonly speed = 150;
+	readonly deliverySlownessFactor = 0.95;
 
 	moveAngle: number | null = null;
 
@@ -28,7 +29,13 @@ export class PlayerController {
 			return;
 		}
 
-		const targetPoint = this.position.walk(angle, this.speed * deltaTime);
+		let speed = this.speed * deltaTime;
+
+		if (this.pickedUp) {
+			speed *= this.deliverySlownessFactor;
+		}
+
+		const targetPoint = this.position.walk(angle, speed);
 		const building = map.collides(targetPoint);
 
 		if (this.assigned?.source == building && !this.assigned.carrier) {
