@@ -14,7 +14,7 @@ export class MapReader {
 		private loadingArea: LoadingArea
 	) {}
 
-	async loadMap(): Promise<boolean> {
+	async loadMap() {
 		let jsonData = await this.readMapFromXml();
 
 		this.nodes = jsonData.osm.node;
@@ -54,16 +54,12 @@ export class MapReader {
 			this.loadingArea.getBoundingBox().minLatitude.toFixed(6)+ "," + 
 			this.loadingArea.getBoundingBox().maxLongitude.toFixed(6) + "," + 
 			this.loadingArea.getBoundingBox().maxLatitude.toFixed(6);
+			
 		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
+		let map;
 
-		console.debug(
-			"latitude = [" + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ", " + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + "], " + 
-			"longitude = [" + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ", " + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +"], "+
-			"loading from: " + mapURL
-			);
-		
 		try {
-			var map = await fetch(mapURL).then(response => response.text())
+			map = await fetch(mapURL).then(response => response.text())
 		} catch (error) {
 			console.error(error);
 		}
@@ -82,7 +78,7 @@ export class MapReader {
 				let polygonString = this.constructPolygonString(building);
 
 				let center = this.calculateCenter(this.getPoint(building));
-				let address = await this.extractAddress(building, center);
+				let address = await this.extractAddress(building);
 
 				let buildingDB = new Building();
 				buildingDB.addressReal = true;
@@ -151,32 +147,15 @@ export class MapReader {
 		return waters;
 	}
 
-	getStreets() {
-		let highways = this.findByTag("highway");
-
-		highways.forEach(highway => {
-			let coordinates: Point[] = this.getPoint(highway);
-
-			//console.debug(highway);
-
-			coordinates.forEach(coord => {
-				//console.debug(coord.toString());
-			});
-
-		});
-
-		return highways;
-	}
-
 	findMember(member) {
 		let memberId = member._attributes.ref;
 		let searchedWay;
 
-		this.ways.map(way => {
+		for (let way of this.ways) {
 			if (way._attributes.id == memberId) {
 				searchedWay = way;
 			}
-		});
+		}
 
 		return searchedWay;
 	}
@@ -195,8 +174,8 @@ export class MapReader {
 		return polygonString;
 	}
 
-	getPointOfNode(id: string): Point {
-		let filteredNodes = this.nodes.filter(element => element._attributes.id === id);
+	getPointOfNode(id: string) {
+		const filteredNodes = this.nodes.filter(element => element._attributes.id === id);
 
 		if(filteredNodes.length > 1) {
 			console.error("didn't get unique element");
@@ -208,23 +187,21 @@ export class MapReader {
 			return null;
 		}
 
-		let node = filteredNodes[0];	
+		const node = filteredNodes[0];	
+
 		return new Point(+node._attributes.lat, +node._attributes.lon);
 	}
 
 	getNode(id: string) {
-		let node = this.nodes.filter(element => element._attributes.id === id);
+		const node = this.nodes.filter(element => element._attributes.id === id);
 
-		if(node === null) console.error("no node returned");
+		if(node === null) {
+			console.error("no node returned");
+		}
 
 		return node;
 	}
 
-	/**
-	 * returns the "way" objects which have a tag with the given attribute.
-	 * @param attribute 
-	 * @returns 
-	 */
 	findByTag(attribute: string) {
 		const filtered = [];
 
@@ -247,21 +224,16 @@ export class MapReader {
 		return filtered;
 	}
 
-	/**
-	 * returns the coordinates, which form the polygon of the given "way" object
-	 * @param way 
-	 * @returns 
-	 */
-	getPoint(way): Point[] {
+	getPoint(way) {
 		let coordinates: Point[] = [];
 		let nodes = way.nd;
 
 		if(nodes) {
 			if(nodes.length > 1) {
-				nodes.forEach(buildingNode => {
+				for (let buildingNode of nodes) {
 					let nodeRef = buildingNode._attributes.ref;
 					coordinates.push(this.getPointOfNode(nodeRef));
-				});
+				}
 			}
 			else {
 				let nodeRef = nodes._attributes.ref;
@@ -272,41 +244,35 @@ export class MapReader {
 		return coordinates;
 	}
 
-	/**
-	 * constructs a string containing latitude and longitude which define the polygon of a building.
-	 * the constructed polygonstring has the following format: [latitude], [longitude] ; [latitude], [longitude] ; ...
-	 * @param building 
-	 * @returns 
-	 */
-	constructPolygonString(building): string {
+	constructPolygonString(building) {
 		let polygonString = "";
 		let buildingNodes = building.nd;
 
 		if(buildingNodes) {
 			if(buildingNodes.length > 1) {
-				buildingNodes.forEach(buildingNode => {
-					let nodeRef = buildingNode._attributes.ref;
-					let coordinates: Point = this.getPointOfNode(nodeRef);
+				for (let buildingNode of buildingNodes) {
+					const nodeRef = buildingNode._attributes.ref;
+					const coordinates: Point = this.getPointOfNode(nodeRef);
+
 					polygonString = coordinates.toString() + ";" + polygonString;
-				});
+				}
 			}
 			else {
-				let nodeRef = buildingNodes._attributes.ref;
-				let coordinates: Point = this.getPointOfNode(nodeRef);
+				const nodeRef = buildingNodes._attributes.ref;
+				const coordinates: Point = this.getPointOfNode(nodeRef);
+				
 				polygonString = coordinates.toString() + ";" + polygonString;
 			}
 		}
 		return polygonString;
 	}
 
-	async extractAddress(building, center) {
+	async extractAddress(building) {
 		let buildingTags = building.tag;
 		let city = "";
 		let street = "";
 		let postcode = "";
 		let houseNumber = "";
-
-		let address = '';
 
 		if (buildingTags._attributes.k == "addr:city"
 			&& buildingTags._attributes.k == "addr:postcode"
