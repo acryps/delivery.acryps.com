@@ -23,6 +23,8 @@ export class Player {
 	}
 
 	get color() {
-		return `#${parseInt(this.id, 36).toString(16).padStart(6, '3f4a31').substring(0, 6)}`;
+		const maxTokenValue = 2176782336; // token is base 36 and 6 characters long
+
+		return `hsl(${360 / maxTokenValue * parseInt(this.id, 36)}, 100%, 70%)`;
 	}
 }
