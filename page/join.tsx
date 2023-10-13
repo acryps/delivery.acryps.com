@@ -1,6 +1,8 @@
 import { Component } from "@acryps/page";
 
 export class JoinComponent extends Component {
+	private readonly tokenLength = 6;
+
 	private token: string = '';
 	private invalidToken: boolean = false;
 
@@ -18,8 +20,7 @@ export class JoinComponent extends Component {
 
 	render() {
 		return <ui-join>
-			<input $ui-value={this.token} maxlength='6' placeholder='Token' ui-error={this.invalidToken} />
-			{this.invalidToken && <ui-error-message>Game does not exist</ui-error-message>}
+			<input $ui-value={this.token} maxlength={this.tokenLength} placeholder='Token' ui-error={this.invalidToken} />
 
 			<ui-action ui-create-game ui-click={() => this.join()}>
 				Join
