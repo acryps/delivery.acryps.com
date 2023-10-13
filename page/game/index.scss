@@ -102,14 +102,41 @@ ui-game {
 					border-radius: 50%;
 					background: var(--color);
 				}
+
+				> ui-name {
+					flex: 1;
+
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+
+				> ui-host {
+					color: var(--page-color-dimmed);
+				}
 			}
 		}
 
-		ui-action[ui-start] {
-			@include primary-action;
-
+		ui-action {
 			flex-shrink: 0;
-			margin: 1rem;
+			margin-inline: 1rem;
+			margin-top: 1rem;
+
+			&:last-child {
+				margin-bottom: 1rem;
+			}
+
+			&[ui-start] {
+				@include primary-action;
+			}
+
+			&[ui-info] {
+				@include disabled-action;
+			}
+
+			&[ui-leave] {
+				@include action;
+			}
 		}
 	}
 

@@ -24,16 +24,21 @@ export class LobbyComponent extends Component {
 			</ui-invite>
 
 			<ui-players>
-				{this.parent.players.map(player => <ui-player style={`--color: ${player.color}`}>
-					{player.name}
+				{this.parent.players.map((player, playerIndex) => <ui-player style={`--color: ${player.color}`}>
+					<ui-name>{player.name}</ui-name>
+					{playerIndex == 0 && <ui-host>Host</ui-host>}
 				</ui-player>)}
 			</ui-players>
 
-			<ui-action ui-start ui-click={() => this.parent.socket.send(JSON.stringify({
+			{this.parent.isHost
+			? <ui-action ui-start ui-click-text='Starting ...' ui-click={() => this.parent.socket.send(JSON.stringify({
 				start: true
 			}))}>
 				Start Game
 			</ui-action>
+			: <ui-action ui-info>Waiting for host ...</ui-action>}
+
+			<ui-action ui-leave ui-href='/'>Leave</ui-action>
 		</ui-lobby>;
 	}
 }

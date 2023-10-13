@@ -35,6 +35,10 @@ export class GameComponent extends Component {
 		return this.players.find(player => player.id == this.id);
 	}
 
+	get isHost() {
+		return this.players.findIndex(player => player.id == this.id) == 0;
+	}
+
 	async onload() {
 		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
 
@@ -58,12 +62,15 @@ export class GameComponent extends Component {
 			this.socket.onmessage = event => {
 				const data = JSON.parse(event.data) as ServerMessage;
 
-				if (!('move' in data)) {
-					console.log(data);
-				}
-
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
+
+					this.lobby.update();
+				}
+
+				if ('leave' in data) {
+					const playerIndex = this.players.findIndex(player => player.id == Player.from(data.leave).id);
+					this.players.splice(playerIndex, 1);
 
 					this.lobby.update();
 				}

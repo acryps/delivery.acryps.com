@@ -33,7 +33,7 @@ export class CreateGameComponent extends Component {
 				</ui-radius>)}
 			</ui-radii>
 
-			<ui-action ui-create ui-click={async () => {
+			<ui-action ui-create ui-click-text='Creating ...' ui-click={async () => {
 				const token = await fetch('/game', {
 					method: 'post',
 					headers: {
