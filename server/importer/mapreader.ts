@@ -1,7 +1,7 @@
 import { Coordinates } from "./coordinates";
 import * as convert from "xml-js";
-import * as fs from 'fs';
-import { Building, DbContext } from "../managed/database";
+import { Building, DbContext, Import } from "../managed/database";
+import { LoadingArea } from "./loading-area";
 
 const fileName = 'zurich-tiny';
 const cwd = process.cwd() + "/importer";
@@ -10,38 +10,26 @@ export class MapReader {
 	nodes;
 	ways;
 	relations;
-	db;
 
-	constructor(db: DbContext) {
-		this.db = db;
-		let jsonData = this.readMap();
+	constructor(
+		private database: DbContext,
+		private loadingArea: LoadingArea
+	) {}
+
+	async loadMap() {
+		// gather map data
+		let jsonData = await this.readMapFromXml();
 
 		this.nodes = jsonData.osm.node;
 		this.ways = jsonData.osm.way;
 		this.relations = jsonData.osm.relation;
 
-		console.debug("sizes: " + this.nodes.length + " " + this.ways.length + " " + this.relations.length);
-	}
+		console.debug("loading map for loading area around: lat:" + this.loadingArea.center.latitude + ", long:" + this.loadingArea.center.longitude);
 
-
-	calculateBoundingBox(startLocation: Coordinates) {
-		let loadedArea: Coordinates;
-
-		let toLoadBoundingBoxes: Coordinates[];
-
-		// todo: load the boundingBoxes
-	}
-
-	async getXML() {
-		const mapURL = `http://overpass.openstreetmap.ru/cgi/xapi_meta?*[bbox=8.2827,47.0316,8.3425,47.0598]`;
-		
-		try {
-			var map = await fetch(mapURL).then(response => response.text())
-		} catch (error) {
-			console.error(error);
-		}
-
-		return map;
+		// todo: uncomment, when rest ist tested!!
+		this.loadBuildings();
+		// this.loadStreets();
+		// this.loadWater();
 	}
 
 	async readMapFromXml() {
@@ -56,18 +44,27 @@ export class MapReader {
 		return jsonData;
 	}
 
-	readMap() {
-		const xmlFilePath = cwd + "/map/" + fileName + ".osm";
+	async getXML() {
+		let boundingBox = 
+			this.loadingArea.getBoundingBox().minLongitude.toFixed(6) + "," + 
+			this.loadingArea.getBoundingBox().minLatitude.toFixed(6)+ "," + 
+			this.loadingArea.getBoundingBox().maxLongitude.toFixed(6) + "," + 
+			this.loadingArea.getBoundingBox().maxLatitude.toFixed(6);
+		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
 
+		console.debug(
+			"latitude = [" + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ", " + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + "], " + 
+			"longitude = [" + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ", " + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +"], "+
+			"loading from: " + mapURL
+			);
+		
 		try {
-			let xmlData = fs.readFileSync(xmlFilePath, 'utf8');
-			let jsonString = convert.xml2json(xmlData, {compact: true, spaces: 4});
-			var jsonData = JSON.parse(jsonString);
+			var map = await fetch(mapURL).then(response => response.text())
 		} catch (error) {
 			console.error(error);
 		}
 
-		return jsonData;
+		return map;
 	}
 
 	async loadBuildings() {
@@ -85,27 +82,19 @@ export class MapReader {
 
 			let buildingDB = new Building();
 			buildingDB.address = address;
-			buildingDB.centerlatitude = center.latitude;
-			buildingDB.centerlongitude = center.longitude;
+			buildingDB.centerLatitude = center.latitude;
+			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
 
 			buildingsDB.push(buildingDB);
 
-			//console.debug(building)
-
 			await buildingDB.create();
 		});
-
-		//console.debug(buildingsDB.length);
-		// for(let i: number = 0; i < 100; i++) {
-		// 	//console.debug(buildingsDB[i]);
-		// 	await buildingsDB[i].create();
-		// }		
-
+		
 		return buildings;
 	}
 
-	getStreets() {
+	async loadStreets() {
 		let highways = this.filterWaysByAttribute("highway");
 
 		highways.forEach(highway => {
@@ -122,7 +111,7 @@ export class MapReader {
 		return highways;
 	}
 
-	loadWater() {
+	async loadWater() {
 		let water = this.filterWaysByAttribute('water');
 
 		water.forEach(waterArea => {
@@ -147,7 +136,7 @@ export class MapReader {
 			return null;
 		}
 
-		let node = filteredNodes[0];	
+		let node = filteredNodes[0];
 		return new Coordinates(+node._attributes.lat, +node._attributes.lon);
 	}
 
@@ -267,7 +256,7 @@ export class MapReader {
 			});
 		}
 		else {
-			console.warn("building has no address");
+			// todo: handle no address
 		}
 
 		return street + " " + housenumber + " " + postcode + " " + city;
