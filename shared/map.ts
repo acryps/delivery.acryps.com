@@ -62,7 +62,7 @@ export class Map {
 
 	searchBuilding(angle: number, distance: number, skip: BuildingViewModel[], attempts = 0) {
 		if (!this.buildings.length) {
-			throw new Error('no buildings in this map');
+			return;
 		}
 
 		if (attempts == 1000) {
