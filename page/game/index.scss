@@ -76,7 +76,6 @@ ui-game {
 
 		ui-players {
 			flex-grow: 1;
-			flex-shrink: 0;
 
 			display: block;
 			overflow-x: hidden;
@@ -85,23 +84,32 @@ ui-game {
 			border-bottom: 1px solid var(--page-color);
 
 			ui-player {
-				display: block;
+				display: flex;
 				padding: 1rem;
 
+				align-items: center;
+				line-height: 1;
+
 				border-bottom: 1px dotted var(--page-color);
+
+				&::before {
+					content: '';
+
+					width: 1rem;
+					height: 1rem;
+					margin-right: 0.5rem;
+
+					border-radius: 50%;
+					background: var(--color);
+				}
 			}
 		}
 
 		ui-action[ui-start] {
+			@include primary-action;
+
 			flex-shrink: 0;
-
-			display: block;
 			margin: 1rem;
-			padding: 1rem;
-
-			background: var(--page-color);
-			color: var(--page-background);
-			text-align: center;
 		}
 	}
 

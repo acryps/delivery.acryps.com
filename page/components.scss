@@ -1,0 +1,37 @@
+@mixin primary-action {
+	display: block;
+	padding: 1rem;
+
+	border: 2px solid var(--page-color);
+
+	text-align: center;
+	color: var(--page-background);
+	background: var(--page-color);
+
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--page-color-dimmed);
+		background: var(--page-color-dimmed);
+	}
+}
+
+@mixin action {
+	display: block;
+	padding-inline: 1rem;
+	padding-block: 0.5rem;
+
+	border: 2px solid var(--page-color);
+
+	text-align: center;
+	color: var(--page-color);
+	background: var(--page-background);
+
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--page-color-dimmed);
+		color: var(--page-background);
+		background: var(--page-color-dimmed);
+	}
+}
