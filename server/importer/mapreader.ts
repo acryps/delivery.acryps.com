@@ -17,7 +17,6 @@ export class MapReader {
 	) {}
 
 	async loadMap() {
-		// gather map data
 		let jsonData = await this.readMapFromXml();
 
 		this.nodes = jsonData.osm.node;
@@ -26,10 +25,15 @@ export class MapReader {
 
 		console.debug("loading map for loading area around: lat:" + this.loadingArea.center.latitude + ", long:" + this.loadingArea.center.longitude);
 
-		// todo: uncomment, when rest ist tested!!
-		this.loadBuildings();
-		// this.loadStreets();
-		// this.loadWater();
+		if(this.nodes.length > 1 && this.ways.length > 1) {
+			// todo: uncomment, when rest ist tested!!
+			this.loadBuildings();
+			// this.loadStreets();
+			// this.loadWater();
+		}
+		else {
+			console.warn("MAP-READER: loaded map with no data");
+		}
 	}
 
 	async readMapFromXml() {
@@ -69,7 +73,6 @@ export class MapReader {
 
 	async loadBuildings() {
 		let buildings = this.filterWaysByAttribute("building");
-		let buildingsDB: Building[] = [];
 
 		buildings.forEach(async building => {
 			let polygonString = this.constructPolygonString(building);
@@ -78,23 +81,16 @@ export class MapReader {
 
 			let center = this.calculateCenter(this.getPoints(building));
 
-			let osmId = building._attributes.id;
-
 			let buildingDB = new Building();
 			buildingDB.address = address;
 			buildingDB.centerLatitude = center.latitude;
 			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
-
 			buildingDB.importerId = building._attributes.id;
 			buildingDB.addressReal = true;
 
-			buildingsDB.push(buildingDB);
-
 			await buildingDB.create();
 		});
-		
-		return buildings;
 	}
 
 	async loadStreets() {
