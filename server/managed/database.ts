@@ -1,16 +1,16 @@
 import { Entity, DbSet, RunContext, QueryUUID, QueryProxy, QueryString, QueryJSON, QueryTimeStamp, QueryNumber, QueryTime, QueryDate, QueryBoolean, QueryBuffer, QueryEnum, ForeignReference, PrimaryReference, View, ViewSet } from "vlquery";
 
 export class StreetQueryProxy extends QueryProxy {
-	get centerlatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get centerlongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get name(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 }
 
 export class Street extends Entity<StreetQueryProxy> {
 	declare id: string;
-	centerlatitude: number;
-	centerlongitude: number;
+	centerLatitude: number;
+	centerLongitude: number;
 	polygon: string;
 	name: string;
 	
@@ -20,8 +20,8 @@ export class Street extends Entity<StreetQueryProxy> {
 
 		columns: {
 			id: { type: "uuid", name: "id" },
-			centerlatitude: { type: "float4", name: "centerlatitude" },
-			centerlongitude: { type: "float4", name: "centerlongitude" },
+			centerLatitude: { type: "float4", name: "center_latitude" },
+			centerLongitude: { type: "float4", name: "center_longitude" },
 			polygon: { type: "text", name: "polygon" },
 			name: { type: "text", name: "name" }
 		},
@@ -33,16 +33,16 @@ export class Street extends Entity<StreetQueryProxy> {
 }
 			
 export class WaterBodyQueryProxy extends QueryProxy {
-	get centerlatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get centerlongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get name(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 }
 
 export class WaterBody extends Entity<WaterBodyQueryProxy> {
 	declare id: string;
-	centerlatitude: number;
-	centerlongitude: number;
+	centerLatitude: number;
+	centerLongitude: number;
 	polygon: string;
 	name: string;
 	
@@ -52,8 +52,8 @@ export class WaterBody extends Entity<WaterBodyQueryProxy> {
 
 		columns: {
 			id: { type: "uuid", name: "id" },
-			centerlatitude: { type: "float4", name: "centerlatitude" },
-			centerlongitude: { type: "float4", name: "centerlongitude" },
+			centerLatitude: { type: "float4", name: "center_latitude" },
+			centerLongitude: { type: "float4", name: "center_longitude" },
 			polygon: { type: "text", name: "polygon" },
 			name: { type: "text", name: "name" }
 		},
@@ -65,8 +65,8 @@ export class WaterBody extends Entity<WaterBodyQueryProxy> {
 }
 			
 export class BuildingQueryProxy extends QueryProxy {
-	get centerlatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get centerlongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get addressReal(): Partial<QueryBoolean> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get address(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
@@ -74,8 +74,8 @@ export class BuildingQueryProxy extends QueryProxy {
 }
 
 export class Building extends Entity<BuildingQueryProxy> {
-	centerlatitude: number;
-	centerlongitude: number;
+	centerLatitude: number;
+	centerLongitude: number;
 	addressReal: boolean;
 	declare id: string;
 	polygon: string;
@@ -87,8 +87,8 @@ export class Building extends Entity<BuildingQueryProxy> {
 		source: "building",
 
 		columns: {
-			centerlatitude: { type: "float4", name: "centerlatitude" },
-			centerlongitude: { type: "float4", name: "centerlongitude" },
+			centerLatitude: { type: "float4", name: "center_latitude" },
+			centerLongitude: { type: "float4", name: "center_longitude" },
 			addressReal: { type: "bool", name: "address_real" },
 			id: { type: "uuid", name: "id" },
 			polygon: { type: "text", name: "polygon" },
