@@ -6,9 +6,9 @@ export class JoinComponent extends Component {
 	private invalidToken: boolean = false;
 
 	async join() {
-		const gameExists = await fetch(`/game/${this.token}`).then(response => response.json());
+		const joinableGame = await fetch(`/game/${this.token}`).then(response => response.json());
 
-		if (gameExists) {
+		if (joinableGame) {
 			this.navigate(`/play/${this.token}`);
 		} else {
 			this.invalidToken = true;

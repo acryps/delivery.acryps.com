@@ -18,6 +18,10 @@ export class Game {
 
 	private gameLoop: NodeJS.Timeout;
 
+	get isRunning() {
+		return !!this.gameLoop;
+	}
+
 	constructor(map: Map) {
 		this.players = [];
 		this.map = map;
@@ -29,7 +33,7 @@ export class Game {
 	join(player: PlayerController) {
 		if (this.gameLoop) {
 			console.warn(`user ${player.name} tried to join running game ${this.token}`);
-			return;
+			throw new Error();
 		}
 
 		this.players.push(player);
@@ -48,10 +52,13 @@ export class Game {
 			leave: player
 		});
 
-		console.log(`player '${player.name}' left game '${this.token}'`);
+		const playerLeaveMessage = `player '${player.name}' left game '${this.token}'`;
 
 		if (!this.players.length) {
+			console.log(playerLeaveMessage);
 			this.stop();
+		} else {
+			console.log(`${playerLeaveMessage}, '${this.players[0].name} is now host'`);
 		}
 	}
 

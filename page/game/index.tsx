@@ -39,6 +39,10 @@ export class GameComponent extends Component {
 		return this.players.findIndex(player => player.id == this.id) == 0;
 	}
 
+	onrouteleave() {
+		this.socket.close();
+	}
+
 	async onload() {
 		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
 
