@@ -118,6 +118,8 @@ export class MapComponent extends Component {
 		context.restore();
 
 		// draw frame
+		context.lineWidth = 1;
+
 		context.strokeStyle = 'white';
 		context.stroke(buildingsPath);
 
@@ -129,7 +131,8 @@ export class MapComponent extends Component {
 		context.fill(packageSourcePath);
 
 		// render player
-		const playerSize = 25;
+		const playerSize = 20;
+		context.lineWidth = 5;
 
 		for (let player of this.parent.players) {
 			const playerPosition = this.transform(player.position);
@@ -138,6 +141,10 @@ export class MapComponent extends Component {
 			context.beginPath();
 			context.arc(...playerPosition, playerSize / 2, 0, Math.PI * 2);
 			context.fill();
+
+			if (player.delivery && player.delivery.carrier) {
+				context.stroke();
+			}
 		}
 
 		requestAnimationFrame(() => {
