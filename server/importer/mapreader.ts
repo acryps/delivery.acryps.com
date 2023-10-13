@@ -3,9 +3,6 @@ import * as convert from "xml-js";
 import { Building, DbContext, Import } from "../managed/database";
 import { LoadingArea } from "./loading-area";
 
-const fileName = 'zurich-tiny';
-const cwd = process.cwd() + "/importer";
-
 export class MapReader {
 	nodes;
 	ways;
