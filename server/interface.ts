@@ -44,7 +44,13 @@ export function registerInterface(app, database: DbContext) {
 	});
 
 	app.get('/game/:token', async (request, response) => {
-		return response.json(games.some(game => game.token == request.params.token.toLowerCase()));
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
+
+		if (!game) {
+			response.json(false);
+		} else {
+			response.json(!game.isRunning);
+		}
 	});
 
 	app.get('/map/:token', async (request, response) => {
@@ -71,7 +77,11 @@ export function registerInterface(app, database: DbContext) {
 			peers: game.players
 		}));
 
-		game.join(player);
+		try {
+			game.join(player);
+		} catch (error) {
+			socket.close();
+		}
 
 		socket.on('message', data => {
 			const gameMessage: ClientMessage = JSON.parse(data);
