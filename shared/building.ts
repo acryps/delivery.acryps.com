@@ -24,6 +24,19 @@ export class BuildingViewModel {
 		);
 	}
 
+	get area() {
+		let area = 0;
+		
+		for (let pointIndex = 0; pointIndex < this.geometry.length; pointIndex++) {
+			const currentPoint = this.geometry[pointIndex];
+			const nextPoint = this.geometry[(pointIndex + 1) % this.geometry.length];
+			
+			area += (currentPoint.latitude * nextPoint.longitude) - (nextPoint.latitude * currentPoint.longitude);
+		}
+		
+		return Math.abs(area / 2);
+	}
+
 	get center() {
 		let totalLatitude = 0;
 		let totalLongitude = 0;

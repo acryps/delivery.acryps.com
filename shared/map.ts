@@ -4,6 +4,8 @@ import { Point } from "./point";
 import { Rectangle } from "./rectangle";
 
 export class Map {
+	readonly maximalSearchedBuildingArea = 5e-7;
+
 	constructor (
 		public center: Point,
 		public radius: number,
@@ -71,7 +73,7 @@ export class Map {
 		
 		for (let building of this.buildings) {
 			if (Rectangle.fromPolygon(building.geometry).contains(probe)) {
-				if (!skip.includes(building)) {
+				if (!skip.includes(building) && building.area < this.maximalSearchedBuildingArea) {
 					return building;
 				}
 			}

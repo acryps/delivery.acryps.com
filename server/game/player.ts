@@ -1,14 +1,13 @@
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
 import { Point } from "../../shared/point";
-
-const randomNameGenerator = require('boring-name-generator');
+import { generateName } from "./name";
 
 export class PlayerController {
 	static readonly pickupOffsetRadius = 50;
 
 	readonly id = Math.random().toString(36).substring(2, 8);
-	readonly name = randomNameGenerator().spaced;
+	readonly name = generateName();
 
 	readonly speed = 100;
 
