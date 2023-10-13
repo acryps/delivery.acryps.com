@@ -16,7 +16,7 @@ DbClient.connectedClient.connect().then(async () => {
 
 	const database = new DbContext(new RunContext());
 
-	// importArea(database);
+	importArea(database);
 
 	registerInterface(app, database);
 
