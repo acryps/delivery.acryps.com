@@ -42,4 +42,8 @@ export class Point {
 	clone() {
 		return new Point(this.latitude, this.longitude);
 	}
+
+	toString() {
+		return `${this.latitude},${this.longitude}`;
+	}
 }
