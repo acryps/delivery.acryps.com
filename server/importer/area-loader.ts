@@ -9,18 +9,13 @@ export class AreaLoader {
 		private database: DbContext
 	){}
 
+	/**
+	 * loads the area surrounding the start-location into the database (if not loaded already)
+	 * @param startLocation 
+	 */
 	async loadArea(startLocation: Point) {
-		const range = LoadingArea.size * 10;
 
-		let sideLength = range/2;
-		let importsAroundStart: Import[] = await this.database.import.where(importObject => 
-			importObject.centerLatitude.valueOf() < (startLocation.latitude + sideLength).valueOf() && 
-			importObject.centerLatitude.valueOf() > (startLocation.latitude - sideLength).valueOf() && 
-			importObject.centerLongitude.valueOf() < (startLocation.longitude + sideLength).valueOf() &&
-			importObject.centerLongitude.valueOf() > (startLocation.longitude - sideLength).valueOf()
-			).toArray();
-
-		let loadingAreasAroundStart: LoadingArea[] = LoadingArea.fromImportsArray(importsAroundStart);
+		let loadingAreasAroundStart: LoadingArea[] = await this.getSurroundingLoadingAreas(startLocation);
 
 		let startArea: LoadingArea;
 
@@ -40,6 +35,7 @@ export class AreaLoader {
 		}
 
 		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
+
 		console.debug("AREA-LOADER: need to load "+ areasToLoad.length + " areas around start-area");
 
 		await areasToLoad.forEach(async areaToLoad => {
@@ -48,5 +44,24 @@ export class AreaLoader {
 
 			await this.database.import.create(areaToLoad.toImport());
 		});
+	}
+
+	/**
+	 * returns the loading-areas surrounding the given location, which are already loaded in the database
+	 * @param location 
+	 * @returns 
+	 */
+	private async getSurroundingLoadingAreas(location: Point): Promise<LoadingArea[]> {
+		const range = LoadingArea.size * 10;
+
+		let sideLength = range/2;
+		let importsSurroundingLocation: Import[] = await this.database.import.where(importObject => 
+			importObject.centerLatitude.valueOf() < (location.latitude + sideLength).valueOf() && 
+			importObject.centerLatitude.valueOf() > (location.latitude - sideLength).valueOf() && 
+			importObject.centerLongitude.valueOf() < (location.longitude + sideLength).valueOf() &&
+			importObject.centerLongitude.valueOf() > (location.longitude - sideLength).valueOf()
+			).toArray();
+
+		return LoadingArea.fromImportsArray(importsSurroundingLocation);
 	}
 }
