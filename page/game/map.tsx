@@ -6,6 +6,9 @@ import { Rectangle } from "../../shared/rectangle";
 export class MapComponent extends Component {
 	declare parent: GameComponent;
 
+	static readonly playerSize = 20;
+	static readonly notchSize = 4;
+
 	playerViewLocation = { x: 0.5, y: 0.9 };
 
 	width: number;
@@ -134,23 +137,27 @@ export class MapComponent extends Component {
 		context.fillStyle = '#8884';
 		context.fill(buildingsPath);
 
-		context.fillStyle = '#f00';
+		context.fillStyle = this.parent.player?.color;
 		context.stroke(packageSourcePath);
 		context.fill(packageSourcePath);
 
 		// render player
-		const playerSize = 20;
-		context.lineWidth = 5;
+		context.lineWidth = MapComponent.notchSize;
 
 		for (let player of this.parent.players) {
-			const playerPosition = this.transform(player.position);
+			const carrying = player.delivery && player.delivery.carrier == player;
+			let size = MapComponent.playerSize / 2;
+
+			if (carrying) {
+				size += MapComponent.notchSize / 2;
+			}
 
 			context.fillStyle = player.color;
 			context.beginPath();
-			context.arc(...playerPosition, playerSize / 2, 0, Math.PI * 2);
+			context.arc(...this.transform(player.position), size, 0, Math.PI * 2);
 			context.fill();
 
-			if (player.delivery && player.delivery.carrier) {
+			if (carrying) {
 				context.stroke();
 			}
 		}
