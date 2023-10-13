@@ -24,6 +24,20 @@ export class Rectangle {
 		);
 	}
 
+	static fromCenterRadius(center: Point, radius: number) {
+		const centerLatRad = (center.latitude * Math.PI) / 180;
+		
+		// Calculate the angular distance in radians
+		const angularDistance = radius / Point.earthRadius;
+		
+		// Calculate the bounding box coordinates
+		return this.fromCenter(
+			center, 
+			(angularDistance * 180) / Math.PI,
+			(angularDistance * 180) / (Math.PI * Math.cos(centerLatRad))
+		);
+	}
+
 	static fromPolygon(points: Point[]) {
 		const latitudes = points.map(point => point.latitude);
 		const longitudes = points.map(point => point.longitude);

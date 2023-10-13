@@ -1,3 +1,5 @@
+import { Rectangle } from "./rectangle";
+
 export class Point {
 	static readonly earthRadius = 6378137;
 
