@@ -87,8 +87,8 @@ export class MapReader {
 
 			let buildingDB = new Building();
 			buildingDB.address = address;
-			buildingDB.centerlatitude = center.latitude;
-			buildingDB.centerlongitude = center.longitude;
+			buildingDB.centerLatitude = center.latitude;
+			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
 
 			buildingsDB.push(buildingDB);
@@ -125,10 +125,18 @@ export class MapReader {
 				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
-				waterDB.centerlatitude = center.latitude;
-				waterDB.centerlongitude = center.longitude;
+				waterDB.centerLatitude = center.latitude;
+				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
-				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+				waterDB.name = 'water';
+
+				if (water.tag) {
+					for (let tag of water.tag) {
+						if (tag._attributes.k == 'name') {
+							waterDB.name = tag._attributes.v;
+						}
+					}
+				}
 
 				watersDB.push(waterDB);
 
@@ -142,10 +150,18 @@ export class MapReader {
 				let polygonString = this.constructPolygonFromPoint(coordinates);
 
 				let waterDB = new WaterBody();
-				waterDB.centerlatitude = center.latitude;
-				waterDB.centerlongitude = center.longitude;
+				waterDB.centerLatitude = center.latitude;
+				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
-				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+				waterDB.name = 'water';
+
+				if (water.tag) {
+					for (let tag of water.tag) {
+						if (tag._attributes.k == 'name') {
+							waterDB.name = tag._attributes.v;
+						}
+					}
+				}
 
 				watersDB.push(waterDB);
 
