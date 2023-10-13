@@ -91,6 +91,9 @@ export class MapReader {
 			buildingDB.centerLongitude = center.longitude;
 			buildingDB.polygon = polygonString;
 
+			buildingDB.importerId = building._attributes.id;
+			buildingDB.addressReal = true;
+
 			buildingsDB.push(buildingDB);
 
 			await buildingDB.create();
@@ -128,7 +131,15 @@ export class MapReader {
 				waterDB.centerLatitude = center.latitude;
 				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
-				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+				waterDB.name = 'water';
+
+				if (water.tag) {
+					for (let tag of water.tag) {
+						if (tag._attributes.k == 'name') {
+							waterDB.name = tag._attributes.v;
+						}
+					}
+				}
 
 				watersDB.push(waterDB);
 
@@ -145,7 +156,15 @@ export class MapReader {
 				waterDB.centerLatitude = center.latitude;
 				waterDB.centerLongitude = center.longitude;
 				waterDB.polygon = polygonString;
-				waterDB.name = water._attributes.name ?  water._attributes.name : 'water';
+				waterDB.name = 'water';
+
+				if (water.tag) {
+					for (let tag of water.tag) {
+						if (tag._attributes.k == 'name') {
+							waterDB.name = tag._attributes.v;
+						}
+					}
+				}
 
 				watersDB.push(waterDB);
 
@@ -304,13 +323,83 @@ export class MapReader {
 		return polygonString;
 	}
 
-	/**
-	 * extracts address of the given building, if the address is defined. otherwise it returns an empty string.
-	 * the address has the following format: [street] [housenumber] [postcode] [city]
-	 * @param building 
-	 * @returns 
-	 */
-	extractAddress(building): string {
+	extractAddress(building) {
+		let buildingTags = building.tag;
+		let city = "";
+		let street = "";
+		let postcode = "";
+		let houseNumber = "";
+
+		let address = '';
+
+		if (buildingTags._attributes.k == "addr:city"
+			&& buildingTags._attributes.k == "addr:postcode"
+			&& buildingTags._attributes.k == "addr:street"
+			&& buildingTags._attributes.k == "addr:housenumber"
+		) {
+			for (let tag of buildingTags) {
+				switch (tag._attributes.k) {
+					case "addr:city":
+						city = tag._attributes.v;
+						break;
+					case "addr:housenumber":
+						houseNumber = tag._attributes.v;
+						break;
+					case "addr:postcode":
+						postcode = tag._attributes.v;
+						break;
+					case "addr:street":
+						street = tag._attributes.v;
+						break;
+					default:
+						break;
+				}
+			}
+		} else {
+			
+		}
+
+		for (let tag of buildingTags) {
+			if (tag._attributes.k == "addr:city") {
+				city = tag._attributes.v;
+			} else {
+				// get the closest city
+				city = this.getMissingAddress(city);
+			}
+
+			if (tag._attributes.k == "addr:postcode") {
+				postcode = tag._attributes.v;
+			} else {
+				// get the closest postcode
+				postcode = this.getMissingAddress(postcode);
+			}
+
+			if (tag._attributes.k == "addr:street") {
+				street = tag._attributes.v;
+			} else {
+				// get the closest street
+				street = this.getMissingAddress(street);
+			}
+
+			if (tag._attributes.k == "addr:housenumber") {
+				houseNumber = tag._attributes.v;
+			} else {
+				// get the closest house number
+				houseNumber = this.getMissingAddress(houseNumber);
+			}
+		}
+
+		return `${street} ${houseNumber} ${postcode} ${city}`;
+	}
+
+	getMissingAddress(object) {
+		console.debug('searching missing ', object);
+
+
+		return '';
+	}
+
+	extractAddress1(building): string {
 		let buildingTags = building.tag;
 		let city: string = "";
 		let houseNumber: string = "";
