@@ -22,11 +22,6 @@ export class Application {
 		registerDirectives(Component, this.router);
 
 		this.router.host(document.body);
-
-		const start = new Point(47.38468034073662, 8.53153377949949);
-		const end = start.walk(Math.PI / 3, 1491);
-
-		console.debug(`https://www.google.com/maps/place/${end.latitude},+${end.longitude}/@${end.latitude},${end.longitude}`, start.distance(end), end.distance(start));
 	}
 }
 
