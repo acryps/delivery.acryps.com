@@ -1,6 +1,8 @@
 import * as convert from "xml-js";
-import { Building, DbContext, Import } from "../managed/database";
+import { Building, DbContext, Import, WaterBody } from "../managed/database";
 import { LoadingArea } from "./loading-area";
+import { Point } from "../../shared/point";
+import { Rectangle } from "../../shared/rectangle";
 
 export class MapReader {
 	nodes;
