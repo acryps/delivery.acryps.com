@@ -25,7 +25,7 @@ export class LobbyComponent extends Component {
 
 			<ui-players>
 				{this.parent.players.map(player => <ui-player>
-					{player.id}
+					{player.name}
 				</ui-player>)}
 			</ui-players>
 

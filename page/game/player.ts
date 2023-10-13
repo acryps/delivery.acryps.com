@@ -4,13 +4,15 @@ import { Point } from "../../shared/point";
 
 export class Player {
 	id: string;
-	position: Point;
+	name: string;
 
+	position: Point;
 	delivery: Delivery;
 
 	static from(serialized) {
 		const player = new Player();
 		player.id = serialized.id;
+		player.name = serialized.name;
 		player.position = Point.from(serialized.position);
 
 		return player;
