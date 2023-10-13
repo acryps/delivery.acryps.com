@@ -47,18 +47,18 @@ export class Map {
 		return false;
 	}
 
-	planDelivery() {
+	planDelivery(usedBuildings: BuildingViewModel[]) {
 		const angle = Math.random() * Math.PI * 2;
 		const distance = Math.random() * this.radius / 4 + this.radius / 2;
 
 		const delivery = new Delivery();
-		delivery.source = this.searchBuilding(angle, distance);
-		delivery.destination = this.searchBuilding(angle + Math.PI, distance);
+		delivery.source = this.searchBuilding(angle, distance, usedBuildings);
+		delivery.destination = this.searchBuilding(angle + Math.PI, distance, usedBuildings);
 
 		return delivery;
 	}
 
-	searchBuilding(angle: number, distance: number, attempts = 0) {
+	searchBuilding(angle: number, distance: number, skip: BuildingViewModel[], attempts = 0) {
 		if (!this.buildings.length) {
 			throw new Error('no buildings in this map');
 		}
@@ -71,10 +71,12 @@ export class Map {
 		
 		for (let building of this.buildings) {
 			if (Rectangle.fromPolygon(building.geometry).contains(probe)) {
-				return building;
+				if (!skip.includes(building)) {
+					return building;
+				}
 			}
 		}
 
-		return this.searchBuilding(angle + Math.random() * 0.1 - 0.05, distance + Math.random() / 1000 - 0.0005, attempts + 1);
+		return this.searchBuilding(angle + Math.random() * 0.1 - 0.05, distance + Math.random() / 1000 - 0.0005, skip, attempts + 1);
 	}
 }

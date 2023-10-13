@@ -1,6 +1,7 @@
 import { Map } from "../../shared/map";
 import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
+import { BuildingViewModel } from "../../shared/building";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -40,7 +41,15 @@ export class Game {
 	assignPackage(player: PlayerController) {
 		player.pickedUp = null;
 
-		const delivery = this.map.planDelivery();
+		const usedBuildings: BuildingViewModel[] = []; 
+
+		for (let player of this.players) {
+			if (player.assigned) {
+				usedBuildings.push(player.assigned.source, player.assigned.destination);
+			}
+		}
+
+		const delivery = this.map.planDelivery(usedBuildings);
 		player.assigned = delivery;
 		delivery.assignee = player;
 
