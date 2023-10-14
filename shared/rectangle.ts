@@ -8,6 +8,30 @@ export class Rectangle {
 		public maxLongitude: number
 	) {}
 
+	get topLeft() {
+		return new Point(this.minLatitude, this.minLongitude);
+	}
+
+	get topRight() {
+		return new Point(this.maxLatitude, this.minLongitude);
+	}
+
+	get bottomLeft() {
+		return new Point(this.minLatitude, this.maxLongitude);
+	}
+
+	get bottomRight() {
+		return new Point(this.maxLatitude, this.maxLongitude);
+	}
+
+	get latitudeLength() {
+		return this.topLeft.distance(this.topRight);
+	}
+
+	get longitudeLength() {
+		return this.bottomLeft.distance(this.bottomRight);
+	}
+
 	get center() {
 		return new Point(
 			this.minLatitude + (this.maxLatitude - this.minLatitude) / 2,
@@ -21,6 +45,20 @@ export class Rectangle {
 			center.latitude + latitude / 2,
 			center.longitude - longitude / 2,
 			center.longitude + longitude / 2
+		);
+	}
+
+	static fromCenterRadius(center: Point, radius: number) {
+		const centerLatRad = (center.latitude * Math.PI) / 180;
+		
+		// Calculate the angular distance in radians
+		const angularDistance = radius / Point.earthRadius;
+		
+		// Calculate the bounding box coordinates
+		return this.fromCenter(
+			center, 
+			(angularDistance * 180) / Math.PI,
+			(angularDistance * 180) / (Math.PI * Math.cos(centerLatRad))
 		);
 	}
 
@@ -56,25 +94,45 @@ export class Rectangle {
 		return true;
 	}
 
-	touches(smaller: Rectangle) {
-		if (smaller.minLatitude >= this.minLatitude && smaller.minLatitude <= this.maxLatitude) {
-			if (smaller.minLongitude >= this.minLongitude && smaller.minLongitude <= this.maxLongitude) {
+	touches(other: Rectangle) {
+		if (other.minLatitude >= this.minLatitude && other.minLatitude <= this.maxLatitude) {
+			if (other.minLongitude >= this.minLongitude && other.minLongitude <= this.maxLongitude) {
 				return true;
 			}
 
-			if (smaller.maxLongitude >= this.minLongitude && smaller.maxLongitude <= this.maxLongitude) {
+			if (other.maxLongitude >= this.minLongitude && other.maxLongitude <= this.maxLongitude) {
 				return true;
 			}
 		}
 
-		if (smaller.maxLatitude >= this.minLatitude && smaller.maxLatitude <= this.maxLatitude) {
-			if (smaller.minLongitude >= this.minLongitude && smaller.minLongitude <= this.maxLongitude) {
+		if (other.maxLatitude >= this.minLatitude && other.maxLatitude <= this.maxLatitude) {
+			if (other.minLongitude >= this.minLongitude && other.minLongitude <= this.maxLongitude) {
 				return true;
 			}
 
-			if (smaller.maxLongitude >= this.minLongitude && smaller.maxLongitude <= this.maxLongitude) {
+			if (other.maxLongitude >= this.minLongitude && other.maxLongitude <= this.maxLongitude) {
 				return true;
 			}
 		}
+	}
+
+	inside(bigger: Rectangle) {
+		if (bigger.minLatitude > this.minLatitude) {
+			return false;
+		}
+
+		if (bigger.maxLatitude < this.maxLatitude) {
+			return false;
+		}
+
+		if (bigger.minLongitude > this.minLongitude) {
+			return false;
+		}
+
+		if (bigger.maxLongitude < this.maxLongitude) {
+			return false;
+		}
+
+		return true;
 	}
 }

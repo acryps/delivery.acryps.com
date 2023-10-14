@@ -1,0 +1,70 @@
+@mixin pending-action {
+	&[ui-click-pending] {
+		animation: pulse 1s infinite alternate-reverse ease-in-out;
+
+		@keyframes pulse {
+			from {
+				background: var(--page-color);
+				border-color: var(--page-color);
+			}
+
+			to {
+				background: #bbb;
+				border-color: #bbb;
+			}
+		}
+	}
+}
+
+@mixin primary-action {
+	@include pending-action;
+
+	display: block;
+	padding: 1rem;
+
+	border: 2px solid var(--page-color);
+
+	text-align: center;
+	color: var(--page-background);
+	background: var(--page-color);
+
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--page-color-dimmed);
+		background: var(--page-color-dimmed);
+	}
+}
+
+@mixin action {
+	@include pending-action;
+
+	display: block;
+	padding-inline: 1rem;
+	padding-block: 0.5rem;
+
+	border: 2px solid var(--page-color);
+
+	text-align: center;
+	color: var(--page-color);
+	background: var(--page-background);
+
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--page-color-dimmed);
+		color: var(--page-background);
+		background: var(--page-color-dimmed);
+	}
+}
+
+@mixin disabled-action {
+	display: block;
+	padding: 1rem;
+
+	border: 2px solid var(--page-color-dimmed);
+
+	text-align: center;
+	color: var(--page-background);
+	background: var(--page-color-dimmed);
+}

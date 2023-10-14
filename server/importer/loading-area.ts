@@ -4,7 +4,7 @@ import { Import } from "../managed/database";
 
 export class LoadingArea {
 	// defines the fixed size of the loading-areas
-	static size: number = 0.005;
+	static size: number = 0.001;
 
 	// the centers of the 8 neighbors of a loading-area
 	neighborCenters: Point[];
@@ -32,14 +32,14 @@ export class LoadingArea {
 		let notLoadedNeighbors: LoadingArea[] = [];
 
 		loadingAreas.forEach(loadingArea => {
-			for(let i = 0; i < this.neighborCenters.length; i++) {
-				if(loadingArea.center.latitude === this.neighborCenters[i].latitude && loadingArea.center.longitude === this.neighborCenters[i].longitude)
+			for (let i = 0; i < this.neighborCenters.length; i++) {
+				if (loadingArea.center.latitude === this.neighborCenters[i].latitude && loadingArea.center.longitude === this.neighborCenters[i].longitude)
 					loadedLoadingAreas[i] = true;
 				}
 		});
 		
-		for(let i = 0; i < this.neighborCenters.length; i++) {
-			if(loadedLoadingAreas[i] == false) {
+		for (let i = 0; i < this.neighborCenters.length; i++) {
+			if (loadedLoadingAreas[i] == false) {
 				let newLoadingArea = new LoadingArea(new Point(this.neighborCenters[i].latitude, this.neighborCenters[i].longitude));
 				notLoadedNeighbors.push(newLoadingArea);
 			}

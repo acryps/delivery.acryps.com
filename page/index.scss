@@ -1,9 +1,13 @@
+@import './components.scss';
+
 @import './assets/font/index.scss';
 @import './game/index.scss';
 
 :root {
 	--page-color: #fff;
+	--page-color-dimmed: #ddd;
 	--page-background: #000;
+	--page-error: #ff5a5a;
 }
 
 body {
@@ -30,18 +34,10 @@ ui-home {
 	inset: 0;
 
 	ui-action {
-		display: block;
-		padding: 1rem;
+		@include action;
+
 		margin: 1rem;
-
-		border: 2px solid var(--page-color);
-
-		cursor: pointer;
-
-		&:hover {
-			background: var(--page-color);
-			color: var(--page-background);
-		}
+		padding-block: 1rem;
 	}
 }
 
@@ -72,6 +68,8 @@ ui-create-game {
 		ui-radius {
 			margin-right: 1rem;
 
+			cursor: pointer;
+
 			&[ui-active] {
 				color: var(--page-background);
 				background: var(--page-color);
@@ -80,13 +78,80 @@ ui-create-game {
 	}
 
 	ui-action {
-		margin-top: auto;
+		&[ui-create] {
+			@include primary-action;
+
+			margin-top: auto;
+		}
+
+		&[ui-back] {
+			@include action;
+
+			margin-top: 1rem;
+		}
+	}
+}
+
+ui-join {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	row-gap: 1rem;
+
+	position: fixed;
+	inset: 0;
+
+	text-align: center;
+
+	input {
+		all: unset;
 
 		display: block;
+		width: 8rem;
 		padding: 1rem;
 
-		text-align: center;
-		color: var(--page-background);
-		background: var(--page-color);
+		border: 2px solid var(--page-color);
+		background: var(--page-background);
+		color: var(--page-color);
+
+		text-transform: uppercase;
+
+		&[ui-error] {
+			border-color: var(--page-error);
+			animation: shake 0.3s;
+		}
+	}
+
+	ui-action {
+		width: 8rem;
+		
+		&[ui-join] {
+			@include primary-action;
+
+			margin-bottom: 1rem;
+		}
+
+		&[ui-back] {
+			@include action;
+		}
+	}
+}
+
+@keyframes shake {
+	0% {
+		transform: translate(0px, 0px)
+	}
+
+	25% {
+		transform: translate(5px, 0px)
+	}
+
+	50% {
+		transform: translate(-5px, 0px)
+	}
+
+	75% {
+		transform: translate(5px, 0px)
 	}
 }

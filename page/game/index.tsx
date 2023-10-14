@@ -18,7 +18,6 @@ export class GameComponent extends Component {
 	mapRenderer: MapComponent;
 	lobby = new LobbyComponent();
 
-	delivery: Delivery;
 	deliveryIndicator = new DeliveryIndicator();
 
 	targetTracker = new TargetTracker();
@@ -36,9 +35,23 @@ export class GameComponent extends Component {
 		return this.players.find(player => player.id == this.id);
 	}
 
-	async onload() {
-		this.map = Map.from(await fetch(`/map/${this.parameters.token}`).then(response => response.json()));
+	get isHost() {
+		return this.players.findIndex(player => player.id == this.id) == 0;
+	}
 
+	onrouteleave() {
+		this.socket.close();
+	}
+
+	async onload() {
+		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
+
+		if (!map) {
+			this.navigate('/');
+			return;
+		}
+
+		this.map = Map.from(map);
 		this.center = new Point(this.map.center.latitude, this.map.center.longitude);
 		this.radius = this.map.radius;
 
@@ -53,12 +66,15 @@ export class GameComponent extends Component {
 			this.socket.onmessage = event => {
 				const data = JSON.parse(event.data) as ServerMessage;
 
-				if (!('move' in data)) {
-					console.log(data);
-				}
-
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
+
+					this.lobby.update();
+				}
+
+				if ('leave' in data) {
+					const playerIndex = this.players.findIndex(player => player.id == Player.from(data.leave).id);
+					this.players.splice(playerIndex, 1);
 
 					this.lobby.update();
 				}
@@ -68,19 +84,17 @@ export class GameComponent extends Component {
 				}
 
 				if ('assigned' in data) {
-					if (data.assigned.assignee == this.id) {
-						this.delivery = Delivery.from(data.assigned, this.players, this.map);
+					const player = this.players.find(player => player.id == data.assigned.assignee);
+					player.delivery = Delivery.from(data.assigned, this.players, this.map);
 
-						this.targetTracker.target = this.delivery.source.center;
-						this.deliveryIndicator.update();
-					}
+					this.deliveryIndicator.update();
 				}
 
 				if ('pickedUp' in data) {
-					if (data.pickedUp == this.delivery.id) {
-						this.delivery.carrier = this.player;
-						this.deliveryIndicator.update();
-					}
+					const delivery = this.players.find(player => player.delivery?.id == data.pickedUp).delivery;
+					delivery.carrier = delivery.assignee;
+
+					this.deliveryIndicator.update();
 				}
 
 				if ('move' in data) {
@@ -89,6 +103,14 @@ export class GameComponent extends Component {
 
 						player.position = update.position;
 					}
+				}
+
+				if ('steal' in data) {
+					const thief = this.players.find(player => player.id == data.steal.thief);
+					const victim = this.players.find(player => player.id == data.steal.victim);
+
+					thief.delivery = victim.delivery;
+					this.deliveryIndicator.update();
 				}
 			};
 		};

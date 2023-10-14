@@ -24,6 +24,27 @@ export class BuildingViewModel {
 		);
 	}
 
+	get area() {
+		const geometryLength = this.geometry.length;
+		let area = 0;
+		
+		for (let pointIndex = 0; pointIndex < geometryLength; pointIndex++) {
+			const currentPoint = this.geometry[pointIndex];
+			const currentLatitude = currentPoint.latitude * (Math.PI / 180);
+			const currentLongitude = currentPoint.longitude * (Math.PI / 180);
+
+			const nextPoint = this.geometry[(pointIndex + 1) % geometryLength];
+			const nextLatitude = nextPoint.latitude * (Math.PI / 180);
+			const nextLongitude = nextPoint.longitude * (Math.PI / 180);
+			
+			area += (nextLongitude + currentLongitude) * (Math.sin(nextLatitude) - Math.sin(currentLatitude));
+		}
+		
+		area = Math.abs(area * Point.earthRadius * Point.earthRadius / 2.0); // Earth's radius in km
+		
+		return area;
+	}
+
 	get center() {
 		let totalLatitude = 0;
 		let totalLongitude = 0;

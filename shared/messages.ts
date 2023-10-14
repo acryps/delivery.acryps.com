@@ -6,11 +6,16 @@ export interface PlayerMessage {
 	position: Point;
 }
 
+export interface PlayerJoinMessage extends PlayerMessage {
+	name: string;
+}
+
 export interface DeliveryMessage {
 	id: string;
 	assignee: string;
 	source: string;
 	destination: string;
+	completed: boolean;
 }
 
 export interface ClientMessage {
@@ -19,17 +24,19 @@ export interface ClientMessage {
 }
 
 export interface ServerMessage {
-	move?: {
-		id: string;
-		position: Point;
-	}[];
-
 	start?: boolean,
-
+	
 	leave?: PlayerMessage,
-	join?: PlayerMessage,
-
+	join?: PlayerJoinMessage,
+	
+	move?: PlayerMessage[];
+	
 	assigned?: DeliveryMessage;
 	pickedUp?: string;
 	delivered?: string;
+
+	steal?: {
+		thief: string,
+		victim: string
+	}
 }

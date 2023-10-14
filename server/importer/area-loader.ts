@@ -1,7 +1,7 @@
 import { Point } from "../../shared/point";
 import { DbContext, Import } from "../managed/database";
 import { LoadingArea } from "./loading-area";
-import { MapReader } from "./mapreader";
+import { MapReader } from "./map-reader";
 
 export class AreaLoader {
 
@@ -20,37 +20,35 @@ export class AreaLoader {
 		let startArea: LoadingArea;
 
 		loadingAreasAroundStart.forEach(loadingArea => {
-			if(loadingArea.getBoundingBox().contains(startLocation)) {
+			if (loadingArea.getBoundingBox().contains(startLocation)) {
 				startArea = loadingArea;
 			}
 		});
 
-		if(startArea === null || startArea === undefined) {
-			console.debug("AREA-LOADER: need to load start-area");
+		if (startArea === null || startArea === undefined) {
+			console.debug("[import] need to load start-area");
 
 			startArea = LoadingArea.defineNewArea(startLocation);
 			let startAreaLoader = new MapReader(this.database, startArea);
 
-			if(await startAreaLoader.loadMap()) {
+			if (await startAreaLoader.loadMap()) {
 				await this.database.import.create(startArea.toImport());
-			}
-			else {
-				console.warn("AREA-LOADER: could not correctly load map");
+			} else {
+				console.warn("[import] could not correctly load map");
 			}
 		}
 
 		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
 
-		console.debug("AREA-LOADER: need to load "+ areasToLoad.length + " areas around start-area");
+		console.debug("[import] need to load "+ areasToLoad.length + " areas around start-area");
 
 		await areasToLoad.forEach(async areaToLoad => {
 			let areaLoader = new MapReader(this.database, areaToLoad);
 
-			if(await areaLoader.loadMap()) {
+			if (await areaLoader.loadMap()) {
 				await this.database.import.create(areaToLoad.toImport());
-			}
-			else {
-				console.warn("AREA-LOADER: could not correctly load map");
+			} else {
+				console.warn("[import] could not correctly load map");
 			}
 		});
 	}

@@ -10,7 +10,7 @@ export class HomeComponent extends Component {
 				Join Game
 			</ui-action>
 
-			<ui-action ui-create-game ui-click={async () => {
+			<ui-action ui-create-game ui-click-text='Prepare hosting ...' ui-click={async () => {
 				if ('geolocation' in navigator) {
 					navigator.geolocation.getCurrentPosition(position => {
 						this.navigate(`/create/${position.coords.latitude}/${position.coords.longitude}`);
