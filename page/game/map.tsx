@@ -74,8 +74,6 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
-		this.parent.targetTracker.updatePosition();
-
 		const now = new Date();
 		const deltaTime = +now - +this.lastFrame;
 		this.lastFrame = now;
@@ -162,6 +160,10 @@ export class MapComponent extends Component {
 			}
 		}
 
+		// update the direction tracker
+		this.parent.targetTracker.updatePosition();
+
+		// update the distance tracker
 		if (this.parent.player && this.parent.player.delivery?.carrier == this.parent.player) {
 			const start = this.parent.player.delivery.source.center;
 
