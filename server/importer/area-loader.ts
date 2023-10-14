@@ -42,15 +42,17 @@ export class AreaLoader {
 
 		console.debug("[import] need to load "+ areasToLoad.length + " areas around start-area");
 
-		await areasToLoad.forEach(async areaToLoad => {
+		for (let areaToLoad of areasToLoad) {
 			let areaLoader = new MapReader(this.database, areaToLoad);
 
-			if (await areaLoader.loadMap()) {
-				await this.database.import.create(areaToLoad.toImport());
-			} else {
-				console.warn("[import] could not correctly load map");
-			}
-		});
+			areaLoader.loadMap().then(successful => {
+				if (successful) {
+					this.database.import.create(areaToLoad.toImport());
+				}
+			}).catch(error => {
+				console.warn(`[import] could not load map: ${error}`);
+			});
+		}
 	}
 
 	/**
