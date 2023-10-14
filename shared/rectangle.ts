@@ -12,8 +12,24 @@ export class Rectangle {
 		return new Point(this.minLatitude, this.minLongitude);
 	}
 
+	get topRight() {
+		return new Point(this.maxLatitude, this.minLongitude);
+	}
+
+	get bottomLeft() {
+		return new Point(this.minLatitude, this.maxLongitude);
+	}
+
 	get bottomRight() {
 		return new Point(this.maxLatitude, this.maxLongitude);
+	}
+
+	get latitudeLength() {
+		return this.topLeft.distance(this.topRight);
+	}
+
+	get longitudeLength() {
+		return this.bottomLeft.distance(this.bottomRight);
 	}
 
 	get center() {

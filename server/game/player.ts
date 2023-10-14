@@ -5,13 +5,14 @@ import { Point } from "../../shared/point";
 import { generateName } from "./name";
 
 export class PlayerController {
-	static readonly pickupOffsetRadius = 50;
+	static readonly pickupOffsetDistance = 25;
+	static readonly pickupWalkingDistance = 1;
 
 	readonly id = Math.random().toString(36).substring(2, 2 + tokenLength);
 	readonly name = generateName();
 
 	readonly speed = 50 / 3.6;
-	readonly deliverySlownessFactor = 0.95;
+	readonly deliverySlownessFactor = 0.85;
 
 	moveAngle: number | null = null;
 

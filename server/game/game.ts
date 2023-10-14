@@ -155,28 +155,20 @@ export class Game {
 		player.assigned = delivery;
 		delivery.assignee = player;
 
-		let offsetDirection = Math.random() * Math.PI * 2;
+		// walk away from the building in random directions until we are not in a building anymore
+		const minimalDistance = PlayerController.pickupOffsetDistance + Math.max(delivery.source.boundingBox.latitudeLength, delivery.source.boundingBox.longitudeLength);
+		let distance = minimalDistance;
 
-		// move away form the pickup location
-		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
+		do {
+			player.position = delivery.source.center.walk(Math.random() * Math.PI * 2, distance);
 
-		// walk away in the same direction until we are not intersecting any houses anymore
-		let collider;
-		let iterations = 0;
+			distance += PlayerController.pickupWalkingDistance;
 
-		while (collider = this.map.collides(player.position)) {
-			player.position = player.position.walk(offsetDirection, player.speed);
-
-			if (collider == this.map.boundingBox) {
-				offsetDirection -= Math.PI;
+			// to make sure that the distance never overflows
+			if (distance > this.map.radius) {
+				distance = minimalDistance;
 			}
-
-			if (iterations == 100) {
-				offsetDirection = Math.random() * Math.PI * 2;
-
-				iterations = 0;
-			}
-		}
+		} while (this.map.collides(player.position));
 
 		this.broadcast({
 			assigned: delivery.toJSON()
