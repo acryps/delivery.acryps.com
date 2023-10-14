@@ -26,21 +26,21 @@ export class AreaLoader {
 		});
 
 		if (startArea === null || startArea === undefined) {
-			console.debug("AREA-LOADER: need to load start-area");
+			console.debug("[import] need to load start-area");
 
 			startArea = LoadingArea.defineNewArea(startLocation);
 			let startAreaLoader = new MapReader(this.database, startArea);
 
 			if (await startAreaLoader.loadMap()) {
-				//await this.database.import.create(startArea.toImport());
+				await this.database.import.create(startArea.toImport());
 			} else {
-				console.warn("AREA-LOADER: could not correctly load map");
+				console.warn("[import] could not correctly load map");
 			}
 		}
 
 		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
 
-		console.debug("AREA-LOADER: need to load "+ areasToLoad.length + " areas around start-area");
+		console.debug("[import] need to load "+ areasToLoad.length + " areas around start-area");
 
 		await areasToLoad.forEach(async areaToLoad => {
 			let areaLoader = new MapReader(this.database, areaToLoad);
@@ -48,7 +48,7 @@ export class AreaLoader {
 			if (await areaLoader.loadMap()) {
 				await this.database.import.create(areaToLoad.toImport());
 			} else {
-				console.warn("AREA-LOADER: could not correctly load map");
+				console.warn("[import] could not correctly load map");
 			}
 		});
 	}

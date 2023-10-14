@@ -9,10 +9,6 @@ export class MapReader {
 	ways;
 	relations;
 
-	buildingPointsDatabase: Point[] = [];
-	buildingsDatabase;
-
-
 	constructor(
 		private database: DbContext,
 		private loadingArea: LoadingArea
@@ -25,16 +21,14 @@ export class MapReader {
 		this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
 		this.relations = Array.isArray(jsonData.osm.relation) ? jsonData.osm.relation : [jsonData.osm.relation];
 
-		console.debug('MAP-READER: loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
+		console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
 
 		if (this.nodes && this.ways) {
 
 			if (await this.saveBuildings() /*&& this.loadStreets() && this.loadWater()*/) {
-				console.debug('MAP-READER: finished loading data into database');
+				console.debug('[import] finished loading data into database');
 
-				this.loadBuildingsFromDatabase();
-				
-				// fix missing addresses
+				this.guessMissingAddresses();
 
 				return true;
 			}
@@ -63,7 +57,7 @@ export class MapReader {
 			
 		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
 
-		console.debug(
+		console.debug('[import] '+
 			'latitude = [' + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + '], ' + 
 			'longitude = [' + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +'], '+
 			'loading from: ' + mapURL
@@ -78,26 +72,47 @@ export class MapReader {
 		return map;
 	}
 
-	loadBuildingsFromDatabase() {
-		this.buildingsDatabase = this.database.building.toArray();
-		this.buildingsDatabase = Array.isArray(this.buildingsDatabase) ? this.buildingsDatabase : [this.buildingsDatabase];
+	async guessMissingAddresses() {
+		console.debug('[import] loading missing addresses');
 
-		for (let buildingDatabase of this.buildingsDatabase) {
-			this.buildingPointsDatabase.push(new Point(buildingDatabase.centerLatitude, buildingDatabase.centerLongitude));
+		let buildingsToFix: Building[] = await this.database.building.where(building => 
+			building.address == null &&
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 2)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 2)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 2)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 2)).valueOf()
+		).toArray();
+
+		let buildingsDatabase = await this.database.building.where(building => 
+			building.addressReal == true && 
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 2)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 2)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 2)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 2)).valueOf()
+		).toArray();
+
+		for (let buildingToFix of buildingsToFix) {
+			const missingAddress = await this.getMissingAddress(new Point(buildingToFix.centerLatitude, buildingToFix.centerLongitude), buildingsDatabase);
+			buildingToFix.address = missingAddress;
+			buildingToFix.update();
 		}
 	}
 
 	async saveBuildings() {
-		console.debug('MAP-READER: starting to load buildings');
+		console.debug('[import] starting to load buildings');
 
 		let buildings = this.findByTag('building');
 		
-		console.debug('MAP-READER: loading ' + buildings.length + ' buildings');
+		console.debug('[import] loading ' + buildings.length + ' buildings');
+
+		let alreadyLoaded = 0;
 
 		for (let building of buildings) {
 			let openStreetMapId = building._attributes.id;
 
-			if (!this.isBuildingLoaded(openStreetMapId)) {
+			if (await this.isBuildingLoaded(openStreetMapId)) {
+				alreadyLoaded++;
+			} else {
 				let center: Point = this.calculateCenter(this.getPoint(building));
 				let address = await this.extractAddress(building);
 
@@ -110,8 +125,9 @@ export class MapReader {
 				buildingDB.importerId = openStreetMapId;
 
 				await buildingDB.create();
-			} 
+			}
 		};	
+		console.debug('[import] already loaded ' + alreadyLoaded + ' buildings before');
 
 		return buildings;
 	}
@@ -167,7 +183,7 @@ export class MapReader {
 			let coordinates: Point[] = this.getPoint(highway);
 
 			coordinates.forEach(coord => {
-				
+
 			});
 
 		});
@@ -204,9 +220,7 @@ export class MapReader {
 
 	/**
 	 * constructs a string containing latitude and longitude which define the polygon of a building.
-	 * the constructed polygonstring has the following format: [latitude], [longitude] ; [latitude], [longitude] ; ...
-	 * @param building 
-	 * @returns 
+	* the constructed polygonstring has the following format: [latitude], [longitude] ; [latitude], [longitude] ; ...
 	 */
 	constructPolygonString(building): string {
 		let buildingNodes = building.nd;
@@ -234,10 +248,10 @@ export class MapReader {
 		let node = this.nodes.filter(element => element._attributes.id === id);
 
 		if (!Array.isArray(node)) {
-			console.error('MAP-READER: error while gathering unique node. got no element.');
+			console.error('[import] error while gathering unique node. got no element.');
 			return null;
 		} else if (node.length > 1) {
-			console.error('MAP-READER: error while gathering unique node. did not get unique node.');
+			console.error('[import] error while gathering unique node. did not get unique node.');
 			return null;
 		}
 
@@ -351,40 +365,26 @@ export class MapReader {
 		return;
 	}
 
-	async getMissingAddress(center: Point) {
-		let address = '';
+	async getMissingAddress(center: Point, buildings: Building[]) {
+		const nearestBuilding = this.findNearestBuilding(center, buildings);
 
-		const nearestPoint = this.findNearestPoint(center, this.buildingPointsDatabase);
+		console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
 
-		for (let building of this.buildingsDatabase) {
-			if (building.centerLatitude == nearestPoint.latitude && building.centerLongitude == nearestPoint.longitude) {
-				address = building.address;
-			}
-		}
-
-		return address;
+		return nearestBuilding.address;
 	}
 
-	findNearestPoint(center: Point, points: Point[]) {
+	findNearestBuilding(center: Point, points: Building[]): Building {
 		let minDistance = Infinity;
-		let nearestPoint = center;
-
-		console.debug('trying to find nearest point to: ' + center);
-		console.debug('points ' + points.length);
+		let nearestPoint;
 
 		for (let point of points) {
-			const distance = this.calculateDistance(center, point);
-			//console.debug('distance to ' + point + ' is ' + distance + ' mindistance ' + minDistance);
+			const distance = this.calculateDistance(center, new Point(point.centerLatitude, point.centerLongitude));
 
 			if (distance !== 0 && distance < minDistance) {
 				minDistance = distance;
 				nearestPoint = point;
 			}
-
-			//console.debug('nearest point to ' + center + ' is ' + nearestPoint);
 		}
-
-		console.debug('nearest point to ' + center + ' is ' + nearestPoint + ' with distance ' + minDistance);
 
 		return nearestPoint;
 	}
@@ -399,13 +399,8 @@ export class MapReader {
 	}
 
 	async isBuildingLoaded(openStreetMapId) {
-		const buildings = await this.database.building.where(building => building.importerId === openStreetMapId).toArray();
-		
-		if (Array.isArray(buildings)) {
-			return true;
-		}
-
-		return false;
+		const building = await this.database.building.first(building => building.importerId == openStreetMapId);
+		return building;
 	}
 
 	calculateCenter(points: Point[]) {
