@@ -42,6 +42,16 @@ ui-game {
 			
 			font-size: 1.5rem;
 		}
+
+		ui-progress {
+			position: absolute;
+			left: 0;
+			right: calc(100% - 100% * var(--progress));
+			bottom: 0;
+
+			height: 0.25rem;
+			background: var(--page-color);
+		}
 	}
 
 	ui-lobby {
