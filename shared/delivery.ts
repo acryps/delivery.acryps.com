@@ -9,12 +9,9 @@ export class Delivery {
 	id = Math.random().toString(36).substring(2);
 
 	assignee;
-
-	// if carried
 	carrier;
-
-	// if dropped
-	droppedLocation: Point;
+	
+	completed = false;
 
 	source: BuildingViewModel;
 	destination: BuildingViewModel;
@@ -34,7 +31,8 @@ export class Delivery {
 			id: this.id,
 			assignee: this.assignee.id,
 			source: this.source.id,
-			destination: this.destination.id
+			destination: this.destination.id,
+			completed: this.completed
 		};
 	}
 }

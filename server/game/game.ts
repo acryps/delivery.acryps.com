@@ -4,6 +4,7 @@ import { ServerMessage } from "../../shared/messages";
 import { BuildingViewModel } from "../../shared/building";
 import { tokenLength } from "../../shared/constants";
 import { Rectangle } from "../../shared/rectangle";
+import { Delivery } from "../../shared/delivery";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -12,8 +13,10 @@ export class Game {
 
 	readonly token: string;
 
-	players: PlayerController[] = [];
 	map: Map;
+	
+	players: PlayerController[] = [];
+	deliveries: Delivery[] = [];
 
 	onStop: () => void;
 

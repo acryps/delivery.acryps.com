@@ -58,21 +58,29 @@ ui-game {
 			flex-shrink: 0;
 
 			display: flex;
+			flex-direction: column;
 			align-items: center;
-			justify-content: space-between;
 
 			padding: 1rem;
 
 			background: var(--page-color);
 			color: var(--page-background);
-			font-size: 2rem;
+			font-size: 4rem;
 
 			ui-token {
+				display: block;
+
 				text-transform: uppercase;
+				font-size: 1rem;
+				font-weight: bold;
 			}
 
-			img { 
-				height: 4rem;
+			img {
+				width: 10rem;
+				margin-bottom: 1rem;
+				aspect-ratio: 1;
+
+				image-rendering: pixelated;
 			}
 		}
 
@@ -103,6 +111,10 @@ ui-game {
 
 					border-radius: 50%;
 					background: var(--color);
+				}
+
+				&[ui-self] {
+					font-weight: bold;
 				}
 
 				> ui-name {

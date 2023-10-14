@@ -16,15 +16,15 @@ export class LobbyComponent extends Component {
 
 		return <ui-lobby>
 			<ui-invite>
+				{qrCodeImage}
+
 				<ui-token>
 					{this.parent.parameters.token}
 				</ui-token>
-
-				{qrCodeImage}
 			</ui-invite>
 
 			<ui-players>
-				{this.parent.players.map((player, playerIndex) => <ui-player style={`--color: ${player.color}`}>
+				{this.parent.players.map((player, playerIndex) => <ui-player ui-self={player == this.parent.player} style={`--color: ${player.color}`}>
 					<ui-name>{player.name}</ui-name>
 					{playerIndex == 0 && <ui-host>Host</ui-host>}
 				</ui-player>)}

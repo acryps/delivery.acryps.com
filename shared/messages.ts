@@ -15,6 +15,7 @@ export interface DeliveryMessage {
 	assignee: string;
 	source: string;
 	destination: string;
+	completed: boolean;
 }
 
 export interface ClientMessage {
