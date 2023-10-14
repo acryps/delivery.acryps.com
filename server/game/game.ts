@@ -9,7 +9,7 @@ import { Delivery } from "../../shared/delivery";
 export class Game {
 	readonly ticksPerSecond = 30;
 	readonly tickMillisecondsInterval = 1 / this.ticksPerSecond * 1000;
-	readonly stealingDistance = 1;
+	readonly stealingDistance = 2;
 
 	readonly token: string;
 

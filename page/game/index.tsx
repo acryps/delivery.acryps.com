@@ -8,9 +8,11 @@ import { Point } from "../../shared/point";
 import { TargetTracker } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
+import { StatusComponent } from "./status";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
+	declare rootNode: HTMLElement;
 
 	id: string;
 	players: Player[] = [];
@@ -19,8 +21,8 @@ export class GameComponent extends Component {
 	lobby = new LobbyComponent();
 
 	deliveryIndicator = new DeliveryIndicator();
-
 	targetTracker = new TargetTracker();
+	status = new StatusComponent();
 
 	map: Map;
 
@@ -69,6 +71,7 @@ export class GameComponent extends Component {
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
 
+					this.rootNode.style.setProperty('--player-color', this.player.color);
 					this.lobby.update();
 				}
 
@@ -95,6 +98,8 @@ export class GameComponent extends Component {
 					delivery.carrier = delivery.assignee;
 
 					this.deliveryIndicator.update();
+
+					this.status.show(delivery.carrier, ' picked up a package');
 				}
 
 				if ('move' in data) {
@@ -111,6 +116,8 @@ export class GameComponent extends Component {
 
 					thief.delivery = victim.delivery;
 					this.deliveryIndicator.update();
+
+					this.status.show(thief, ' stole ', victim, '`s package');
 				}
 			};
 		};
@@ -123,7 +130,10 @@ export class GameComponent extends Component {
 			{this.mapRenderer}
 			{this.targetTracker}
 
-			{this.deliveryIndicator}
+			<ui-header>
+				{this.deliveryIndicator}
+				{this.status}
+			</ui-header>
 
 			{this.lobby}
 		</ui-game>;

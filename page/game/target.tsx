@@ -13,15 +13,13 @@ export class TargetTracker extends Component {
 				return this.parent.player.delivery.destination.center;
 			}
 
-			if (!this.parent.player.delivery.carrier && !this.parent.player.delivery.droppedLocation) {
+			if (!this.parent.player.delivery.carrier) {
 				return this.parent.player.delivery.source.center;
 			}
 		}
 	}
 
 	updatePosition() {
-		this.rootNode.style.setProperty('--player-color', this.parent.player?.color);
-
 		if (this.target) {
 			this.rootNode.setAttribute('ui-tracking', '');
 
