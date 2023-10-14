@@ -11,18 +11,34 @@ export class HomeComponent extends Component {
 			</ui-action>
 
 			<ui-action ui-create-game ui-click-text='Prepare hosting ...' ui-click={async () => {
-				if ('geolocation' in navigator) {
-					navigator.geolocation.getCurrentPosition(position => {
-						this.navigate(`/create/${position.coords.latitude}/${position.coords.longitude}`);
-					}, () => {
-						this.navigate(`/create/${this.default.latitude}/${this.default.longitude}`);
-					});
-				} else {
-					this.navigate(`/create/${this.default.latitude}/${this.default.longitude}`);
-				}
+				const location = await this.getCurrentLocation();
+
+				this.navigate(`/create/${location.latitude}/${location.longitude}`);
 			}}>
 				Host Game
 			</ui-action>
 		</ui-home>
+	}
+
+	async getCurrentLocation() {
+		if ('permissions' in navigator) {
+			const permission = await navigator.permissions.query({ name: 'geolocation' });
+
+			if (permission.state != 'granted') {
+				return this.default;
+			}
+		}
+
+		if ('geolocation' in navigator) {
+			return new Promise<Point>(done => {
+				navigator.geolocation.getCurrentPosition(position => {
+					done(new Point(position.coords.latitude, position.coords.longitude));
+				}, () => {
+					done(this.default);
+				});
+			});
+		}
+
+		return this.default;
 	}
 }
