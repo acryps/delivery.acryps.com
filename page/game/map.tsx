@@ -2,6 +2,7 @@ import { Component } from "@acryps/page";
 import { GameComponent } from ".";
 import { Point } from "../../shared/point";
 import { Rectangle } from "../../shared/rectangle";
+import { RenderStyle } from "./style";
 
 export class MapComponent extends Component {
 	declare parent: GameComponent;
@@ -20,6 +21,9 @@ export class MapComponent extends Component {
 
 	lastFrame = new Date();
 
+	buildingStyle: RenderStyle;
+	mapStyle: RenderStyle;
+
 	get position() {
 		return this.parent.player?.position ?? this.parent.center;
 	}
@@ -32,6 +36,11 @@ export class MapComponent extends Component {
 			this.height = mapCanvas.height = mapCanvas.clientHeight;
 
 			let startTouch;
+
+			const style = getComputedStyle(mapCanvas);
+
+			this.buildingStyle = new RenderStyle('building', style);
+			this.mapStyle = new RenderStyle('map', style);
 			
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
@@ -119,21 +128,16 @@ export class MapComponent extends Component {
 		context.restore();
 
 		// create playing field
-		context.fillStyle = '#000';
-
 		const topLeft = this.transform(this.parent.map.boundingBox.topLeft);
 		const bottomRight = this.transform(this.parent.map.boundingBox.bottomRight);
 
-		context.fillRect(...topLeft, bottomRight[0] - topLeft[0], bottomRight[1] - topLeft[1]);
+		context.beginPath();
+		context.rect(...topLeft, bottomRight[0] - topLeft[0], bottomRight[1] - topLeft[1]);
+
+		this.mapStyle.render(context);
 
 		// draw frame
-		context.lineWidth = 1;
-
-		context.strokeStyle = 'white';
-		context.stroke(buildingsPath);
-
-		context.fillStyle = '#8884';
-		context.fill(buildingsPath);
+		this.buildingStyle.render(context, buildingsPath);
 
 		context.fillStyle = this.parent.player?.color;
 		context.stroke(packageSourcePath);
