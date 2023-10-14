@@ -37,7 +37,6 @@ export class TargetTracker extends Component {
 	render() {
 		return <ui-tracker style={`
 			--player-size: ${MapComponent.playerSize}px;
-			--notch-size: ${MapComponent.notchSize}px;
 			--offset-x: ${this.parent.mapRenderer.playerViewLocation.x};
 			--offset-y: ${this.parent.mapRenderer.playerViewLocation.y};
 		`}></ui-tracker>;
