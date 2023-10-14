@@ -106,7 +106,7 @@ export class GameComponent extends Component {
 					for (let update of data.move) {
 						const player = this.players.find(player => player.id == update.id);
 
-						player.position = update.position;
+						player.position = Point.from(update.position);
 					}
 				}
 

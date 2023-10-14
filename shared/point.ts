@@ -55,6 +55,13 @@ export class Point {
 		return new Point(this.latitude, this.longitude);
 	}
 
+	toPosition() {
+		return {
+			x: (Point.earthRadius * this.latitude * (Math.PI / 180)),
+			y: (Point.earthRadius * Math.log(Math.tan(Math.PI / 4 + (this.longitude * (Math.PI / 180)) / 2)))
+		};
+	}
+
 	toString() {
 		return `${this.latitude},${this.longitude}`;
 	}

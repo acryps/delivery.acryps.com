@@ -15,7 +15,7 @@ export class MapComponent extends Component {
 	width: number;
 	height: number;
 
-	scale = { x: 500000, y: 350000 };
+	scale = 1;
 	
 	renderedRotation = 0;
 
@@ -196,17 +196,12 @@ export class MapComponent extends Component {
 	}
 
 	transform(point: Point): [number, number] {
-		let x = point.latitude;
-		let y = point.longitude;
+		const pointLocation = point.toPosition();
+		const playerLocation = this.position.toPosition();
 
-		// move everything to the current maps location
-		x -= this.position.latitude;
-		y -= this.position.longitude;
-
-		// scale to viewport
-		x *= this.scale.x;
-		y *= this.scale.y;
-
-		return [x, y];
+		return [
+			(pointLocation.x - playerLocation.x) * this.scale,
+			(pointLocation.y - playerLocation.y) * this.scale
+		];
 	}
 }
