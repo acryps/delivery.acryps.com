@@ -7,7 +7,7 @@ export class CreateGameComponent extends Component {
 	}
 
 	radii = [100, 250, 500, 1000, 2500];
-	radius = this.radii[1];
+	radius = this.radii[2];
 
 	render() {
 		return <ui-create-game>
