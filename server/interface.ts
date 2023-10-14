@@ -16,28 +16,30 @@ export function registerInterface(app, database: DbContext) {
 		const radius = request.body.radius;
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
+		// TODO importArea(center, database);
 
-		// importArea(center, database);
+		// get all buildings in a way larger the area
+		// then take all buildings that touch the bounding box
+		const doubleBoundingBox = Rectangle.fromCenterRadius(center, radius * 1.5);
 
 		const buildings = await database.building
-			.where(building => building.centerLatitude.valueOf() > boundingBox.minLatitude)
-			.where(building => building.centerLatitude.valueOf() < boundingBox.maxLatitude)
-			.where(building => building.centerLongitude.valueOf() > boundingBox.minLongitude)
-			.where(building => building.centerLongitude.valueOf() < boundingBox.maxLongitude)
+			.where(building => building.centerLatitude.valueOf() > doubleBoundingBox.minLatitude)
+			.where(building => building.centerLatitude.valueOf() < doubleBoundingBox.maxLatitude)
+			.where(building => building.centerLongitude.valueOf() > doubleBoundingBox.minLongitude)
+			.where(building => building.centerLongitude.valueOf() < doubleBoundingBox.maxLongitude)
 			.toArray();
 
-		console.log(`loaded ${buildings.length} buildings for ${center} + ${radius}`)
+		console.log(`loaded ${buildings.length} buildings for ${center} + ${radius}`);
 
 		const map = new Map(center, radius, buildings.map(building => new BuildingViewModel(
 			building.id,
 			building.address,
 			building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
-		)))
+		)));
 
 		const game = new Game(map);
-
 		games.push(game);
-
+		
 		game.onStop = () => games.splice(games.indexOf(game), 1);
 
 		response.json(game.token);

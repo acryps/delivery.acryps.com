@@ -59,6 +59,7 @@ export class Map {
 
 	planDelivery(usedBuildings: BuildingViewModel[]) {
 		const availableBuildings = this.buildings
+			.filter(building => building.boundingBox.inside(this.boundingBox))
 			.filter(building => !usedBuildings.includes(building))
 			.filter(building => building.area < this.maximalSearchedBuildingArea);
 

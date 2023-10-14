@@ -94,25 +94,45 @@ export class Rectangle {
 		return true;
 	}
 
-	touches(smaller: Rectangle) {
-		if (smaller.minLatitude >= this.minLatitude && smaller.minLatitude <= this.maxLatitude) {
-			if (smaller.minLongitude >= this.minLongitude && smaller.minLongitude <= this.maxLongitude) {
+	touches(other: Rectangle) {
+		if (other.minLatitude >= this.minLatitude && other.minLatitude <= this.maxLatitude) {
+			if (other.minLongitude >= this.minLongitude && other.minLongitude <= this.maxLongitude) {
 				return true;
 			}
 
-			if (smaller.maxLongitude >= this.minLongitude && smaller.maxLongitude <= this.maxLongitude) {
+			if (other.maxLongitude >= this.minLongitude && other.maxLongitude <= this.maxLongitude) {
 				return true;
 			}
 		}
 
-		if (smaller.maxLatitude >= this.minLatitude && smaller.maxLatitude <= this.maxLatitude) {
-			if (smaller.minLongitude >= this.minLongitude && smaller.minLongitude <= this.maxLongitude) {
+		if (other.maxLatitude >= this.minLatitude && other.maxLatitude <= this.maxLatitude) {
+			if (other.minLongitude >= this.minLongitude && other.minLongitude <= this.maxLongitude) {
 				return true;
 			}
 
-			if (smaller.maxLongitude >= this.minLongitude && smaller.maxLongitude <= this.maxLongitude) {
+			if (other.maxLongitude >= this.minLongitude && other.maxLongitude <= this.maxLongitude) {
 				return true;
 			}
 		}
+	}
+
+	inside(bigger: Rectangle) {
+		if (bigger.minLatitude > this.minLatitude) {
+			return false;
+		}
+
+		if (bigger.maxLatitude < this.maxLatitude) {
+			return false;
+		}
+
+		if (bigger.minLongitude > this.minLongitude) {
+			return false;
+		}
+
+		if (bigger.maxLongitude < this.maxLongitude) {
+			return false;
+		}
+
+		return true;
 	}
 }
