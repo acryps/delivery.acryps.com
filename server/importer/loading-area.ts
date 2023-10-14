@@ -4,7 +4,7 @@ import { Import } from "../managed/database";
 
 export class LoadingArea {
 	// defines the fixed size of the loading-areas
-	static size: number = 0.002;
+	static size: number = 0.003;
 
 	// the centers of the 8 neighbors of a loading-area
 	neighborCenters: Point[];
