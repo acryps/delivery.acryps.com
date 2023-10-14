@@ -4,7 +4,7 @@ import { Point } from "./point";
 import { Rectangle } from "./rectangle";
 
 export class Map {
-	readonly maximalSearchedBuildingArea = 5e-7;
+	readonly maximalSearchedBuildingArea = 1000;
 
 	boundingBox: Rectangle;
 
@@ -58,7 +58,9 @@ export class Map {
 	}
 
 	planDelivery(usedBuildings: BuildingViewModel[]) {
-		const availableBuildings = this.buildings.filter(building => !usedBuildings.includes(building));
+		const availableBuildings = this.buildings
+			.filter(building => !usedBuildings.includes(building))
+			.filter(building => building.area < this.maximalSearchedBuildingArea);
 
 		const delivery = new Delivery();
 		delivery.source = availableBuildings[Math.floor(Math.random() * availableBuildings.length)];
