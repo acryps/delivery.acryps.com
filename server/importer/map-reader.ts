@@ -25,7 +25,7 @@ export class MapReader {
 
 		if (this.nodes && this.ways) {
 
-			if (await this.saveBuildings() /*&& this.loadStreets() && this.loadWater()*/) {
+			if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
 				console.debug('[import] finished loading data into database');
 
 				this.guessMissingAddresses();
@@ -33,6 +33,7 @@ export class MapReader {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -74,22 +75,22 @@ export class MapReader {
 	}
 
 	async guessMissingAddresses() {
-		console.debug('[import] loading missing addresses');
+		console.debug('[import] loading missing addresses ... ');
 
 		let buildingsToFix: Building[] = await this.database.building.where(building => 
 			building.address == null &&
-			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 2)).valueOf() &&
-			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 2)).valueOf() &&
-			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 2)).valueOf() &&
-			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 2)).valueOf()
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 1.5)).valueOf()
 		).toArray();
 
 		let buildingsDatabase = await this.database.building.where(building => 
 			building.addressReal == true && 
-			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 2)).valueOf() &&
-			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 2)).valueOf() &&
-			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 2)).valueOf() &&
-			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 2)).valueOf()
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 1.5)).valueOf()
 		).toArray();
 
 		for (let buildingToFix of buildingsToFix) {
@@ -97,6 +98,7 @@ export class MapReader {
 			buildingToFix.address = missingAddress;
 			buildingToFix.update();
 		}
+		console.debug('[import] loaded missing addresses');
 	}
 
 	async saveBuildings() {
@@ -128,6 +130,7 @@ export class MapReader {
 				await buildingDB.create();
 			}
 		};	
+		
 		console.debug('[import] already loaded ' + alreadyLoaded + ' buildings before');
 
 		return buildings;
@@ -140,7 +143,7 @@ export class MapReader {
 		for (let water of waters) {
 			let coordinates = [];
 
-			if (water.member) {
+			if (Array.isArray(water.member)) {
 				for (let member of water.member) {
 					const way = this.findMember(member);
 					
@@ -371,7 +374,7 @@ export class MapReader {
 		const nearestBuilding = this.findNearestBuilding(center, buildings);
 
 		if (nearestBuilding) {
-			console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
+			// console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
 
 			return nearestBuilding.address;
 		}
