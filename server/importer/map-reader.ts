@@ -14,7 +14,7 @@ export class MapReader {
 		private loadingArea: LoadingArea
 	) {}
 
-	async loadMap(): Promise<boolean> {
+	async loadMap() {
 		let jsonData = await this.readMapFromXml();
 
 		this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
@@ -54,6 +54,7 @@ export class MapReader {
 			this.loadingArea.getBoundingBox().minLatitude.toFixed(6)+ ',' + 
 			this.loadingArea.getBoundingBox().maxLongitude.toFixed(6) + ',' + 
 			this.loadingArea.getBoundingBox().maxLatitude.toFixed(6);
+			
 			
 		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
 
@@ -195,11 +196,11 @@ export class MapReader {
 		let memberId = member._attributes.ref;
 		let searchedWay;
 
-		this.ways.map(way => {
+		for (let way of this.ways) {
 			if (way._attributes.id == memberId) {
 				searchedWay = way;
 			}
-		});
+		}
 
 		return searchedWay;
 	}
@@ -245,7 +246,7 @@ export class MapReader {
 	}
 
 	getNode(id: string) {
-		let node = this.nodes.filter(element => element._attributes.id === id);
+		const node = this.nodes.filter(element => element._attributes.id === id);
 
 		if (!Array.isArray(node)) {
 			console.error('[import] error while gathering unique node. got no element.');
@@ -294,13 +295,14 @@ export class MapReader {
 		let coordinates: Point[] = [];
 		let nodes = way.nd;
 
-		if (nodes) {
-			if (nodes.length > 1) {
-				nodes.forEach(buildingNode => {
+		if(nodes) {
+			if(nodes.length > 1) {
+				for (let buildingNode of nodes) {
 					let nodeRef = buildingNode._attributes.ref;
 					coordinates.push(this.getPointOfNode(nodeRef));
-				});
-			} else {
+				}
+			}
+			else {
 				let nodeRef = nodes._attributes.ref;
 				coordinates.push(this.getPointOfNode(nodeRef));
 			}

@@ -4,6 +4,16 @@ import { GameComponent } from ".";
 export class DeliveryIndicator extends Component {
 	declare parent: GameComponent;
 
+	private progress: HTMLElement;
+
+	updateDistance(full: number, current: number) {
+		const ratio = Math.min(1 / full * current, 1);
+
+		if (this.progress) {
+			this.progress.style.setProperty('--progress', ratio.toString());
+		}
+	}
+
 	render() {
 		if (this.parent.player?.delivery) {
 			if (this.parent.player.delivery.carrier) {
@@ -15,6 +25,8 @@ export class DeliveryIndicator extends Component {
 					<ui-location>
 						{this.parent.player.delivery.destination.address.trim()}
 					</ui-location>
+
+					{this.progress = <ui-progress></ui-progress>}
 				</ui-delivery>;
 			}
 

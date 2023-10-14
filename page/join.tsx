@@ -6,9 +6,9 @@ export class JoinComponent extends Component {
 	private invalidToken: boolean = false;
 
 	async join() {
-		const gameExists = await fetch(`/game/${this.token}`).then(response => response.json());
+		const joinableGame = await fetch(`/game/${this.token}`).then(response => response.json());
 
-		if (gameExists) {
+		if (joinableGame) {
 			this.navigate(`/play/${this.token}`);
 		} else {
 			this.invalidToken = true;
@@ -21,7 +21,7 @@ export class JoinComponent extends Component {
 		return <ui-join>
 			<input $ui-value={this.token} maxlength={tokenLength} placeholder='Token' ui-error={this.invalidToken} />
 
-			<ui-action ui-join ui-click={() => this.join()}>
+			<ui-action ui-join ui-click-text='Joining...' ui-click={async () => this.token.length && this.join()}>
 				Join
 			</ui-action>
 

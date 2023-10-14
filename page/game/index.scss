@@ -14,7 +14,9 @@ ui-game {
 			width: 100%;
 			height: 100%;
 
-			background: #fff;
+			background: linear-gradient(45deg, #000 calc(50% - 0.5px), #222 calc(50% - 0.5px), #222 calc(50% + 0.5px), #000 calc(50% + 0.5px));
+			background-size: 1rem 1rem;
+			background-repeat: repeat;
 		}
 	}
 
@@ -42,6 +44,16 @@ ui-game {
 			
 			font-size: 1.5rem;
 		}
+
+		ui-progress {
+			position: absolute;
+			left: 0;
+			right: calc(100% - 100% * var(--progress));
+			bottom: 0;
+
+			height: 0.25rem;
+			background: var(--page-color);
+		}
 	}
 
 	ui-lobby {
@@ -58,21 +70,29 @@ ui-game {
 			flex-shrink: 0;
 
 			display: flex;
+			flex-direction: column;
 			align-items: center;
-			justify-content: space-between;
 
 			padding: 1rem;
 
 			background: var(--page-color);
 			color: var(--page-background);
-			font-size: 2rem;
+			font-size: 4rem;
 
 			ui-token {
+				display: block;
+
 				text-transform: uppercase;
+				font-size: 1rem;
+				font-weight: bold;
 			}
 
-			img { 
-				height: 4rem;
+			img {
+				width: 10rem;
+				margin-bottom: 1rem;
+				aspect-ratio: 1;
+
+				image-rendering: pixelated;
 			}
 		}
 
@@ -104,14 +124,45 @@ ui-game {
 					border-radius: 50%;
 					background: var(--color);
 				}
+
+				&[ui-self] {
+					font-weight: bold;
+				}
+
+				> ui-name {
+					flex: 1;
+
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+
+				> ui-host {
+					color: var(--page-color-dimmed);
+				}
 			}
 		}
 
-		ui-action[ui-start] {
-			@include primary-action;
-
+		ui-action {
 			flex-shrink: 0;
-			margin: 1rem;
+			margin-inline: 1rem;
+			margin-top: 1rem;
+
+			&:last-child {
+				margin-bottom: 1rem;
+			}
+
+			&[ui-start] {
+				@include primary-action;
+			}
+
+			&[ui-info] {
+				@include disabled-action;
+			}
+
+			&[ui-leave] {
+				@include action;
+			}
 		}
 	}
 

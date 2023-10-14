@@ -74,8 +74,6 @@ export class MapComponent extends Component {
 	}
 
 	renderFrame(context: CanvasRenderingContext2D) {
-		this.parent.targetTracker.updatePosition();
-
 		const now = new Date();
 		const deltaTime = +now - +this.lastFrame;
 		this.lastFrame = now;
@@ -93,7 +91,7 @@ export class MapComponent extends Component {
 			
 			if (this.parent.player?.delivery) {
 				if (building == this.parent.player.delivery.source) {
-					if (!this.parent.player.delivery.droppedLocation && !this.parent.player.delivery.carrier) {
+					if (!this.parent.player.delivery.carrier) {
 						path = packageSourcePath;
 					}
 				}
@@ -160,6 +158,19 @@ export class MapComponent extends Component {
 			if (carrying) {
 				context.stroke();
 			}
+		}
+
+		// update the direction tracker
+		this.parent.targetTracker.updatePosition();
+
+		// update the distance tracker
+		if (this.parent.player && this.parent.player.delivery?.carrier == this.parent.player) {
+			const start = this.parent.player.delivery.source.center;
+
+			this.parent.deliveryIndicator?.updateDistance(
+				start.distance(this.parent.player.delivery.destination.center),
+				start.distance(this.parent.player.position)
+			);
 		}
 
 		requestAnimationFrame(() => {

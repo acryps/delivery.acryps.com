@@ -1,8 +1,15 @@
 :root {
-	--font-family: sawton;
+	--font-family: tomorrow;
 }
 
 @font-face {
-	font-family: sawton;
-	src: url('./assets/font/index.woff2');
+	font-family: tomorrow;
+	font-weight: regular;
+	src: url('./assets/font/regular.ttf');
+}
+
+@font-face {
+	font-family: tomorrow;
+	font-weight: bold;
+	src: url('./assets/font/bold.ttf');
 }

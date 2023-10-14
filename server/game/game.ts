@@ -4,6 +4,7 @@ import { ServerMessage } from "../../shared/messages";
 import { BuildingViewModel } from "../../shared/building";
 import { tokenLength } from "../../shared/constants";
 import { Rectangle } from "../../shared/rectangle";
+import { Delivery } from "../../shared/delivery";
 
 export class Game {
 	readonly ticksPerSecond = 30;
@@ -12,12 +13,18 @@ export class Game {
 
 	readonly token: string;
 
-	players: PlayerController[] = [];
 	map: Map;
+	
+	players: PlayerController[] = [];
+	deliveries: Delivery[] = [];
 
 	onStop: () => void;
 
 	private gameLoop: NodeJS.Timeout;
+
+	get isRunning() {
+		return !!this.gameLoop;
+	}
 
 	constructor(map: Map) {
 		this.players = [];
@@ -30,7 +37,7 @@ export class Game {
 	join(player: PlayerController) {
 		if (this.gameLoop) {
 			console.warn(`user ${player.name} tried to join running game ${this.token}`);
-			return;
+			throw new Error();
 		}
 
 		this.players.push(player);
@@ -49,10 +56,13 @@ export class Game {
 			leave: player
 		});
 
-		console.log(`player '${player.name}' left game '${this.token}'`);
+		const playerLeaveMessage = `player '${player.name}' left game '${this.token}'`;
 
 		if (!this.players.length) {
+			console.log(playerLeaveMessage);
 			this.stop();
+		} else {
+			console.log(`${playerLeaveMessage}, '${this.players[0].name} is now host'`);
 		}
 	}
 
@@ -148,21 +158,20 @@ export class Game {
 		player.assigned = delivery;
 		delivery.assignee = player;
 
-		let offsetDirection = Math.random() * Math.PI * 2;
+		// walk away from the building in random directions until we are not in a building anymore
+		const minimalDistance = PlayerController.pickupOffsetDistance + Math.max(delivery.source.boundingBox.latitudeLength, delivery.source.boundingBox.longitudeLength);
+		let distance = minimalDistance;
 
-		// move away form the pickup location
-		player.position = player.assigned.source.entrance.walk(offsetDirection, PlayerController.pickupOffsetRadius);
+		do {
+			player.position = delivery.source.center.walk(Math.random() * Math.PI * 2, distance);
 
-		// walk away in the same direction until we are not intersecting any houses anymore
-		let collider;
+			distance += PlayerController.pickupWalkingDistance;
 
-		while (collider = this.map.collides(player.position)) {
-			player.position = player.position.walk(offsetDirection, player.speed);
-
-			if (collider == this.map.boundingBox) {
-				offsetDirection -= Math.PI;
+			// to make sure that the distance never overflows
+			if (distance > this.map.radius) {
+				distance = minimalDistance;
 			}
-		}
+		} while (this.map.collides(player.position));
 
 		this.broadcast({
 			assigned: delivery.toJSON()

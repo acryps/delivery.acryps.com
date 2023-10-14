@@ -9,5 +9,5 @@ RUN cd page ; npm install ; cd ..
 # build application
 RUN npm run build
 
-WORKDIR /usr/src/app/server
+WORKDIR server
 CMD [ "node", "built/server/index.js" ]
