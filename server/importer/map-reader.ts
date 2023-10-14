@@ -370,9 +370,11 @@ export class MapReader {
 	async getMissingAddress(center: Point, buildings: Building[]) {
 		const nearestBuilding = this.findNearestBuilding(center, buildings);
 
-		console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
+		if (nearestBuilding) {
+			console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
 
-		return nearestBuilding.address;
+			return nearestBuilding.address;
+		}
 	}
 
 	findNearestBuilding(center: Point, points: Building[]): Building {
