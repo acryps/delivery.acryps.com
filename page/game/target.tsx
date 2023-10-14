@@ -20,8 +20,6 @@ export class TargetTracker extends Component {
 	}
 
 	updatePosition() {
-		this.rootNode.style.setProperty('--player-color', this.parent.player?.color);
-
 		if (this.target) {
 			this.rootNode.setAttribute('ui-tracking', '');
 

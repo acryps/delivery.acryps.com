@@ -11,6 +11,7 @@ import { Map } from "../../shared/map";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
+	declare rootNode: HTMLElement;
 
 	id: string;
 	players: Player[] = [];
@@ -69,6 +70,7 @@ export class GameComponent extends Component {
 				if ('join' in data) {
 					this.players.push(Player.from(data.join));
 
+					this.rootNode.style.setProperty('--player-color', this.player.color);
 					this.lobby.update();
 				}
 
