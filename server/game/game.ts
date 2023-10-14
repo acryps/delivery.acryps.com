@@ -144,7 +144,10 @@ export class Game {
 	}
 
 	private assignPackage(player: PlayerController) {
-		player.pickedUp = null;
+		if (player.pickedUp) {
+			player.score += player.pickedUp.worth;
+			player.pickedUp = null;
+		}
 
 		const usedBuildings: BuildingViewModel[] = []; 
 

@@ -3,11 +3,20 @@ import { Point } from "../../shared/point";
 
 
 export class Player {
+
 	id: string;
 	name: string;
 
 	position: Point;
 	delivery: Delivery;
+
+	score: number = 0;
+
+	get color() {
+		const maxTokenValue = 2176782336; // token is base 36 and 6 characters long
+
+		return `hsl(${360 / maxTokenValue * parseInt(this.id, 36)}, 100%, 70%)`;
+	}
 
 	static from(serialized) {
 		const player = new Player();
@@ -22,9 +31,7 @@ export class Player {
 		this.position = new Point(position.latitude, position.longitude);
 	}
 
-	get color() {
-		const maxTokenValue = 2176782336; // token is base 36 and 6 characters long
-
-		return `hsl(${360 / maxTokenValue * parseInt(this.id, 36)}, 100%, 70%)`;
+	updateScore() {
+		this.score += this.delivery.worth;
 	}
 }

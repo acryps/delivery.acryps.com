@@ -8,6 +8,7 @@ import { Point } from "../../shared/point";
 import { TargetTracker } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
+import { StatsComponent } from "./stats";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -20,6 +21,7 @@ export class GameComponent extends Component {
 	lobby = new LobbyComponent();
 
 	deliveryIndicator = new DeliveryIndicator();
+	stats = new StatsComponent();
 
 	targetTracker = new TargetTracker();
 
@@ -38,6 +40,12 @@ export class GameComponent extends Component {
 
 	get isHost() {
 		return this.players.findIndex(player => player.id == this.id) == 0;
+	}
+
+	get hasHighscore() {
+		const highestScore = this.players.sort((a, b) => a.score - b.score)[0]?.score;
+
+		return this.player.score == highestScore;
 	}
 
 	onrouteleave() {
@@ -87,9 +95,15 @@ export class GameComponent extends Component {
 
 				if ('assigned' in data) {
 					const player = this.players.find(player => player.id == data.assigned.assignee);
+
+					if (this.player.delivery) {
+						this.player.updateScore();
+					}
+
 					player.delivery = Delivery.from(data.assigned, this.players, this.map);
 
 					this.deliveryIndicator.update();
+					this.stats.update();
 				}
 
 				if ('pickedUp' in data) {
@@ -97,6 +111,7 @@ export class GameComponent extends Component {
 					delivery.carrier = delivery.assignee;
 
 					this.deliveryIndicator.update();
+					this.stats.update();
 				}
 
 				if ('move' in data) {
@@ -113,6 +128,7 @@ export class GameComponent extends Component {
 
 					thief.delivery = victim.delivery;
 					this.deliveryIndicator.update();
+					this.stats.update();
 				}
 			};
 		};
@@ -122,10 +138,13 @@ export class GameComponent extends Component {
 		this.mapRenderer = new MapComponent();
 
 		return <ui-game>
+			<ui-overview>
+				{this.deliveryIndicator}
+				{this.stats}
+			</ui-overview>
+
 			{this.mapRenderer}
 			{this.targetTracker}
-
-			{this.deliveryIndicator}
 
 			{this.lobby}
 		</ui-game>;
