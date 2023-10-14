@@ -6,6 +6,14 @@ ui-game {
 	-webkit-touch-callout: none;
 
 	ui-map {
+		--building-stroke-size: 2;
+		--building-stroke-color: #fff;
+		--building-fill-color: #444;
+
+		--map-stroke-size: 1;
+		--map-stroke-color: #222;
+		--map-fill-color: #000;
+
 		display: block;
 		width: 100%;
 		height: 100%;
@@ -14,7 +22,14 @@ ui-game {
 			width: 100%;
 			height: 100%;
 
-			background: linear-gradient(45deg, #000 calc(50% - 0.5px), #222 calc(50% - 0.5px), #222 calc(50% + 0.5px), #000 calc(50% + 0.5px));
+			// pattern background
+			background: linear-gradient(45deg, 
+				#000 calc(50% - (var(--map-stroke-size) * 1px / 2)), 
+				var(--map-stroke-color) calc(50% - (var(--map-stroke-size) * 1px / 2)), 
+				var(--map-stroke-color) calc(50% + (var(--map-stroke-size) * 1px / 2)), 
+				#000 calc(50% + (var(--map-stroke-size) * 1px / 2))
+			);
+
 			background-size: 1rem 1rem;
 			background-repeat: repeat;
 		}
