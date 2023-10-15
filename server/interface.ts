@@ -7,6 +7,7 @@ import { BuildingViewModel } from "../shared/building";
 import { Map } from "../shared/map";
 import { Rectangle } from "../shared/rectangle";
 import { AreaLoader } from "./importer/area-loader";
+import { Railway } from "../shared/railway";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
@@ -30,13 +31,26 @@ export function registerInterface(app, database: DbContext) {
 			.where(building => building.centerLongitude.valueOf() < doubleBoundingBox.maxLongitude)
 			.toArray();
 
-		console.log(`loaded ${buildings.length} buildings for ${center} + ${radius}`);
+		const railways = await database.railway
+			.where(railway => railway.minLatitude.valueOf() > doubleBoundingBox.minLatitude)
+			.where(railway => railway.maxLatitude.valueOf() < doubleBoundingBox.maxLatitude)
+			.where(railway => railway.minLongitude.valueOf() > doubleBoundingBox.minLongitude)
+			.where(railway => railway.maxLongitude.valueOf() < doubleBoundingBox.maxLongitude)
+			.toArray();
 
-		const map = new Map(center, radius, buildings.map(building => new BuildingViewModel(
-			building.id,
-			building.address,
-			building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
-		)));
+		const map = new Map(
+			center, 
+			radius, 
+			buildings.map(building => new BuildingViewModel(
+				building.id,
+				building.address,
+				building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
+			)),
+			railways.map(railway => new Railway(
+				railway.path.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1])),
+				railway.gauge
+			))
+		);
 
 		const game = new Game(map);
 		games.push(game);
