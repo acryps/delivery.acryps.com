@@ -1,6 +1,7 @@
 import { BuildingViewModel } from "./building";
 import { Delivery } from "./delivery";
 import { Point } from "./point";
+import { Railway } from "./railway";
 import { Rectangle } from "./rectangle";
 
 export class Map {
@@ -11,7 +12,8 @@ export class Map {
 	constructor (
 		public center: Point,
 		public radius: number,
-		public buildings: BuildingViewModel[]
+		public buildings: BuildingViewModel[],
+		public railways: Railway[]
 	) {
 		this.boundingBox = Rectangle.fromCenterRadius(center, radius);
 	}
@@ -20,7 +22,8 @@ export class Map {
 		return new Map(
 			Point.from(serialized.center),
 			serialized.radius,
-			serialized.buildings.map(building => BuildingViewModel.from(building))
+			serialized.buildings.map(building => BuildingViewModel.from(building)),
+			serialized.railways.map(railway => Railway.from(railway))
 		);
 	}
 

@@ -3,6 +3,7 @@ import { Building, DbContext, Import, WaterBody } from '../managed/database';
 import { LoadingArea } from './loading-area';
 import { Point } from '../../shared/point';
 import { Rectangle } from '../../shared/rectangle';
+import { RailwayImporter } from './railways';
 
 export class MapReader {
 	nodes;
@@ -24,6 +25,7 @@ export class MapReader {
 		console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
 
 		if (this.nodes && this.ways) {
+			await new RailwayImporter(this.database, this.nodes).import(this.findByTag('railway'));
 
 			if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
 				console.debug('[import] finished loading data into database');
@@ -63,7 +65,7 @@ export class MapReader {
 			'latitude = [' + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + '], ' + 
 			'longitude = [' + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +'], '+
 			'loading from: ' + mapURL
-			);
+		);
 		
 		try {
 			var map = await fetch(mapURL).then(response => response.text())
