@@ -48,7 +48,11 @@ ui-game {
 		inset-inline: 0;
 		top: 0;
 
-		display: block;
+		display: flex;
+		flex-wrap: wrap;
+
+		border-bottom: 1px solid var(--page-color);
+		background: var(--page-background);
 
 		ui-delivery {
 			display: flex;
@@ -57,8 +61,7 @@ ui-game {
 			height: calc(var(--delivery-indicator-height) - 2rem);
 			padding: 1rem;
 
-			border-bottom: 1px solid var(--page-color);
-			background: var(--page-background);
+			flex: 1;
 
 			ui-prompt {
 				display: block;
@@ -68,7 +71,7 @@ ui-game {
 			ui-location {
 				display: block;
 				
-				font-size: 1.5rem;
+				font-size: 1.2rem;
 			}
 
 			ui-progress {
@@ -82,10 +85,43 @@ ui-game {
 			}
 		}
 
+		ui-stats {
+			display: flex;
+			width: 8rem;
+			padding: 1rem;
+			
+			flex-direction: column;
+			row-gap: 0.5rem;
+
+			text-align: end;
+
+			ui-score {
+				position: relative;
+				flex: 1;
+
+				ui-current {
+					color: var(--player-color);
+					font-size: 4rem;
+				}
+
+				ui-delivery-worth {
+					position: absolute;
+					right: 0;
+					bottom: 5%;
+
+					border-radius: 50%;
+					background: rgba(0,0,0,0.5);
+				}
+			}
+		}
+
 		ui-status {
 			&:not(:empty) {
+				--inline-padding: 1rem;
+
 				display: block;
-				padding: 0.5rem 1rem;
+				width: calc(100% - 2 * var(--inline-padding));
+				padding: 0.5rem var(--inline-padding);
 
 				color: var(--page-background);
 				background: var(--page-color);

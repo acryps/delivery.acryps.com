@@ -44,10 +44,8 @@ export class GameComponent extends Component {
 		return this.players.findIndex(player => player.id == this.id) == 0;
 	}
 
-	get hasHighscore() {
-		const highestScore = this.players.sort((a, b) => a.score - b.score)[0]?.score;
-
-		return this.player.score == highestScore;
+	get highscore() {
+		return this.players.sort((a, b) => a.score - b.score)[0]?.score;
 	}
 
 	onrouteleave() {
@@ -144,18 +142,15 @@ export class GameComponent extends Component {
 		this.mapRenderer = new MapComponent();
 
 		return <ui-game>
-			<ui-overview>
-				{this.deliveryIndicator}
-				{this.stats}
-			</ui-overview>
-
 			{this.mapRenderer}
 			{this.targetTracker}
 
-			<ui-header>
+			<ui-overview>
 				{this.deliveryIndicator}
+				{this.stats}
+
 				{this.status}
-			</ui-header>
+			</ui-overview>
 
 			{this.lobby}
 		</ui-game>;

@@ -212,6 +212,12 @@ export class MapComponent extends Component {
 			if (carrying) {
 				context.stroke();
 			}
+
+			if (player.score == this.parent.highscore) {
+				const path = new Path2D('M14.727 10L16 4 15 3 11.692 4.692 8.75 1 7.25 1 4.308 4.692 1 3 0 4 1.273 10zM1.636 12L2 14 14 14 14.364 12z');
+
+				context.fill(path);
+			}
 		}
 
 		// update the direction tracker
