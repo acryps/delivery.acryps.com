@@ -6,8 +6,8 @@ export class CreateGameComponent extends Component {
 		longitude
 	}
 
-	radii = [500, 1000, 2000];
-	radius = this.radii[1];
+	radii = [100, 250, 500, 1000, 2500];
+	radius = this.radii[2];
 
 	render() {
 		return <ui-create-game>
@@ -33,7 +33,7 @@ export class CreateGameComponent extends Component {
 				</ui-radius>)}
 			</ui-radii>
 
-			<ui-action ui-create ui-click-text='Creating ...' ui-click={async () => {
+			<ui-action ui-create ui-click-text='Preparing Game...' ui-click={async () => {
 				const token = await fetch('/game', {
 					method: 'post',
 					headers: {

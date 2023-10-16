@@ -9,6 +9,7 @@ import { TargetTracker } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
 import { StatsComponent } from "./stats";
+import { StatusComponent } from "./status";
 
 export class GameComponent extends Component {
 	declare parameters: { token };
@@ -24,6 +25,7 @@ export class GameComponent extends Component {
 	stats = new StatsComponent();
 
 	targetTracker = new TargetTracker();
+	status = new StatusComponent();
 
 	map: Map;
 
@@ -112,13 +114,15 @@ export class GameComponent extends Component {
 
 					this.deliveryIndicator.update();
 					this.stats.update();
+
+					this.status.show(delivery.carrier, ' picked up a package');
 				}
 
 				if ('move' in data) {
 					for (let update of data.move) {
 						const player = this.players.find(player => player.id == update.id);
 
-						player.position = update.position;
+						player.position = Point.from(update.position);
 					}
 				}
 
@@ -129,6 +133,8 @@ export class GameComponent extends Component {
 					thief.delivery = victim.delivery;
 					this.deliveryIndicator.update();
 					this.stats.update();
+
+					this.status.show(thief, ' stole ', victim, '`s package');
 				}
 			};
 		};
@@ -145,6 +151,11 @@ export class GameComponent extends Component {
 
 			{this.mapRenderer}
 			{this.targetTracker}
+
+			<ui-header>
+				{this.deliveryIndicator}
+				{this.status}
+			</ui-header>
 
 			{this.lobby}
 		</ui-game>;

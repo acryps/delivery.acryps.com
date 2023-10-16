@@ -8,14 +8,14 @@ export class MapComponent extends Component {
 	declare parent: GameComponent;
 
 	static readonly playerSize = 20;
-	static readonly notchSize = 4;
 
 	playerViewLocation = { x: 0.5, y: 0.9 };
 
+	realMapHeight = 150; // meters
+
 	width: number;
 	height: number;
-
-	scale = { x: 500000, y: 350000 };
+	scale: number;
 	
 	renderedRotation = 0;
 
@@ -23,6 +23,7 @@ export class MapComponent extends Component {
 
 	buildingStyle: RenderStyle;
 	mapStyle: RenderStyle;
+	notchStyle: RenderStyle;
 
 	get position() {
 		return this.parent.player?.position ?? this.parent.center;
@@ -35,12 +36,15 @@ export class MapComponent extends Component {
 			this.width = mapCanvas.width = mapCanvas.clientWidth;
 			this.height = mapCanvas.height = mapCanvas.clientHeight;
 
+			this.scale = this.height / this.realMapHeight;
+
 			let startTouch;
 
 			const style = getComputedStyle(mapCanvas);
 
 			this.buildingStyle = new RenderStyle('building', style);
 			this.mapStyle = new RenderStyle('map', style);
+			this.notchStyle = new RenderStyle('notch', style);
 			
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
@@ -144,14 +148,14 @@ export class MapComponent extends Component {
 		context.fill(packageSourcePath);
 
 		// render player
-		context.lineWidth = MapComponent.notchSize;
+		this.notchStyle.apply(context);
 
 		for (let player of this.parent.players) {
 			const carrying = player.delivery && player.delivery.carrier == player;
 			let size = MapComponent.playerSize / 2;
 
 			if (carrying) {
-				size += MapComponent.notchSize / 2;
+				size += this.notchStyle.stroke.size / 2;
 			}
 
 			context.fillStyle = player.color;
@@ -196,17 +200,12 @@ export class MapComponent extends Component {
 	}
 
 	transform(point: Point): [number, number] {
-		let x = point.latitude;
-		let y = point.longitude;
+		const angle = this.position.bearing(point);
+		const distance = this.position.distance(point);
 
-		// move everything to the current maps location
-		x -= this.position.latitude;
-		y -= this.position.longitude;
-
-		// scale to viewport
-		x *= this.scale.x;
-		y *= this.scale.y;
-
-		return [x, y];
+		return [
+			Math.cos(angle) * distance * this.scale,
+			Math.sin(angle) * distance * this.scale,
+		];
 	}
 }

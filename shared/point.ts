@@ -32,20 +32,18 @@ export class Point {
 	}
 
 	distance(point: Point) {
-		// convert latitude and longitude from degrees to radians
-		const lat1Rad = (this.latitude * Math.PI) / 180;
-		const lon1Rad = (this.longitude * Math.PI) / 180;
-		const lat2Rad = (point.latitude * Math.PI) / 180;
-		const lon2Rad = (point.longitude * Math.PI) / 180;
+		const currentLatitude = (this.latitude * Math.PI) / 180;
+		const currentLongitude = (this.longitude * Math.PI) / 180;
+		const nextLatitude = (point.latitude * Math.PI) / 180;
+		const nextLongitude = (point.longitude * Math.PI) / 180;
 		
-		// Haversine formula
-		const dLat = lat2Rad - lat1Rad;
-		const dLon = lon2Rad - lon1Rad;
+		// haversine formula
+		const latitudeDelta = nextLatitude - currentLatitude;
+		const longitudeDelta = nextLongitude - currentLongitude;
 		
-		const offset = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+		const offset = Math.sin(latitudeDelta / 2) * Math.sin(latitudeDelta / 2) + Math.cos(currentLatitude) * Math.cos(nextLatitude) * Math.sin(longitudeDelta / 2) * Math.sin(longitudeDelta / 2);
 		const centralAngle = 2 * Math.atan2(Math.sqrt(offset), Math.sqrt(1 - offset));
 		
-		// Calculate the distance
 		const distance = Point.earthRadius * centralAngle;
 		
 		return distance;
@@ -53,6 +51,18 @@ export class Point {
 
 	clone() {
 		return new Point(this.latitude, this.longitude);
+	}
+
+	bearing(point: Point) {
+		const currentLatitude = (this.latitude * Math.PI) / 180;
+		const currentLongitude = (this.longitude * Math.PI) / 180;
+		const nextLatitude = (point.latitude * Math.PI) / 180;
+		const nextLongitude = (point.longitude * Math.PI) / 180;
+
+		const y = Math.sin(nextLongitude - currentLongitude) * Math.cos(nextLatitude);
+		const x = Math.cos(currentLatitude) * Math.sin(nextLatitude) - Math.sin(currentLatitude) * Math.cos(nextLatitude) * Math.cos(nextLongitude - currentLongitude);
+
+		return (Math.atan2(y, x) + (Math.PI * 2)) % (Math.PI * 2);
 	}
 
 	toString() {
