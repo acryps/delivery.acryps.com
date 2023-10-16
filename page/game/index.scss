@@ -3,13 +3,17 @@ ui-game {
 	--building-stroke-color: #fff;
 	--building-fill-color: #fff4;
 
+	--railway-gravel-stroke-color: #111;
+
+	--railway-rail-stroke-size: 1;
+	--railway-rail-stroke-color: #888;
+
 	--map-stroke-size: 2;
 	--map-stroke-color: #222;
 	--map-fill-color: #000;
 
 	--notch-stroke-size: 4;
 	--notch-stroke-color: #ccc;
-	--notch-fill-color: none;
 
 	position: fixed;
 	inset: 0;
