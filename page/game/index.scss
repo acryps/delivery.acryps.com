@@ -248,14 +248,16 @@ ui-game {
 	}
 
 	ui-tracker {
+		--tracker-size: calc(var(--player-size) + 0.3rem);
+
 		position: fixed;
-		top: calc(100% * var(--offset-y) - var(--player-size) / 2 - var(--notch-stroke-size) * 1px);
-		left: calc(100% * var(--offset-x) - var(--player-size) / 2 - var(--notch-stroke-size) * 1px);
+		top: calc(100% * var(--offset-y) - var(--tracker-size) / 2 - var(--notch-stroke-size) * 1px);
+		left: calc(100% * var(--offset-x) - var(--tracker-size) / 2 - var(--notch-stroke-size) * 1px);
 
-		width: 0;
-		height: 0;
+		width: var(--tracker-size);
+		height: var(--tracker-size);
 
-		border: calc(var(--player-size) / 2 + var(--notch-stroke-size) * 1px) solid transparent;
+		border: calc(var(--notch-stroke-size) * 1px) solid transparent;
 		border-right-color: var(--player-color);
 		border-radius: 50%;
 
