@@ -8,13 +8,18 @@ import { Map } from "../shared/map";
 import { Rectangle } from "../shared/rectangle";
 import { AreaLoader } from "./importer/area-loader";
 import { Railway } from "../shared/railway";
+import { gameConfiguration } from "../shared/constants";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
 
 	app.post('/game', async (request, response) => {
 		const center = new Point(request.body.center.latitude, request.body.center.longitude);
-		const radius = request.body.radius;
+		let radius = request.body.radius;
+
+		if (!(radius in gameConfiguration.radii)) {
+			radius = gameConfiguration.radii[gameConfiguration.defaultRadiusIndex];
+		}
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
 		let areaLoader = new AreaLoader(database);
