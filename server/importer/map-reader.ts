@@ -1,5 +1,5 @@
 import * as convert from 'xml-js';
-import { Building, DbContext, Import, WaterBody } from '../managed/database';
+import { Building, DbContext, Import, Tree, WaterBody } from '../managed/database';
 import { LoadingArea } from './loading-area';
 import { Point } from '../../shared/point';
 import { Rectangle } from '../../shared/rectangle';
@@ -27,7 +27,7 @@ export class MapReader {
 		if (this.nodes && this.ways) {
 			await new RailwayImporter(this.database, this.nodes).import(this.findByTag('railway'));
 
-			if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
+			if (await this.saveBuildings() && this.loadWater() && this.loadTrees() /*&& this.loadStreets()*/) {
 				console.debug('[import] finished loading data into database');
 
 				this.guessMissingAddresses();
@@ -136,6 +136,34 @@ export class MapReader {
 		console.debug('[import] already loaded ' + alreadyLoaded + ' buildings before');
 
 		return buildings;
+	}
+
+	async loadTrees() {
+		console.debug('[import] starting to load trees');
+
+		let trees = this.getNodesByAttribute('tree');
+		
+		console.debug('[import] loading ' + trees.length + ' trees');
+
+		let alreadyLoaded = 0;
+
+		for (let tree of trees) {
+			let openStreetMapId = tree._attributes.id;
+
+			if (await this.isTreeLoaded(openStreetMapId)) {
+				alreadyLoaded++;
+			} else {
+				let treeDB = new Tree();
+				treeDB.location = this.getPointOfNode(tree._attributes.id).toString();
+				treeDB.importerId = openStreetMapId;
+
+				await treeDB.create();
+			}
+		}
+
+		console.debug('[import] already loaded ' + alreadyLoaded + ' trees before');
+
+		return trees;
 	}
 
 	async loadWater() {
@@ -262,6 +290,28 @@ export class MapReader {
 		}
 
 		return node;
+	}
+
+	getNodesByAttribute(attribute: string) {
+		const filtered = [];
+		
+		for (let item of this.nodes) {
+			if (item.tag) {
+				if (Array.isArray(item.tag)) {
+					for (let tag of item.tag) {
+						if (tag._attributes.v == attribute) {
+							filtered.push(item);
+						}
+					}
+				} else {
+					if (item.tag._attributes.v == attribute) {
+						filtered.push(item);
+					}
+				}
+			}
+		}
+
+		return filtered;
 	}
 
 	/**
@@ -410,6 +460,11 @@ export class MapReader {
 	async isBuildingLoaded(openStreetMapId) {
 		const building = await this.database.building.first(building => building.importerId == openStreetMapId);
 		return building;
+	}
+
+	async isTreeLoaded(openStreetMapId) {
+		const tree = await this.database.tree.first(tree => tree.importerId == openStreetMapId);
+		return tree;
 	}
 
 	calculateCenter(points: Point[]) {
