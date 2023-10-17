@@ -1,7 +1,7 @@
-import { Point } from "../../shared/point";
-import { DbContext, Import } from "../managed/database";
-import { LoadingArea } from "./loading-area";
-import { MapReader } from "./map-reader";
+import { Point } from '../../shared/point';
+import { DbContext, Import } from '../managed/database';
+import { LoadingArea } from './loading-area';
+import { MapReader } from './map-reader';
 
 export class AreaLoader {
 
@@ -15,32 +15,32 @@ export class AreaLoader {
 	 */
 	async loadArea(startLocation: Point) {
 
-		let loadingAreasAroundStart: LoadingArea[] = await this.getSurroundingLoadingAreas(startLocation);
+		const loadingAreasAroundStart: LoadingArea[] = await this.getSurroundingLoadingAreas(startLocation);
 
 		let startArea: LoadingArea;
 
-		loadingAreasAroundStart.forEach(loadingArea => {
+		for (let loadingArea of loadingAreasAroundStart) {
 			if (loadingArea.getBoundingBox().contains(startLocation)) {
 				startArea = loadingArea;
 			}
-		});
+		}
 
 		if (startArea === null || startArea === undefined) {
-			console.debug("[import] need to load start-area");
+			console.debug('[import] need to load start-area');
 
 			startArea = LoadingArea.defineNewArea(startLocation);
-			let startAreaLoader = new MapReader(this.database, startArea);
+			const startAreaLoader = new MapReader(this.database, startArea);
 
 			if (await startAreaLoader.loadMap()) {
 				await this.database.import.create(startArea.toImport());
 			} else {
-				console.warn("[import] could not correctly load map");
+				console.warn('[import] could not correctly load map');
 			}
 		}
 
-		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
+		const areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
 
-		console.debug("[import] need to load "+ areasToLoad.length + " areas around start-area");
+		console.debug('[import] need to load ' + areasToLoad.length + ' areas around start-area');
 
 		for (let areaToLoad of areasToLoad) {
 			let areaLoader = new MapReader(this.database, areaToLoad);
@@ -62,9 +62,8 @@ export class AreaLoader {
 	 */
 	private async getSurroundingLoadingAreas(location: Point): Promise<LoadingArea[]> {
 		const range = LoadingArea.size * 10;
-
-		let sideLength = range/2;
-		let importsSurroundingLocation: Import[] = await this.database.import.where(importObject => 
+		const sideLength = range/2;
+		const importsSurroundingLocation: Import[] = await this.database.import.where(importObject => 
 			importObject.centerLatitude.valueOf() < (location.latitude + sideLength).valueOf() && 
 			importObject.centerLatitude.valueOf() > (location.latitude - sideLength).valueOf() && 
 			importObject.centerLongitude.valueOf() < (location.longitude + sideLength).valueOf() &&
