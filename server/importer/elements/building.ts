@@ -17,11 +17,11 @@ export class BuildingImporter {
 	}
 
 	async saveBuildings() {
-		console.debug('[import] starting to load buildings');
+		console.log('[import building] starting to load buildings');
 
 		const buildings = this.map.findByTag('building');
 		
-		console.debug('[import] loading ' + buildings.length + ' buildings');
+		console.log('[import building] loading ' + buildings.length + ' buildings');
 
 		let alreadyLoaded = 0;
 
@@ -46,7 +46,7 @@ export class BuildingImporter {
 			}
 		};	
 		
-		console.debug('[import] already loaded ' + alreadyLoaded + ' buildings before');
+		console.log('[import building] already loaded ' + alreadyLoaded + ' buildings before');
 	}
 
 	/**
@@ -71,8 +71,6 @@ export class BuildingImporter {
 	}
 
 	private async guessMissingAddresses() {
-		console.debug('[import] loading missing addresses ... ');
-
 		let buildingsToFix: Building[] = await this.database.building.where(building => 
 			building.address == null &&
 			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 1.5)).valueOf() &&
@@ -94,7 +92,6 @@ export class BuildingImporter {
 			buildingToFix.address = missingAddress;
 			buildingToFix.update();
 		}
-		console.debug('[import] loaded missing addresses');
 	}
 
 	private async isBuildingLoaded(openStreetMapId) {
