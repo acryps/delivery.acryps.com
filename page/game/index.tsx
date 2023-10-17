@@ -5,7 +5,7 @@ import { DeliveryIndicator } from "./delivery";
 import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { Point } from "../../shared/point";
-import { TargetTracker } from "./target";
+import { TargetTrackerComponent } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
 import { StatsComponent } from "./stats";
@@ -24,7 +24,7 @@ export class GameComponent extends Component {
 	deliveryIndicator = new DeliveryIndicator();
 	stats = new StatsComponent();
 
-	targetTracker = new TargetTracker();
+	targetTracker = new TargetTrackerComponent();
 	status = new StatusComponent();
 
 	map: Map;

@@ -1,9 +1,8 @@
 import { Component } from "@acryps/page";
 import { GameComponent } from ".";
-import { Point } from "../../shared/point";
 import { MapComponent } from "./map";
 
-export class TargetTracker extends Component {
+export class TargetTrackerComponent extends Component {
 	declare parent: GameComponent;
 	declare rootNode: HTMLElement;
 
