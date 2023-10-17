@@ -28,6 +28,7 @@ export class GameComponent extends Component {
 	status = new StatusComponent();
 
 	map: Map;
+	durationMinutes: number;
 
 	center: Point;
 	radius: number;
@@ -54,6 +55,7 @@ export class GameComponent extends Component {
 
 	async onload() {
 		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
+		this.durationMinutes = await fetch(`/duration/${this.parameters.token}`).then(response => response.json());
 
 		if (!map) {
 			this.navigate('/');
@@ -91,6 +93,7 @@ export class GameComponent extends Component {
 
 				if ('start' in data) {
 					this.lobby.remove();
+					this.stats.startCountdown(this.durationMinutes);
 				}
 
 				if ('assigned' in data) {
