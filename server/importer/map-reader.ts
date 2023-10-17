@@ -17,22 +17,31 @@ export class MapReader {
 	async loadMap() {
 		const jsonData = await this.readMapFromXml();
 
-		this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
-		this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
-		this.relations = Array.isArray(jsonData.osm.relation) ? jsonData.osm.relation : [jsonData.osm.relation];
-
+		try {
+			this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
+			this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
+			this.relations = Array.isArray(jsonData.osm.relation) ? jsonData.osm.relation : [jsonData.osm.relation];
+		} catch (error) {
+			console.error('[import] could not load data: ' + error);
+			return false;
+		}
+		
 		console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
 
-		if (this.nodes && this.ways) {
-			if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
-				console.debug('[import] finished loading data into database');
-
-				this.guessMissingAddresses();
-
-				return true;
+		try {
+			if (this.nodes && this.ways) {
+				if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
+					console.debug('[import] finished loading data into database');
+	
+					this.guessMissingAddresses();
+	
+					return true;
+				}
 			}
+		} catch (error) {
+			console.error('[import] could not save data to database: ' + error);
 		}
-
+		
 		return false;
 	}
 
