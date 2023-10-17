@@ -15,7 +15,7 @@ export class MapReader {
 	) {}
 
 	async loadMap() {
-		let jsonData = await this.readMapFromXml();
+		const jsonData = await this.readMapFromXml();
 
 		this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
 		this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
@@ -24,7 +24,6 @@ export class MapReader {
 		console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
 
 		if (this.nodes && this.ways) {
-
 			if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
 				console.debug('[import] finished loading data into database');
 
@@ -56,14 +55,13 @@ export class MapReader {
 			this.loadingArea.getBoundingBox().maxLongitude.toFixed(6) + ',' + 
 			this.loadingArea.getBoundingBox().maxLatitude.toFixed(6);
 			
-			
 		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
 
-		console.debug('[import] '+
+		console.debug(
+			'[import] ' +
 			'latitude = [' + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + '], ' + 
 			'longitude = [' + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +'], '+
-			'loading from: ' + mapURL
-			);
+			'loading from: ' + mapURL);
 		
 		try {
 			var map = await fetch(mapURL).then(response => response.text())
@@ -104,7 +102,7 @@ export class MapReader {
 	async saveBuildings() {
 		console.debug('[import] starting to load buildings');
 
-		let buildings = this.findByTag('building');
+		const buildings = this.findByTag('building');
 		
 		console.debug('[import] loading ' + buildings.length + ' buildings');
 
@@ -141,7 +139,7 @@ export class MapReader {
 		let watersDB: WaterBody[] = [];
 
 		for (let water of waters) {
-			let coordinates = [];
+			let coordinates: Point[] = [];
 
 			if (Array.isArray(water.member)) {
 				for (let member of water.member) {
@@ -155,8 +153,8 @@ export class MapReader {
 				coordinates = this.getPoint(water);
 			}
 
-			let center = this.calculateCenter(coordinates);
-			let polygonString = this.constructPolygonFromPoint(coordinates);
+			const center = this.calculateCenter(coordinates);
+			const polygonString = this.constructPolygonFromPoint(coordinates);
 
 			let waterDB = new WaterBody();
 			waterDB.centerLatitude = center.latitude;
@@ -173,7 +171,6 @@ export class MapReader {
 			}
 
 			watersDB.push(waterDB);
-
 			await waterDB.create();
 		}
 
@@ -181,16 +178,15 @@ export class MapReader {
 	}
 
 	getStreets() {
-		let highways = this.findByTag('highway');
+		const highways = this.findByTag('highway');
 
-		highways.forEach(highway => {
+		for(let highway of highways) {
 			let coordinates: Point[] = this.getPoint(highway);
 
-			coordinates.forEach(coord => {
-
-			});
-
-		});
+			for (let coordinate of coordinates) {
+				// todo:
+			}
+		}
 
 		return highways;
 	}
@@ -232,9 +228,9 @@ export class MapReader {
 
 		if (buildingNodes) {
 			if (buildingNodes.length > 1) {
-				buildingNodes.forEach(buildingNode => {
+				for (let buildingNode of buildingNodes) {
 					buildingCoordinateString.push(this.getPointOfNode(buildingNode._attributes.ref).toString());
-				});
+				}
 			} else {
 				buildingCoordinateString.push(this.getPointOfNode(buildingNodes._attributes.ref).toString());
 			}
@@ -366,7 +362,8 @@ export class MapReader {
 			} else if(street && houseNumber) {
 				return `${street} ${houseNumber}`;
 			}
-		} 
+		}
+
 		return;
 	}
 
@@ -374,8 +371,6 @@ export class MapReader {
 		const nearestBuilding = this.findNearestBuilding(center, buildings);
 
 		if (nearestBuilding) {
-			// console.log(`[import] copied address '${nearestBuilding.address}' (${center.distance(new Point(nearestBuilding.centerLatitude, nearestBuilding.centerLongitude)).toFixed(1)}m away)`);
-
 			return nearestBuilding.address;
 		}
 	}

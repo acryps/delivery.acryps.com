@@ -1,6 +1,6 @@
-import { Point } from "../../shared/point";
-import { Rectangle } from "../../shared/rectangle";
-import { Import } from "../managed/database";
+import { Point } from '../../shared/point';
+import { Rectangle } from '../../shared/rectangle';
+import { Import } from '../managed/database';
 
 export class LoadingArea {
 	// defines the fixed size of the loading-areas
@@ -31,12 +31,14 @@ export class LoadingArea {
 		let loadedLoadingAreas: boolean[] = new Array(8).fill(false);
 		let notLoadedNeighbors: LoadingArea[] = [];
 
-		loadingAreas.forEach(loadingArea => {
+		for (let loadingArea of loadingAreas) {
 			for (let i = 0; i < this.neighborCenters.length; i++) {
-				if (loadingArea.center.latitude === this.neighborCenters[i].latitude && loadingArea.center.longitude === this.neighborCenters[i].longitude)
+				if (loadingArea.center.latitude === this.neighborCenters[i].latitude && 
+					loadingArea.center.longitude === this.neighborCenters[i].longitude) {
 					loadedLoadingAreas[i] = true;
 				}
-		});
+			}
+		}
 		
 		for (let i = 0; i < this.neighborCenters.length; i++) {
 			if (loadedLoadingAreas[i] == false) {
@@ -54,8 +56,8 @@ export class LoadingArea {
 
 	static defineNewArea(startLocation: Point): LoadingArea {
 		//the central point must be a multiple of [this.size]
-		let roundedLatitude = Math.round((startLocation.latitude / this.size)) * this.size;
-		let roundedLongitude = Math.round((startLocation.longitude / this.size)) * this.size;
+		const roundedLatitude = Math.round((startLocation.latitude / this.size)) * this.size;
+		const roundedLongitude = Math.round((startLocation.longitude / this.size)) * this.size;
 
 		return new LoadingArea(new Point(this.toFixedFloat(roundedLatitude), this.toFixedFloat(roundedLongitude)));
 	}
@@ -70,9 +72,9 @@ export class LoadingArea {
 
 	static fromImportsArray(importAreas: Import[]): LoadingArea[] {
 		let loadingAreas: LoadingArea[] = [];
-		importAreas.forEach(importArea => {
+		for (let importArea of importAreas) {
 			loadingAreas.push(this.fromImport(importArea));
-		});
+		}
 		return loadingAreas;
 	}
 
@@ -82,7 +84,7 @@ export class LoadingArea {
 		importObject.centerLatitude = this.center.latitude;
 		importObject.centerLongitude = this.center.longitude;
 
-		let boundingBox = this.getBoundingBox();
+		const boundingBox = this.getBoundingBox();
 		importObject.maxLatitude = boundingBox.maxLatitude;
 		importObject.minLatitude = boundingBox.minLatitude;
 		importObject.maxLongitude = boundingBox.maxLongitude;
