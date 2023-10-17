@@ -5,6 +5,7 @@ import { Point } from '../../shared/point';
 import { Rectangle } from '../../shared/rectangle';
 import { RailwayImporter } from './railways';
 import { BuildingImporter } from './building-importer';
+import { WaterBodyImporter } from './waterbody-importer';
 
 export class MapReader {
 	nodes;
@@ -29,6 +30,7 @@ export class MapReader {
 			if (this.nodes && this.ways) {
 				await new RailwayImporter(this.database, this.nodes).import(this.findByTag('railway'));
 				await new BuildingImporter(this.database, this.loadingArea, this.nodes, this.ways, this.relations).import();
+				await new WaterBodyImporter(this.database, this.loadingArea, this.nodes, this.ways, this.relations).import();
 			}
 
 		} catch (error) {
@@ -75,48 +77,7 @@ export class MapReader {
 		return map;
 	}
 
-	async loadWater() {
-		let waters =  this.findByTag('water');
-		let watersDB: WaterBody[] = [];
 
-		for (let water of waters) {
-			let coordinates: Point[] = [];
-
-			if (Array.isArray(water.member)) {
-				for (let member of water.member) {
-					const way = this.findMember(member);
-					
-					if (way) {
-						coordinates.push(...this.getPoint(way));
-					}
-				}
-			} else {
-				coordinates = this.getPoint(water);
-			}
-
-			const center = this.calculateCenter(coordinates);
-			const polygonString = this.constructPolygonFromPoint(coordinates);
-
-			let waterDB = new WaterBody();
-			waterDB.centerLatitude = center.latitude;
-			waterDB.centerLongitude = center.longitude;
-			waterDB.polygon = polygonString;
-			waterDB.name = 'water';
-
-			if (water.tag) {
-				for (let tag of water.tag) {
-					if (tag._attributes.k == 'name') {
-						waterDB.name = tag._attributes.v;
-					}
-				}
-			}
-
-			watersDB.push(waterDB);
-			await waterDB.create();
-		}
-
-		return waters;
-	}
 
 	getStreets() {
 		const highways = this.findByTag('highway');
