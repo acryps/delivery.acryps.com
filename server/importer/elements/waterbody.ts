@@ -1,7 +1,7 @@
-import { Point } from "../../shared/point";
-import { DbContext, WaterBody } from "../managed/database";
-import { LoadingArea } from "./loading-area";
-import { MapManager } from "./map-manager";
+import { Point } from "../../../shared/point";
+import { DbContext, WaterBody } from "../../managed/database";
+import { LoadingArea } from "../loading-area";
+import { MapManager } from "../map-manager";
 
 export class WaterBodyImporter {
 	constructor(

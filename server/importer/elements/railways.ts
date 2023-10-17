@@ -1,7 +1,7 @@
-import { Point } from "../../shared/point";
-import { Rectangle } from "../../shared/rectangle";
-import { DbContext, Railway } from "../managed/database";
-import { MapManager } from "./map-manager";
+import { Point } from "../../../shared/point";
+import { Rectangle } from "../../../shared/rectangle";
+import { DbContext, Railway } from "../../managed/database";
+import { MapManager } from "../map-manager";
 
 export class RailwayImporter {
 	allowedClasses = ['tram', 'rail'];

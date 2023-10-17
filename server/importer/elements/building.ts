@@ -1,8 +1,8 @@
-import { Point } from "../../shared/point";
-import { Rectangle } from "../../shared/rectangle";
-import { Building, DbContext } from "../managed/database";
-import { LoadingArea } from "./loading-area";
-import { MapManager } from "./map-manager";
+import { Point } from "../../../shared/point";
+import { Rectangle } from "../../../shared/rectangle";
+import { Building, DbContext } from "../../managed/database";
+import { LoadingArea } from "../loading-area";
+import { MapManager } from "../map-manager";
 
 export class BuildingImporter {
 	constructor(

@@ -1,9 +1,9 @@
 import * as convert from 'xml-js';
 import { DbContext} from '../managed/database';
 import { LoadingArea } from './loading-area';
-import { RailwayImporter } from './railways';
-import { BuildingImporter } from './building-importer';
-import { WaterBodyImporter } from './waterbody-importer';
+import { RailwayImporter } from './elements/railways';
+import { BuildingImporter } from './elements/building';
+import { WaterBodyImporter } from './elements/waterbody';
 import { MapManager } from './map-manager';
 
 export class MapReader {

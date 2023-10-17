@@ -72,10 +72,10 @@ export class MapManager {
 	}
 
 	/**
-	 * returns the 'way' objects which have a tag with the given attribute.
-	 * @param attribute 
-	 * @returns 
-	 */
+	* returns the 'way' objects which have a tag with the given attribute.
+	* @param attribute 
+	* @returns 
+	*/
 	findByTag(attribute: string) {
 		const filtered = [];
 
