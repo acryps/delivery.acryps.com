@@ -2,14 +2,13 @@ import { Point } from "../../shared/point";
 import { Rectangle } from "../../shared/rectangle";
 import { Building, DbContext } from "../managed/database";
 import { LoadingArea } from "./loading-area";
+import { MapManager } from "./map-manager";
 
 export class BuildingImporter {
 	constructor(
 		private database: DbContext,
 		private loadingArea: LoadingArea,
-		private nodes,
-		private ways,
-		private relations
+		private map: MapManager
 	) { }
 
 	async import() {
@@ -20,7 +19,7 @@ export class BuildingImporter {
 	async saveBuildings() {
 		console.debug('[import] starting to load buildings');
 
-		const buildings = this.findByTag('building');
+		const buildings = this.map.findByTag('building');
 		
 		console.debug('[import] loading ' + buildings.length + ' buildings');
 
@@ -32,7 +31,7 @@ export class BuildingImporter {
 			if (await this.isBuildingLoaded(openStreetMapId)) {
 				alreadyLoaded++;
 			} else {
-				let center: Point = this.calculateCenter(this.getPoint(building));
+				let center: Point = this.calculateCenter(this.map.getPoint(building));
 				let address = await this.extractAddress(building);
 
 				let buildingDB = new Building();
@@ -61,10 +60,10 @@ export class BuildingImporter {
 		if (buildingNodes) {
 			if (buildingNodes.length > 1) {
 				for (let buildingNode of buildingNodes) {
-					buildingCoordinateString.push(this.getPointOfNode(buildingNode._attributes.ref).toString());
+					buildingCoordinateString.push(this.map.getPointOfNode(buildingNode._attributes.ref).toString());
 				}
 			} else {
-				buildingCoordinateString.push(this.getPointOfNode(buildingNodes._attributes.ref).toString());
+				buildingCoordinateString.push(this.map.getPointOfNode(buildingNodes._attributes.ref).toString());
 			}
 		}
 
@@ -147,7 +146,7 @@ export class BuildingImporter {
 			buildingNodes = Array.isArray(buildingNodes) ? buildingNodes : [buildingNodes];
 
 			for (let buildingNode of buildingNodes) {
-				let buildingNodeTags = this.getNode(buildingNode._attributes.ref)[0].tag;
+				let buildingNodeTags = this.map.getNode(buildingNode._attributes.ref)[0].tag;
 				let address = this.addressFromTags(buildingNodeTags);
 
 				if (address) {
@@ -195,74 +194,4 @@ export class BuildingImporter {
 		return;
 	}
 
-	/**
-	 * returns the 'way' objects which have a tag with the given attribute.
-	 * @param attribute 
-	 * @returns 
-	 */
-	findByTag(attribute: string) {
-		const filtered = [];
-
-		for (let item of [...this.ways, ...this.relations]) {
-			if (item && item.tag) {
-				if (Array.isArray(item.tag)) {
-					for (let tag of item.tag) {
-						if (tag._attributes.k == attribute) {
-							filtered.push(item);
-						}
-					}
-				} else {
-					if (item.tag._attributes.k == attribute) {
-						filtered.push(item);
-					}
-				}
-			}
-		}
-
-		return Array.isArray(filtered) ? filtered : [filtered];
-	}
-
-	/**
-	 * returns the coordinates, which form the polygon of the given 'way' object
-	 * @param way 
-	 * @returns 
-	 */
-	getPoint(way): Point[] {
-		let coordinates: Point[] = [];
-		let nodes = way.nd;
-
-		if(nodes) {
-			if(nodes.length > 1) {
-				for (let buildingNode of nodes) {
-					let nodeRef = buildingNode._attributes.ref;
-					coordinates.push(this.getPointOfNode(nodeRef));
-				}
-			}
-			else {
-				let nodeRef = nodes._attributes.ref;
-				coordinates.push(this.getPointOfNode(nodeRef));
-			}
-		}
-
-		return coordinates;
-	}
-
-	getPointOfNode(id: string): Point {
-		const node = this.getNode(id)[0];
-		return new Point(+node._attributes.lat, +node._attributes.lon);
-	}
-
-	getNode(id: string) {
-		const node = this.nodes.filter(element => element._attributes.id === id);
-
-		if (!Array.isArray(node)) {
-			console.error('[import] error while gathering unique node. got no element.');
-			return null;
-		} else if (node.length > 1) {
-			console.error('[import] error while gathering unique node. did not get unique node.');
-			return null;
-		}
-
-		return node;
-	}
 }

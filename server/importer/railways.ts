@@ -1,16 +1,18 @@
 import { Point } from "../../shared/point";
 import { Rectangle } from "../../shared/rectangle";
 import { DbContext, Railway } from "../managed/database";
+import { MapManager } from "./map-manager";
 
 export class RailwayImporter {
 	allowedClasses = ['tram', 'rail'];
 
 	constructor(
 		private database: DbContext,
-		private nodes: any[]
+		private map: MapManager
 	) {}
 
-	async import(ways) {
+	async import() {
+		const ways = this.map.findByTag('railway');
 		const existing = await this.database.railway.toArray();
 		const added: Railway[] = [];
 
@@ -53,7 +55,7 @@ export class RailwayImporter {
 		const points: Point[] = [];
 
 		for (let reference of way.nd) {
-			const node = this.nodes.find(node => node._attributes.id == reference._attributes.ref);
+			const node = this.map.nodes.find(node => node._attributes.id == reference._attributes.ref);
 
 			points.push(new Point(+node._attributes.lat, +node._attributes.lon));
 		}

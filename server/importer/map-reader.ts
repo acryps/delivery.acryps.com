@@ -1,17 +1,12 @@
 import * as convert from 'xml-js';
-import { Building, DbContext, Import, WaterBody } from '../managed/database';
+import { DbContext} from '../managed/database';
 import { LoadingArea } from './loading-area';
-import { Point } from '../../shared/point';
-import { Rectangle } from '../../shared/rectangle';
 import { RailwayImporter } from './railways';
 import { BuildingImporter } from './building-importer';
 import { WaterBodyImporter } from './waterbody-importer';
+import { MapManager } from './map-manager';
 
 export class MapReader {
-	nodes;
-	ways;
-	relations;
-
 	constructor(
 		private database: DbContext,
 		private loadingArea: LoadingArea
@@ -21,16 +16,14 @@ export class MapReader {
 		const jsonData = await this.readMapFromXml();
 
 		try {
-			this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
-			this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
-			this.relations = Array.isArray(jsonData.osm.relation) ? jsonData.osm.relation : [jsonData.osm.relation];
-		
+			const map = new MapManager(jsonData);
+
 			console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
 
-			if (this.nodes && this.ways) {
-				await new RailwayImporter(this.database, this.nodes).import(this.findByTag('railway'));
-				await new BuildingImporter(this.database, this.loadingArea, this.nodes, this.ways, this.relations).import();
-				await new WaterBodyImporter(this.database, this.loadingArea, this.nodes, this.ways, this.relations).import();
+			if (map.hasNodes() && map.hasWays()) {
+				await new RailwayImporter(this.database, map).import();
+				await new BuildingImporter(this.database, this.loadingArea, map).import();
+				await new WaterBodyImporter(this.database, this.loadingArea, map).import();
 			}
 
 		} catch (error) {
@@ -79,119 +72,119 @@ export class MapReader {
 
 
 
-	getStreets() {
-		const highways = this.findByTag('highway');
+	// getStreets() {
+	// 	const highways = this.findByTag('highway');
 
-		for(let highway of highways) {
-			let coordinates: Point[] = this.getPoint(highway);
+	// 	for(let highway of highways) {
+	// 		let coordinates: Point[] = this.getPoint(highway);
 
-			for (let coordinate of coordinates) {
-				// todo:
-			}
-		}
+	// 		for (let coordinate of coordinates) {
+	// 			// todo:
+	// 		}
+	// 	}
 
-		return highways;
-	}
+	// 	return highways;
+	// }
 
-	findMember(member) {
-		let memberId = member._attributes.ref;
-		let searchedWay;
+	// findMember(member) {
+	// 	let memberId = member._attributes.ref;
+	// 	let searchedWay;
 
-		for (let way of this.ways) {
-			if (way._attributes.id == memberId) {
-				searchedWay = way;
-			}
-		}
+	// 	for (let way of this.ways) {
+	// 		if (way._attributes.id == memberId) {
+	// 			searchedWay = way;
+	// 		}
+	// 	}
 
-		return searchedWay;
-	}
+	// 	return searchedWay;
+	// }
 
-	constructPolygonFromPoint(coordinates: Point[]) {
-		let polygonString = '';
+	// constructPolygonFromPoint(coordinates: Point[]) {
+	// 	let polygonString = '';
 
-		for (let coordinate of coordinates) {
-			if (coordinate == coordinates[coordinates.length - 1]) {
-				polygonString += `${coordinate.latitude},${coordinate.longitude}`;
-			} else {
-				polygonString += `${coordinate.latitude},${coordinate.longitude};`;
-			}
-		}
+	// 	for (let coordinate of coordinates) {
+	// 		if (coordinate == coordinates[coordinates.length - 1]) {
+	// 			polygonString += `${coordinate.latitude},${coordinate.longitude}`;
+	// 		} else {
+	// 			polygonString += `${coordinate.latitude},${coordinate.longitude};`;
+	// 		}
+	// 	}
 
-		return polygonString;
-	}
+	// 	return polygonString;
+	// }
 
-	getPointOfNode(id: string): Point {
-		const node = this.getNode(id)[0];
-		return new Point(+node._attributes.lat, +node._attributes.lon);
-	}
+	// getPointOfNode(id: string): Point {
+	// 	const node = this.getNode(id)[0];
+	// 	return new Point(+node._attributes.lat, +node._attributes.lon);
+	// }
 
-	getNode(id: string) {
-		const node = this.nodes.filter(element => element._attributes.id === id);
+	// getNode(id: string) {
+	// 	const node = this.nodes.filter(element => element._attributes.id === id);
 
-		if (!Array.isArray(node)) {
-			console.error('[import] error while gathering unique node. got no element.');
-			return null;
-		} else if (node.length > 1) {
-			console.error('[import] error while gathering unique node. did not get unique node.');
-			return null;
-		}
+	// 	if (!Array.isArray(node)) {
+	// 		console.error('[import] error while gathering unique node. got no element.');
+	// 		return null;
+	// 	} else if (node.length > 1) {
+	// 		console.error('[import] error while gathering unique node. did not get unique node.');
+	// 		return null;
+	// 	}
 
-		return node;
-	}
+	// 	return node;
+	// }
 
-	/**
-	 * returns the 'way' objects which have a tag with the given attribute.
-	 * @param attribute 
-	 * @returns 
-	 */
-	findByTag(attribute: string) {
-		const filtered = [];
+	// /**
+	//  * returns the 'way' objects which have a tag with the given attribute.
+	//  * @param attribute 
+	//  * @returns 
+	//  */
+	// findByTag(attribute: string) {
+	// 	const filtered = [];
 
-		for (let item of [...this.ways, ...this.relations]) {
-			if (item && item.tag) {
-				if (Array.isArray(item.tag)) {
-					for (let tag of item.tag) {
-						if (tag._attributes.k == attribute) {
-							filtered.push(item);
-						}
-					}
-				} else {
-					if (item.tag._attributes.k == attribute) {
-						filtered.push(item);
-					}
-				}
-			}
-		}
+	// 	for (let item of [...this.ways, ...this.relations]) {
+	// 		if (item && item.tag) {
+	// 			if (Array.isArray(item.tag)) {
+	// 				for (let tag of item.tag) {
+	// 					if (tag._attributes.k == attribute) {
+	// 						filtered.push(item);
+	// 					}
+	// 				}
+	// 			} else {
+	// 				if (item.tag._attributes.k == attribute) {
+	// 					filtered.push(item);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 
-		return Array.isArray(filtered) ? filtered : [filtered];
-	}
+	// 	return Array.isArray(filtered) ? filtered : [filtered];
+	// }
 
-	/**
-	* returns the coordinates, which form the polygon of the given 'way' object
-	* @param way 
-	* @returns 
-	*/
-	getPoint(way): Point[] {
-		let coordinates: Point[] = [];
-		let nodes = way.nd;
+	// /**
+	// * returns the coordinates, which form the polygon of the given 'way' object
+	// * @param way 
+	// * @returns 
+	// */
+	// getPoint(way): Point[] {
+	// 	let coordinates: Point[] = [];
+	// 	let nodes = way.nd;
 
-		if(nodes) {
-			if(nodes.length > 1) {
-				for (let buildingNode of nodes) {
-					let nodeRef = buildingNode._attributes.ref;
-					coordinates.push(this.getPointOfNode(nodeRef));
-				}
-			}
-			else {
-				let nodeRef = nodes._attributes.ref;
-				coordinates.push(this.getPointOfNode(nodeRef));
-			}
-		}
+	// 	if(nodes) {
+	// 		if(nodes.length > 1) {
+	// 			for (let buildingNode of nodes) {
+	// 				let nodeRef = buildingNode._attributes.ref;
+	// 				coordinates.push(this.getPointOfNode(nodeRef));
+	// 			}
+	// 		}
+	// 		else {
+	// 			let nodeRef = nodes._attributes.ref;
+	// 			coordinates.push(this.getPointOfNode(nodeRef));
+	// 		}
+	// 	}
 
-		return coordinates;
-	}
+	// 	return coordinates;
+	// }
 
-	calculateCenter(points: Point[]) {
-		return Rectangle.fromPolygon(points).center;
-	}
+	// calculateCenter(points: Point[]) {
+	// 	return Rectangle.fromPolygon(points).center;
+	// }
 }
