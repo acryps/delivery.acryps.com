@@ -184,6 +184,32 @@ export class Import extends Entity<ImportQueryProxy> {
 	};
 }
 			
+export class TreeQueryProxy extends QueryProxy {
+	get location(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get importerId(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+}
+
+export class Tree extends Entity<TreeQueryProxy> {
+	declare id: string;
+	location: string;
+	importerId: string;
+	
+
+	$$meta = {
+		source: "tree",
+
+		columns: {
+			id: { type: "uuid", name: "id" },
+			location: { type: "text", name: "location" },
+			importerId: { type: "text", name: "importer_id" }
+		},
+
+		get set(): DbSet<Tree, TreeQueryProxy> { 
+			return new DbSet<Tree, TreeQueryProxy>(Tree, null);
+		}
+	};
+}
+			
 
 export class DbContext {
 	street: DbSet<Street, StreetQueryProxy>;
@@ -191,6 +217,7 @@ export class DbContext {
 	building: DbSet<Building, BuildingQueryProxy>;
 	railway: DbSet<Railway, RailwayQueryProxy>;
 	import: DbSet<Import, ImportQueryProxy>;
+	tree: DbSet<Tree, TreeQueryProxy>;
 
 	constructor(private runContext: RunContext) {
 		this.street = new DbSet<Street, StreetQueryProxy>(Street, this.runContext);
@@ -198,6 +225,7 @@ export class DbContext {
 		this.building = new DbSet<Building, BuildingQueryProxy>(Building, this.runContext);
 		this.railway = new DbSet<Railway, RailwayQueryProxy>(Railway, this.runContext);
 		this.import = new DbSet<Import, ImportQueryProxy>(Import, this.runContext);
+		this.tree = new DbSet<Tree, TreeQueryProxy>(Tree, this.runContext);
 	}
 
 	findSet(modelType) {
