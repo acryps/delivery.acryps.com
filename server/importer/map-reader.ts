@@ -3,6 +3,7 @@ import { Building, DbContext, Import, WaterBody } from '../managed/database';
 import { LoadingArea } from './loading-area';
 import { Point } from '../../shared/point';
 import { Rectangle } from '../../shared/rectangle';
+import { RailwayImporter } from './railways';
 
 export class MapReader {
 	nodes;
@@ -30,6 +31,8 @@ export class MapReader {
 
 		try {
 			if (this.nodes && this.ways) {
+				await new RailwayImporter(this.database, this.nodes).import(this.findByTag('railway'));
+
 				if (await this.saveBuildings() && this.loadWater() /*&& this.loadStreets()*/) {
 					console.debug('[import] finished loading data into database');
 	

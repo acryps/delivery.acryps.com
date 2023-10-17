@@ -3,19 +3,20 @@ import { GameComponent } from ".";
 import { Point } from "../../shared/point";
 import { Rectangle } from "../../shared/rectangle";
 import { RenderStyle } from "./style";
+import { Railway } from "../../shared/railway";
 
 export class MapComponent extends Component {
 	declare parent: GameComponent;
 
 	static readonly playerSize = 20;
-	static readonly notchSize = 4;
 
 	playerViewLocation = { x: 0.5, y: 0.9 };
 
+	realMapHeight = 150; // meters
+
 	width: number;
 	height: number;
-
-	scale = { x: 500000, y: 350000 };
+	scale: number;
 	
 	renderedRotation = 0;
 
@@ -23,6 +24,9 @@ export class MapComponent extends Component {
 
 	buildingStyle: RenderStyle;
 	mapStyle: RenderStyle;
+	notchStyle: RenderStyle;
+	railwayGravelStyle: RenderStyle;
+	railwayRailStyle: RenderStyle;
 
 	get position() {
 		return this.parent.player?.position ?? this.parent.center;
@@ -35,12 +39,17 @@ export class MapComponent extends Component {
 			this.width = mapCanvas.width = mapCanvas.clientWidth;
 			this.height = mapCanvas.height = mapCanvas.clientHeight;
 
+			this.scale = this.height / this.realMapHeight;
+
 			let startTouch;
 
 			const style = getComputedStyle(mapCanvas);
 
 			this.buildingStyle = new RenderStyle('building', style);
 			this.mapStyle = new RenderStyle('map', style);
+			this.notchStyle = new RenderStyle('notch', style);
+			this.railwayGravelStyle = new RenderStyle('railway-gravel', style);
+			this.railwayRailStyle = new RenderStyle('railway-rail', style);
 			
 			mapCanvas.ontouchstart = event => {
 				startTouch = {
@@ -92,6 +101,26 @@ export class MapComponent extends Component {
 		this.renderedRotation = this.parent.direction;
 
 		// prepare frame
+		const trackGravelPaths = new Map<number, Path2D>();
+
+		for (let railway of this.visibleRailways) {
+			let path = trackGravelPaths.get(railway.gauge);
+
+			if (!path) {
+				path = new Path2D();
+
+				trackGravelPaths.set(railway.gauge, path);
+			}
+
+			for (let pathIndex = 0; pathIndex < railway.path.length; pathIndex++) {
+				if (pathIndex == 0) {
+					path.moveTo(...this.transform(railway.path[pathIndex]));
+				} else {
+					path.lineTo(...this.transform(railway.path[pathIndex]));
+				}
+			}
+		}
+
 		const buildingsPath = new Path2D();
 		const packageSourcePath = new Path2D();
 
@@ -136,7 +165,28 @@ export class MapComponent extends Component {
 
 		this.mapStyle.render(context);
 
-		// draw frame
+		this.railwayGravelStyle.apply(context);
+
+		// render railways
+		for (let [gauge, path] of trackGravelPaths) {
+			const lineWidth = (gauge / 1000) * this.scale;
+
+			// add track bed
+			context.lineWidth = lineWidth + Railway.padding * 2 * this.scale;
+			context.stroke(path);
+
+			// add rails
+			this.railwayRailStyle.apply(context);
+			context.lineWidth = lineWidth + this.railwayRailStyle.stroke.size * 2;
+			context.stroke(path);
+
+			// add inner track bed
+			this.railwayGravelStyle.apply(context); // will be reused by the next outer track bed
+			context.lineWidth = lineWidth;
+			context.stroke(path);
+		}
+
+		// draw buildings
 		this.buildingStyle.render(context, buildingsPath);
 
 		context.fillStyle = this.parent.player?.color;
@@ -144,14 +194,14 @@ export class MapComponent extends Component {
 		context.fill(packageSourcePath);
 
 		// render player
-		context.lineWidth = MapComponent.notchSize;
+		this.notchStyle.apply(context);
 
 		for (let player of this.parent.players) {
 			const carrying = player.delivery && player.delivery.carrier == player;
 			let size = MapComponent.playerSize / 2;
 
 			if (carrying) {
-				size += MapComponent.notchSize / 2;
+				size += this.notchStyle.stroke.size / 2;
 			}
 
 			context.fillStyle = player.color;
@@ -161,6 +211,12 @@ export class MapComponent extends Component {
 
 			if (carrying) {
 				context.stroke();
+			}
+
+			if (player.score == this.parent.highscore) {
+				const path = new Path2D('M14.727 10L16 4 15 3 11.692 4.692 8.75 1 7.25 1 4.308 4.692 1 3 0 4 1.273 10zM1.636 12L2 14 14 14 14.364 12z');
+
+				context.fill(path);
 			}
 		}
 
@@ -190,23 +246,23 @@ export class MapComponent extends Component {
 
 	get visibleBuildings() {
 		const viewport = this.viewport;
-		const buildings = this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
+		
+		return this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
+	}
 
-		return buildings;
+	get visibleRailways() {
+		const viewport = this.viewport;
+		
+		return this.parent.map.railways.filter(railway => viewport.touches(railway.boundingBox));
 	}
 
 	transform(point: Point): [number, number] {
-		let x = point.latitude;
-		let y = point.longitude;
+		const angle = this.position.bearing(point);
+		const distance = this.position.distance(point);
 
-		// move everything to the current maps location
-		x -= this.position.latitude;
-		y -= this.position.longitude;
-
-		// scale to viewport
-		x *= this.scale.x;
-		y *= this.scale.y;
-
-		return [x, y];
+		return [
+			Math.cos(angle) * distance * this.scale,
+			Math.sin(angle) * distance * this.scale,
+		];
 	}
 }

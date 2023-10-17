@@ -19,6 +19,8 @@ export class PlayerController {
 	assigned: Delivery;
 	pickedUp: Delivery;
 
+	score: number;
+
 	constructor (
 		public socket: WebSocket,
 		public position: Point

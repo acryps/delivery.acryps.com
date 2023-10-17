@@ -1,4 +1,20 @@
 ui-game {
+	--building-stroke-size: 2;
+	--building-stroke-color: #fff;
+	--building-fill-color: #fff4;
+
+	--railway-gravel-stroke-color: #111;
+
+	--railway-rail-stroke-size: 1;
+	--railway-rail-stroke-color: #888;
+
+	--map-stroke-size: 2;
+	--map-stroke-color: #222;
+	--map-fill-color: #000;
+
+	--notch-stroke-size: 4;
+	--notch-stroke-color: #ccc;
+
 	position: fixed;
 	inset: 0;
 
@@ -6,14 +22,6 @@ ui-game {
 	-webkit-touch-callout: none;
 
 	ui-map {
-		--building-stroke-size: 2;
-		--building-stroke-color: #fff;
-		--building-fill-color: #fff4;
-
-		--map-stroke-size: 2;
-		--map-stroke-color: #222;
-		--map-fill-color: #000;
-
 		display: block;
 		width: 100%;
 		height: 100%;
@@ -35,12 +43,16 @@ ui-game {
 		}
 	}
 
-	ui-header {
+	ui-overview {
 		position: fixed;
 		inset-inline: 0;
 		top: 0;
 
-		display: block;
+		display: flex;
+		flex-wrap: wrap;
+
+		border-bottom: 1px solid var(--page-color);
+		background: var(--page-background);
 
 		ui-delivery {
 			display: flex;
@@ -49,8 +61,7 @@ ui-game {
 			height: calc(var(--delivery-indicator-height) - 2rem);
 			padding: 1rem;
 
-			border-bottom: 1px solid var(--page-color);
-			background: var(--page-background);
+			flex: 1;
 
 			ui-prompt {
 				display: block;
@@ -60,24 +71,57 @@ ui-game {
 			ui-location {
 				display: block;
 				
-				font-size: 1.5rem;
+				font-size: 1.2rem;
 			}
 
 			ui-progress {
 				position: absolute;
 				left: 0;
 				right: calc(100% - 100% * var(--progress));
-				bottom: 0;
+				bottom: 1px;
 
 				height: 0.25rem;
 				background: var(--player-color);
 			}
 		}
 
+		ui-stats {
+			display: flex;
+			width: 8rem;
+			padding: 1rem;
+			
+			flex-direction: column;
+			row-gap: 0.5rem;
+
+			text-align: end;
+
+			ui-score {
+				position: relative;
+				flex: 1;
+
+				ui-current {
+					color: var(--player-color);
+					font-size: 4rem;
+				}
+
+				ui-delivery-worth {
+					position: absolute;
+					right: 0;
+					bottom: 5%;
+
+					border-radius: 50%;
+					background: rgba(0,0,0,0.5);
+				}
+			}
+		}
+
 		ui-status {
 			&:not(:empty) {
+				--inline-padding: 1rem;
+
 				display: block;
-				padding: 0.5rem 1rem;
+				width: calc(100% - 2 * var(--inline-padding));
+				padding: 0.5rem var(--inline-padding);
 
 				color: var(--page-background);
 				background: var(--page-color);
@@ -204,14 +248,16 @@ ui-game {
 	}
 
 	ui-tracker {
+		--tracker-size: calc(var(--player-size) + 0.3rem);
+
 		position: fixed;
-		top: calc(100% * var(--offset-y) - var(--player-size) / 2 - var(--notch-size));
-		left: calc(100% * var(--offset-x) - var(--player-size) / 2 - var(--notch-size));
+		top: calc(100% * var(--offset-y) - var(--tracker-size) / 2 - var(--notch-stroke-size) * 1px);
+		left: calc(100% * var(--offset-x) - var(--tracker-size) / 2 - var(--notch-stroke-size) * 1px);
 
-		width: 0;
-		height: 0;
+		width: var(--tracker-size);
+		height: var(--tracker-size);
 
-		border: calc(var(--player-size) / 2 + var(--notch-size)) solid transparent;
+		border: calc(var(--notch-stroke-size) * 1px) solid transparent;
 		border-right-color: var(--player-color);
 		border-radius: 50%;
 

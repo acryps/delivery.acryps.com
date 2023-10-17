@@ -8,6 +8,7 @@ import { Point } from "../../shared/point";
 import { TargetTracker } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
+import { StatsComponent } from "./stats";
 import { StatusComponent } from "./status";
 
 export class GameComponent extends Component {
@@ -21,6 +22,8 @@ export class GameComponent extends Component {
 	lobby = new LobbyComponent();
 
 	deliveryIndicator = new DeliveryIndicator();
+	stats = new StatsComponent();
+
 	targetTracker = new TargetTracker();
 	status = new StatusComponent();
 
@@ -39,6 +42,10 @@ export class GameComponent extends Component {
 
 	get isHost() {
 		return this.players.findIndex(player => player.id == this.id) == 0;
+	}
+
+	get highscore() {
+		return this.players.sort((a, b) => a.score - b.score)[0]?.score;
 	}
 
 	onrouteleave() {
@@ -88,9 +95,15 @@ export class GameComponent extends Component {
 
 				if ('assigned' in data) {
 					const player = this.players.find(player => player.id == data.assigned.assignee);
+
+					if (this.player.delivery) {
+						this.player.updateScore();
+					}
+
 					player.delivery = Delivery.from(data.assigned, this.players, this.map);
 
 					this.deliveryIndicator.update();
+					this.stats.update();
 				}
 
 				if ('pickedUp' in data) {
@@ -98,6 +111,7 @@ export class GameComponent extends Component {
 					delivery.carrier = delivery.assignee;
 
 					this.deliveryIndicator.update();
+					this.stats.update();
 
 					this.status.show(delivery.carrier, ' picked up a package');
 				}
@@ -106,7 +120,7 @@ export class GameComponent extends Component {
 					for (let update of data.move) {
 						const player = this.players.find(player => player.id == update.id);
 
-						player.position = update.position;
+						player.position = Point.from(update.position);
 					}
 				}
 
@@ -116,6 +130,7 @@ export class GameComponent extends Component {
 
 					thief.delivery = victim.delivery;
 					this.deliveryIndicator.update();
+					this.stats.update();
 
 					this.status.show(thief, ' stole ', victim, '`s package');
 				}
@@ -130,10 +145,12 @@ export class GameComponent extends Component {
 			{this.mapRenderer}
 			{this.targetTracker}
 
-			<ui-header>
+			<ui-overview>
 				{this.deliveryIndicator}
+				{this.stats}
+
 				{this.status}
-			</ui-header>
+			</ui-overview>
 
 			{this.lobby}
 		</ui-game>;

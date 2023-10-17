@@ -1,10 +1,10 @@
 export class RenderStyle {
-	private stroke: {
+	stroke: {
 		size: number,
 		color: string
 	}
 
-	private fill: string;
+	fill: string;
 
 	constructor(name: string, source: CSSStyleDeclaration) {
 		this.stroke = {
@@ -25,11 +25,11 @@ export class RenderStyle {
 		this.apply(context);
 
 		if (path) {
-			context.stroke(path);
 			context.fill(path);
+			context.stroke(path);
 		} else {
-			context.stroke();
 			context.fill();
+			context.stroke();
 		}
 	}
 }

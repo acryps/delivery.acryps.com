@@ -1,4 +1,5 @@
 import { Component } from "@acryps/page";
+import { gameConfiguration } from "../shared/constants";
 
 export class CreateGameComponent extends Component {
 	declare parameters: {
@@ -6,8 +7,7 @@ export class CreateGameComponent extends Component {
 		longitude
 	}
 
-	radii = [100, 250, 500, 1000, 2500];
-	radius = this.radii[2];
+	radius = gameConfiguration.radii[2];
 
 	render() {
 		return <ui-create-game>
@@ -24,7 +24,7 @@ export class CreateGameComponent extends Component {
 					Radius
 				</ui-title>
 
-				{this.radii.map(radius => <ui-radius ui-active={radius == this.radius} ui-click={() => {
+				{gameConfiguration.radii.map(radius => <ui-radius ui-active={radius == this.radius} ui-click={() => {
 					this.radius = radius;
 
 					this.update();

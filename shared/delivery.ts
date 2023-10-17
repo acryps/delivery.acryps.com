@@ -1,7 +1,6 @@
 import { BuildingViewModel } from "./building";
 import { Map } from "./map";
 import { DeliveryMessage } from "./messages";
-import { Point } from "./point";
 
 export class Delivery {
 	static readonly pickupRadius = 0.001;
@@ -15,6 +14,14 @@ export class Delivery {
 
 	source: BuildingViewModel;
 	destination: BuildingViewModel;
+
+	get stolen() {
+		return this.assignee && this.carrier && this.assignee.id != this.carrier.id;
+	}
+
+	get worth() {
+		return this.stolen ? 3 : 1;
+	}
 
 	static from(serialized: DeliveryMessage, players, map: Map) {
 		const delivery = new Delivery();
