@@ -5,6 +5,8 @@ import { Rectangle } from "../../shared/rectangle";
 import { RenderStyle } from "./style";
 import { Railway } from "../../shared/railway";
 
+import crown from "url:../assets/crown.svg";
+
 export class MapComponent extends Component {
 	declare parent: GameComponent;
 
@@ -28,6 +30,8 @@ export class MapComponent extends Component {
 	railwayGravelStyle: RenderStyle;
 	railwayRailStyle: RenderStyle;
 
+	private crownImage: HTMLImageElement;
+
 	get position() {
 		return this.parent.player?.position ?? this.parent.center;
 	}
@@ -35,6 +39,21 @@ export class MapComponent extends Component {
 	render() {
 		const mapCanvas = document.createElement('canvas');
 
+		// load resources before drawing
+		this.crownImage = new Image();
+
+		this.crownImage.onload = () => {
+			this.startRenderAnimation(mapCanvas);
+		}
+
+		this.crownImage.src = crown;
+
+		return <ui-map>
+			{mapCanvas}
+		</ui-map>
+	}
+
+	private startRenderAnimation(mapCanvas: HTMLCanvasElement) {
 		requestAnimationFrame(() => {
 			this.width = mapCanvas.width = mapCanvas.clientWidth;
 			this.height = mapCanvas.height = mapCanvas.clientHeight;
@@ -85,13 +104,9 @@ export class MapComponent extends Component {
 
 			this.renderFrame(context);
 		});
-
-		return <ui-map>
-			{mapCanvas}
-		</ui-map>
 	}
 
-	renderFrame(context: CanvasRenderingContext2D) {
+	private renderFrame(context: CanvasRenderingContext2D) {
 		const now = new Date();
 		const deltaTime = +now - +this.lastFrame;
 		this.lastFrame = now;
@@ -214,9 +229,13 @@ export class MapComponent extends Component {
 			}
 
 			if (player.score == this.parent.highscore) {
-				const path = new Path2D('M14.727 10L16 4 15 3 11.692 4.692 8.75 1 7.25 1 4.308 4.692 1 3 0 4 1.273 10zM1.636 12L2 14 14 14 14.364 12z');
+				const crownPosition: [x: number, y:number] = this.transform(player.position);
+				crownPosition[0] -= size;
+				crownPosition[1] -= size * 2.5;
 
-				context.fill(path);
+				const crownSize = size * 2;
+
+				context.drawImage(this.crownImage, crownPosition[0], crownPosition[1], crownSize, crownSize);
 			}
 		}
 
