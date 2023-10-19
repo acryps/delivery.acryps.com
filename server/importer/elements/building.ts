@@ -1,16 +1,10 @@
+import { Importer } from ".";
 import { Point } from "../../../shared/point";
 import { Rectangle } from "../../../shared/rectangle";
-import { Building, DbContext } from "../../managed/database";
-import { LoadingArea } from "../loading-area";
-import { MapManager } from "../map-manager";
+import { Building } from "../../managed/database";
+import { ImportArea } from "../import-area";
 
-export class BuildingImporter {
-	constructor(
-		private database: DbContext,
-		private loadingArea: LoadingArea,
-		private map: MapManager
-	) { }
-
+export class BuildingImporter extends Importer {
 	async import() {
 		await this.saveBuildings();
 		this.guessMissingAddresses();
@@ -73,18 +67,18 @@ export class BuildingImporter {
 	private async guessMissingAddresses() {
 		let buildingsToFix: Building[] = await this.database.building.where(building => 
 			building.address == null &&
-			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 1.5)).valueOf()
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (ImportArea.size * 1.5)).valueOf()
 		).toArray();
 
 		let buildingsDatabase = await this.database.building.where(building => 
 			building.addressReal == true && 
-			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (LoadingArea.size * 1.5)).valueOf() &&
-			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (LoadingArea.size * 1.5)).valueOf()
+			building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + (ImportArea.size * 1.5)).valueOf() &&
+			building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - (ImportArea.size * 1.5)).valueOf()
 		).toArray();
 
 		for (let buildingToFix of buildingsToFix) {

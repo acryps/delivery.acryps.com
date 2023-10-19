@@ -1,55 +1,49 @@
 import { Point } from "../../shared/point";
 import { Rectangle } from "../../shared/rectangle";
 
-export class MapManager {
-	nodes;
-	ways;
-	relations;
+export type MapDocumentNode = {
+	[name: string]: MapDocumentNode | MapDocumentNode[];
+} & {
+	_attributes: Record<string, string>
+};
 
-	constructor(jsonData) {
-		this.nodes = Array.isArray(jsonData.osm.node) ? jsonData.osm.node : [jsonData.osm.node];
-		this.ways = Array.isArray(jsonData.osm.way) ? jsonData.osm.way : [jsonData.osm.way];
-		this.relations = Array.isArray(jsonData.osm.relation) ? jsonData.osm.relation : [jsonData.osm.relation];
+export class MapDocument {
+	nodes: MapDocumentNode | MapDocumentNode[];
+	ways: MapDocumentNode | MapDocumentNode[];
+	relations: MapDocumentNode | MapDocumentNode[];
+
+	constructor(source) {
+		this.nodes = Array.isArray(source.osm.node) ? source.osm.node : [source.osm.node];
+		this.ways = Array.isArray(source.osm.way) ? source.osm.way : [source.osm.way];
+		this.relations = Array.isArray(source.osm.relation) ? source.osm.relation : [source.osm.relation];
+	}
+
+	get empty() {
+		return !this.hasNodes() && !this.hasWays();
 	}
 
 	hasNodes(): boolean {
-		return !(this.nodes === null || this.nodes === undefined);
+		return !this.nodes;
 	}
 
 	hasWays(): boolean {
-		return !(this.ways === null || this.ways === undefined);
+		return !this.ways;
 	}
 
 	hasRelations(): boolean {
-		return !(this.relations === null || this.relations === undefined);
+		return !this.relations;
 	}
-
 
 	findMember(member) {
-		let memberId = member._attributes.ref;
-		let searchedWay;
+		const memberId = member._attributes.ref;
 
-		for (let way of this.ways) {
-			if (way._attributes.id == memberId) {
-				searchedWay = way;
+		if (Array.isArray(this.ways)) {
+			for (let way of this.ways) {
+				if (way._attributes.id == memberId) {
+					return way;
+				}
 			}
 		}
-
-		return searchedWay;
-	}
-
-	constructPolygonFromPoint(coordinates: Point[]) {
-		let polygonString = '';
-
-		for (let coordinate of coordinates) {
-			if (coordinate == coordinates[coordinates.length - 1]) {
-				polygonString += `${coordinate.latitude},${coordinate.longitude}`;
-			} else {
-				polygonString += `${coordinate.latitude},${coordinate.longitude};`;
-			}
-		}
-
-		return polygonString;
 	}
 
 	getPointOfNode(id: string): Point {

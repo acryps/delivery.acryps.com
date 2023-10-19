@@ -1,21 +1,16 @@
+import { Importer } from ".";
 import { Point } from "../../../shared/point";
 import { DbContext, WaterBody } from "../../managed/database";
-import { LoadingArea } from "../loading-area";
-import { MapManager } from "../map-manager";
+import { ImportArea } from "../import-area";
+import { MapDocument } from "../map-manager";
 
-export class WaterBodyImporter {
-	constructor(
-		private database: DbContext,
-		private loadingArea: LoadingArea,
-		private map: MapManager
-	) { }
-
+export class WaterBodyImporter extends Importer {
 	async import() {
 		await this.loadWater();
 	}
 
 	private async loadWater() {
-		let waters =  this.map.findByTag('water');
+		let waters = this.map.findByTag('water');
 		let watersDB: WaterBody[] = [];
 
 		for (let water of waters) {

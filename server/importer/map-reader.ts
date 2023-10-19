@@ -1,72 +1,62 @@
 import * as convert from 'xml-js';
 import { DbContext} from '../managed/database';
-import { LoadingArea } from './loading-area';
+import { ImportArea } from './import-area';
 import { RailwayImporter } from './elements/railways';
 import { BuildingImporter } from './elements/building';
 import { WaterBodyImporter } from './elements/waterbody';
-import { MapManager } from './map-manager';
+import { MapDocument } from './map-manager';
+import { Importer } from './elements';
 
 export class MapReader {
+	static importers = [
+		BuildingImporter,
+		RailwayImporter,
+		WaterBodyImporter
+	];
+
 	constructor(
 		private database: DbContext,
-		private loadingArea: LoadingArea
+		private area: ImportArea
 	) {}
 
-	async loadMap() {
-		const jsonData = await this.readMapFromXml();
-
+	async import() {
 		try {
-			const map = new MapManager(jsonData);
+			const sourceXml = await this.download();
+			const source = JSON.parse(convert.xml2json(sourceXml, { compact: true }));
+			
+			const map = new MapDocument(source);
 
-			console.debug('[import] loading map for loading area around: lat:' + this.loadingArea.center.latitude + ', long:' + this.loadingArea.center.longitude);
-
-			if (map.hasNodes() && map.hasWays()) {
-				await new RailwayImporter(this.database, map).import();
-				await new BuildingImporter(this.database, this.loadingArea, map).import();
-				await new WaterBodyImporter(this.database, this.loadingArea, map).import();
+			if (!map.empty) {
+				for (let importer of MapReader.importers) {
+					await new importer(this.database, this.area, map).import();
+				}
 			}
 
+			this.database.import.create(this.area.toImport());
 		} catch (error) {
-			console.error('[import] could not load data: ' + error);
-			return false;
+			console.error(`[import] could not import map ${this.area.center}: ${error}`);
+
+			throw new Error(`Could not import map: ${error}`);
 		}
-		
-		return false;
 	}
 
-	async readMapFromXml() {
-		try {
-			let xmlData = await this.getXML();
-			let jsonString = convert.xml2json(xmlData, {compact: true, spaces: 4});
-			var jsonData = JSON.parse(jsonString);
-		} catch (error) {
-			console.error(error);
-		}
+	async download() {
+		const boundingBox = this.area.getBoundingBox();
 
-		return jsonData;
-	}
-
-	async getXML() {
-		let boundingBox = 
-			this.loadingArea.getBoundingBox().minLongitude.toFixed(6) + ',' + 
-			this.loadingArea.getBoundingBox().minLatitude.toFixed(6)+ ',' + 
-			this.loadingArea.getBoundingBox().maxLongitude.toFixed(6) + ',' + 
-			this.loadingArea.getBoundingBox().maxLatitude.toFixed(6);
-			
-		const mapURL = 'http://overpass-api.de/api/map?bbox=' + boundingBox;
-
-		console.debug(
-			'[import] ' +
-			'latitude = [' + this.loadingArea.getBoundingBox().minLatitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLatitude.toFixed(4) + '], ' + 
-			'longitude = [' + this.loadingArea.getBoundingBox().minLongitude.toFixed(4) + ', ' + this.loadingArea.getBoundingBox().maxLongitude.toFixed(4) +'], '+
-			'loading from: ' + mapURL);
+		const source = process.env.IMPORT_SOURCE
+			.replace('${min-latitude}', boundingBox.minLatitude.toString())
+			.replace('${min-longitude}', boundingBox.minLongitude.toString())
+			.replace('${max-latitude}', boundingBox.maxLongitude.toString())
+			.replace('${max-longitude}', boundingBox.maxLongitude.toString());
+		
+		console.log(`[import] downloading map from '${source}'`);
 		
 		try {
-			var map = await fetch(mapURL).then(response => response.text())
+			return await fetch(source).then(response => response.text());
 		} catch (error) {
-			console.error(error);
-		}
+			console.warn(`[import] could not download map from '${source}'`, error);
 
-		return map;
+			throw new Error(`Could not download map: ${error}`);
+		}
 	}
 }

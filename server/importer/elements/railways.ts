@@ -1,15 +1,11 @@
+import { Importer } from ".";
 import { Point } from "../../../shared/point";
 import { Rectangle } from "../../../shared/rectangle";
 import { DbContext, Railway } from "../../managed/database";
-import { MapManager } from "../map-manager";
+import { MapDocument } from "../map-manager";
 
-export class RailwayImporter {
+export class RailwayImporter extends Importer {
 	allowedClasses = ['tram', 'rail'];
-
-	constructor(
-		private database: DbContext,
-		private map: MapManager
-	) {}
 
 	async import() {
 		const ways = this.map.findByTag('railway');
@@ -60,7 +56,7 @@ export class RailwayImporter {
 			points.push(new Point(+node._attributes.lat, +node._attributes.lon));
 		}
 
-		railway.path = points.map(point => `${point.latitude},${point.longitude}`).join(';');
+		railway.path = Point.pack(points);
 
 		const boundingBox = Rectangle.fromPolygon(points);
 		railway.minLatitude = boundingBox.minLatitude;

@@ -9,7 +9,11 @@
 		"pghost": "Database Host",
 		"pgdatabase": "Database Database",
 		"pguser": "Database User",
-		"pgpassword": "Database Password"
+		"pgpassword": "Database Password",
+
+		"import": {
+			"source": "Download Source"
+		}
 	},
 	"dependencies": {
 		"@acryps/environment": "^2.7.2",

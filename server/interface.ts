@@ -23,7 +23,7 @@ export function registerInterface(app, database: DbContext) {
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
 		let areaLoader = new AreaLoader(database);
-		await areaLoader.loadArea(center);
+		await areaLoader.importArea(center);
 
 		// get all buildings in a way larger the area
 		// then take all buildings that touch the bounding box
@@ -49,10 +49,10 @@ export function registerInterface(app, database: DbContext) {
 			buildings.map(building => new BuildingViewModel(
 				building.id,
 				building.address,
-				building.polygon.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1]))
+				Point.unpack(building.polygon)
 			)),
 			railways.map(railway => new Railway(
-				railway.path.split(';').map(point => new Point(+point.split(',')[0], +point.split(',')[1])),
+				Point.unpack(railway.path),
 				railway.gauge
 			))
 		);
