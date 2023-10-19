@@ -8,9 +8,9 @@ export type MapDocumentNode = {
 };
 
 export class MapDocument {
-	nodes: MapDocumentNode | MapDocumentNode[];
-	ways: MapDocumentNode | MapDocumentNode[];
-	relations: MapDocumentNode | MapDocumentNode[];
+	private nodes: MapDocumentNode[];
+	private ways: MapDocumentNode[];
+	private relations: MapDocumentNode[];
 
 	constructor(source) {
 		this.nodes = Array.isArray(source.osm.node) ? source.osm.node : [source.osm.node];
@@ -37,53 +37,61 @@ export class MapDocument {
 	findMember(member) {
 		const memberId = member._attributes.ref;
 
-		if (Array.isArray(this.ways)) {
-			for (let way of this.ways) {
-				if (way._attributes.id == memberId) {
-					return way;
-				}
+		for (let way of this.ways) {
+			if (way._attributes.id == memberId) {
+				return way;
 			}
 		}
 	}
 
-	getPointOfNode(id: string): Point {
-		const node = this.getNode(id)[0];
+	findNodeById(id: string) {
+		const node = this.nodes.filter(element => element._attributes.id === id);
+
+		if (node.length) {
+			throw new Error(`Node '${id}' not found`);
+		}
+		
+		if (node.length > 1) {
+			throw new Error(`Node '${id}' found multiple times`);
+		}
+
+		return node[0];
+	}
+
+	findWayById(id: string) {
+		const way = this.ways.filter(element => element._attributes.id === id);
+
+		if (way.length) {
+			throw new Error(`Way '${id}' not found`);
+		}
+		
+		if (way.length > 1) {
+			throw new Error(`Way '${id}' found multiple times`);
+		}
+
+		return way[0];
+	}
+
+	getNodePoint(node: MapDocumentNode) {
 		return new Point(+node._attributes.lat, +node._attributes.lon);
 	}
 
-	getNode(id: string) {
-		const node = this.nodes.filter(element => element._attributes.id === id);
-
-		if (!Array.isArray(node)) {
-			console.error('[import] error while gathering unique node. got no element.');
-			return null;
-		} else if (node.length > 1) {
-			console.error('[import] error while gathering unique node. did not get unique node.');
-			return null;
-		}
-
-		return node;
-	}
-
-	/**
-	* returns the 'way' objects which have a tag with the given attribute.
-	* @param attribute 
-	* @returns 
-	*/
-	findByTag(attribute: string) {
-		const filtered = [];
+	findByTag(attribute: string, allowedClasses?: string[]) {
+		const filtered: MapDocumentNode[] = [];
 
 		for (let item of [...this.ways, ...this.relations]) {
 			if (item && item.tag) {
-				if (Array.isArray(item.tag)) {
-					for (let tag of item.tag) {
-						if (tag._attributes.k == attribute) {
+				const tags = Array.isArray(item.tag) ? item.tag : [item.tag];
+
+				for (let tag of tags) {
+					if (tag._attributes.k == attribute) {
+						if (allowedClasses) {
+							if (allowedClasses.includes(tag._attributes.v)) {
+								filtered.push(item);
+							}
+						} else {
 							filtered.push(item);
 						}
-					}
-				} else {
-					if (item.tag._attributes.k == attribute) {
-						filtered.push(item);
 					}
 				}
 			}
@@ -92,32 +100,32 @@ export class MapDocument {
 		return Array.isArray(filtered) ? filtered : [filtered];
 	}
 
-	/**
-	* returns the coordinates, which form the polygon of the given 'way' object
-	* @param way 
-	* @returns 
-	*/
-	getPoint(way): Point[] {
-		let coordinates: Point[] = [];
-		let nodes = way.nd;
+	getWayPoints(way: MapDocumentNode): Point[] {
+		let points: Point[] = [];
+		let nodeReferences = way.nd;
 
-		if(nodes) {
-			if(nodes.length > 1) {
-				for (let buildingNode of nodes) {
-					let nodeRef = buildingNode._attributes.ref;
-					coordinates.push(this.getPointOfNode(nodeRef));
-				}
+		if (Array.isArray(nodeReferences)) {
+			for (let nodeReference of nodeReferences) {
+				const node = this.findNodeById(nodeReference._attributes.ref);
+
+				points.push(this.getNodePoint(node));
 			}
-			else {
-				let nodeRef = nodes._attributes.ref;
-				coordinates.push(this.getPointOfNode(nodeRef));
-			}
+		} else {
+			const node = this.findNodeById(nodeReferences._attributes.ref);
+
+			points.push(this.getNodePoint(node));
 		}
 
-		return coordinates;
+		return points;
 	}
 
-	calculateCenter(points: Point[]) {
-		return Rectangle.fromPolygon(points).center;
+	getTag(item: MapDocumentNode, name: string) {
+		const tags = Array.isArray(item.tag) ? item.tag : [item.tag];
+
+		return tags.find(tag => tag._attributes.k == name)?._attributes.v;
+	}
+
+	hasTag(item: MapDocumentNode, name: string) {
+		return this.getTag(item, name) !== undefined;
 	}
 }

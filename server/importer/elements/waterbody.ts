@@ -21,11 +21,11 @@ export class WaterBodyImporter extends Importer {
 					const way = this.map.findMember(member);
 					
 					if (way) {
-						coordinates.push(...this.map.getPoint(way));
+						coordinates.push(...this.map.getWayPoints(way));
 					}
 				}
 			} else {
-				coordinates = this.map.getPoint(water);
+				coordinates = this.map.getWayPoints(water);
 			}
 
 			const center = this.map.calculateCenter(coordinates);

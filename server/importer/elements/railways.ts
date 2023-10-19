@@ -1,64 +1,43 @@
 import { Importer } from ".";
 import { Point } from "../../../shared/point";
 import { Rectangle } from "../../../shared/rectangle";
-import { DbContext, Railway } from "../../managed/database";
-import { MapDocument } from "../map-manager";
+import { Railway } from "../../managed/database";
+import { MapDocumentNode } from "../map-manager";
 
 export class RailwayImporter extends Importer {
-	allowedClasses = ['tram', 'rail'];
-
 	async import() {
-		const ways = this.map.findByTag('railway');
 		const existing = await this.database.railway.toArray();
 		const added: Railway[] = [];
 
-		for (let way of ways) {
+		for (let way of this.map.findByTag('railway', ['tram', 'rail'])) {
 			await this.importRail(way, existing, added);
 		}
 
 		console.log(`[import railway] added ${added.length} railways`);
 	}
 
-	async importRail(way, existing: Railway[], added: Railway[]) {
-		if (!Array.isArray(way.tag)) {
+	async importRail(way: MapDocumentNode, existing: Railway[], added: Railway[]) {
+		if (existing.find(railway => this.map.findWayById(railway.importerId))) {
 			return;
 		}
 
-		if (existing.find(railway => railway.importerId == way._attributes.id)) {
-			console.debug('existed');
-
-			return;
-		}
-
-		const type = way.tag.find(tag => tag._attributes.k == 'railway')?._attributes.v;
-
-		if (!this.allowedClasses.includes(type)) {
-			console.debug('had illegal type', type);
-
-			return;
-		}
-
-		if (way.tag.find(tag => tag._attributes.k == 'tunnel')) {
-			console.debug('had tunnel');
-
+		if (this.map.hasTag(way, 'tunnel')) {
 			return;
 		}
 
 		const railway = new Railway();
 		railway.importerId = way._attributes.id;
-		railway.gauge = way.tag.find(tag => tag._attributes.k == 'gauge')?._attributes.v;
 
-		const points: Point[] = [];
+		const gauge = this.map.getTag(way, 'gauge');
 
-		for (let reference of way.nd) {
-			const node = this.map.nodes.find(node => node._attributes.id == reference._attributes.ref);
-
-			points.push(new Point(+node._attributes.lat, +node._attributes.lon));
+		if (gauge) {
+			railway.gauge = +gauge;
 		}
 
-		railway.path = Point.pack(points);
+		const path = this.map.getWayPoints(way);
+		railway.path = Point.pack(path);
 
-		const boundingBox = Rectangle.fromPolygon(points);
+		const boundingBox = Rectangle.fromPolygon(path);
 		railway.minLatitude = boundingBox.minLatitude;
 		railway.maxLatitude = boundingBox.maxLatitude;
 		railway.minLongitude = boundingBox.minLongitude;
