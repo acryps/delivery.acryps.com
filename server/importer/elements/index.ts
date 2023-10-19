@@ -9,7 +9,7 @@ export class Importer {
 		protected map: MapDocument
 	) {}
 
-	async import() {
+	async import(): Promise<{ skipped: any[], added: any[] }> {
 		throw new Error(`No importer defined`);
 	}
 }

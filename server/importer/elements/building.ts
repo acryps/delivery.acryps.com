@@ -11,24 +11,19 @@ export class BuildingImporter extends Importer {
 		const importedBuildings = await this.database.building.includeTree({ id: true }).toArray();
 		this.importedBuildingIds = importedBuildings.map(building => building.id);
 
-		await this.importBuildings();
-		await this.guessMissingAddresses();
-	}
-
-	async importBuildings() {
 		console.log('[import building] importing buildings');
 		const buildings = this.map.findByTag('building');
 		
 		console.log('[import building] found ' + buildings.length + ' buildings');
 
-		let skipped = 0;
-		let added = 0;
+		const skipped = [];
+		const added = [];
 
 		for (let source of buildings) {
 			let openStreetMapId = source._attributes.id;
 
 			if (this.importedBuildingIds.includes(openStreetMapId)) {
-				skipped++;
+				skipped.push(source);
 			} else {
 				const building = new Building();
 				building.importerId = openStreetMapId;
@@ -46,11 +41,13 @@ export class BuildingImporter extends Importer {
 
 				await building.create();
 				
-				added++;
+				added.push(building);
 			}
-		};	
-		
-		console.log(`[import building] imported ${added}, skipped ${skipped} existing`);
+		};
+
+		this.guessMissingAddresses();
+
+		return { skipped, added };
 	}
 
 	private async guessMissingAddresses() {

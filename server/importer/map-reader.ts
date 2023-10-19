@@ -3,9 +3,8 @@ import { DbContext} from '../managed/database';
 import { ImportArea } from './import-area';
 import { RailwayImporter } from './elements/railways';
 import { BuildingImporter } from './elements/building';
-import { WaterBodyImporter } from './elements/waterbody';
+import { WaterBodyImporter } from './elements/water-body';
 import { MapDocument } from './map-manager';
-import { Importer } from './elements';
 
 export class MapReader {
 	static importers = [
