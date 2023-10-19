@@ -45,7 +45,7 @@ export class MapReader {
 		const source = process.env.IMPORT_SOURCE
 			.replace('${min-latitude}', boundingBox.minLatitude.toString())
 			.replace('${min-longitude}', boundingBox.minLongitude.toString())
-			.replace('${max-latitude}', boundingBox.maxLongitude.toString())
+			.replace('${max-latitude}', boundingBox.maxLatitude.toString())
 			.replace('${max-longitude}', boundingBox.maxLongitude.toString());
 		
 		console.log(`[import] downloading map from '${source}'`);
