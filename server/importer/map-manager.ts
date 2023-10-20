@@ -19,57 +19,61 @@ export class MapDocument {
 	}
 
 	get empty() {
-		return !this.hasNodes() && !this.hasWays();
-	}
-
-	hasNodes(): boolean {
-		return !this.nodes;
-	}
-
-	hasWays(): boolean {
-		return !this.ways;
-	}
-
-	hasRelations(): boolean {
-		return !this.relations;
+		return !this.nodes.length && !this.ways.length;
 	}
 
 	findMember(member) {
-		const memberId = member._attributes.ref;
+		try {
+			const memberId = member._attributes.ref;
 
-		for (let way of this.ways) {
-			if (way._attributes.id == memberId) {
-				return way;
+			for (let way of this.ways) {
+				if (way._attributes.id == memberId) {
+					return way;
+				}
 			}
+		} catch (error) {
+			throw new Error(`Failed to find member ${member}: ${error}`);
 		}
+		
 	}
 
 	findNodeById(id: string) {
-		const node = this.nodes.filter(element => element._attributes.id === id);
+		try {
+			
+			const node = this.nodes.filter(element => element._attributes.id === id);
 
-		if (node.length) {
-			throw new Error(`Node '${id}' not found`);
+			if (!node) {
+				throw new Error(`Node '${id}' not found`);
+			}
+			
+			if (node.length > 1) {
+				throw new Error(`Node '${id}' found multiple times`);
+			}
+
+			return node[0];
+
+		} catch (error) {
+			throw new Error(`Failed to find node with id ${id}: ${error}`);
 		}
 		
-		if (node.length > 1) {
-			throw new Error(`Node '${id}' found multiple times`);
-		}
-
-		return node[0];
 	}
 
 	findWayById(id: string) {
-		const way = this.ways.filter(element => element._attributes.id === id);
+		try {
+			const way = this.ways.filter(element => element._attributes.id === id);
 
-		if (way.length) {
-			throw new Error(`Way '${id}' not found`);
-		}
-		
-		if (way.length > 1) {
-			throw new Error(`Way '${id}' found multiple times`);
-		}
+			if (!way) {
+				throw new Error(`Way '${id}' not found`);
+			}
+			
+			if (way.length > 1) {
+				throw new Error(`Way '${id}' found multiple times`);
+			}
 
-		return way[0];
+			return way[0];
+		} catch (error) {
+			throw new Error(`Failed to find way with id ${id}: ${error}`);
+		}
 	}
 
 	getNodePoint(node: MapDocumentNode) {
@@ -77,46 +81,52 @@ export class MapDocument {
 	}
 
 	findByTag(attribute: string, allowedClasses?: string[]) {
-		const filtered: MapDocumentNode[] = [];
+		try {
+			const filtered: MapDocumentNode[] = [];
 
-		for (let item of [...this.ways, ...this.relations]) {
-			if (item && item.tag) {
-				const tags = Array.isArray(item.tag) ? item.tag : [item.tag];
-
-				for (let tag of tags) {
-					if (tag._attributes.k == attribute) {
-						if (allowedClasses) {
-							if (allowedClasses.includes(tag._attributes.v)) {
+			for (let item of [...this.ways, ...this.relations]) {
+				if (item && item.tag) {
+					const tags = Array.isArray(item.tag) ? item.tag : [item.tag];
+	
+					for (let tag of tags) {
+						if (tag._attributes.k == attribute) {
+							if (allowedClasses) {
+								if (allowedClasses.includes(tag._attributes.v)) {
+									filtered.push(item);
+								}
+							} else {
 								filtered.push(item);
 							}
-						} else {
-							filtered.push(item);
 						}
 					}
 				}
 			}
+	
+			return Array.isArray(filtered) ? filtered : [filtered];
+		} catch (error) {
+			throw new Error(`Failed to find by tag ${attribute}: ${error}`);
 		}
-
-		return Array.isArray(filtered) ? filtered : [filtered];
 	}
 
 	getWayPoints(way: MapDocumentNode): Point[] {
-		let points: Point[] = [];
-		let nodeReferences = way.nd;
+		try {
+			let points: Point[] = [];
+			let nodeReferences = way.nd;
 
-		if (Array.isArray(nodeReferences)) {
-			for (let nodeReference of nodeReferences) {
-				const node = this.findNodeById(nodeReference._attributes.ref);
-
+			if (Array.isArray(nodeReferences)) {
+				for (let nodeReference of nodeReferences) {
+					const node = this.findNodeById(nodeReference._attributes.ref);
+					points.push(this.getNodePoint(node));
+				}
+			} else if (nodeReferences) {
+				const node = this.findNodeById(nodeReferences._attributes.ref);
 				points.push(this.getNodePoint(node));
 			}
-		} else {
-			const node = this.findNodeById(nodeReferences._attributes.ref);
 
-			points.push(this.getNodePoint(node));
+			return points;
+		} catch (error) {
+			throw new Error(`Failed to get points of way: ${error}`);
 		}
-
-		return points;
 	}
 
 	getTag(item: MapDocumentNode, name: string) {
