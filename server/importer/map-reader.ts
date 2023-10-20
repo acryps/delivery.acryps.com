@@ -27,11 +27,14 @@ export class MapReader {
 
 			if (!map.empty) {
 				for (let importer of MapReader.importers) {
-					await new importer(this.database, this.area, map).import();
+					console.log(`[import] importing '${importer.name}'...`);
+					const result = await new importer(this.database, this.area, map).import();
+
+					console.log(`[import] imported '${importer.name}', added ${result.added.length}, skipped ${result.skipped.length}`);
 				}
 			}
 
-			this.database.import.create(this.area.toImport());
+			await this.database.import.create(this.area.toImport());
 		} catch (error) {
 			console.error(`[import] could not import map ${this.area.center}: ${error}`);
 
