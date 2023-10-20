@@ -12,11 +12,14 @@ export class AreaLoader {
 	 * loads the area surrounding the start-location into the database (if not loaded already)
 	 */
 	async importArea(location: Point) {
+		console.log(`[import] STARTING IMPORT:`)
+		console.log(`[import] importing area around location ${location}, clamp location to ${ImportArea.clampPointToArea(location)}`);
+		location = ImportArea.clampPointToArea(location);
 		const importedNeighbors: ImportArea[] = await this.getNeighboringImportAreas(location);
 		let center = importedNeighbors.find(area => area.getBoundingBox().contains(location));
 
 		if (!center) {
-			console.log(`[import] need to load area at ${location}`);
+			console.log(`[import] need to load start-area at ${location}`);
 			center = new ImportArea(location);
 
 			try {
@@ -31,9 +34,10 @@ export class AreaLoader {
 		}
 
 		const missingNeighbors: ImportArea[] = center.findMissingNeighbors(importedNeighbors);
-		console.debug(`[import] need to load ${missingNeighbors.length} areas around start-area`);
+		console.log(`[import] need to load ${missingNeighbors.length} areas around start-area`);
 
 		for (let missingNeighbor of missingNeighbors) {
+			console.log('[import] loading missing neighbor: ' + missingNeighbor.center);
 			const reader = new MapReader(this.database, missingNeighbor);
 
 			// load missing neighbor in background to reduce loading speed
@@ -53,12 +57,16 @@ export class AreaLoader {
 		const range = ImportArea.size * (1 + ImportArea.neighborhoodExtent * 2);
 		const sideLength = range / 2;
 
+		console.log(`[import] searching for imported neighbors in range lat = [${(location.latitude - sideLength)}, ${location.latitude + sideLength}], long = [${(location.longitude - sideLength)}, ${location.longitude + sideLength}]`);
+
 		const neighboringImports = await this.database.import
 			.where(area => area.centerLatitude.valueOf() < (location.latitude + sideLength).valueOf())
 			.where(area => area.centerLatitude.valueOf() > (location.latitude - sideLength).valueOf())
 			.where(area => area.centerLongitude.valueOf() < (location.longitude + sideLength).valueOf())
 			.where(area => area.centerLongitude.valueOf() > (location.longitude - sideLength).valueOf())
 			.toArray();
+
+		console.log(`[import] found ${neighboringImports.length} imported areas around location ${location}`);
 
 		return neighboringImports.map(neighbor => new ImportArea(new Point(neighbor.centerLatitude, neighbor.centerLongitude)));
 	}

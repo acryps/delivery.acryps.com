@@ -3,7 +3,7 @@ import { Rectangle } from '../../shared/rectangle';
 import { Import } from '../managed/database';
 
 export class ImportArea {
-	static readonly size = 0.003;
+	static readonly size = 0.005;
 	static readonly neighborhoodExtent = 1; // how many tiles we should go up / left / right / down
 
 	center: Point;
@@ -17,11 +17,14 @@ export class ImportArea {
 	 */
 	findMissingNeighbors(importedAreas: ImportArea[]) {
 		let missingNeighbors: ImportArea[] = [];
+		let neighbors: string[] = [];
 
 		for (let latitudeIndex = -ImportArea.neighborhoodExtent; latitudeIndex <= ImportArea.neighborhoodExtent; latitudeIndex++) {
 			for (let longitudeIndex = -ImportArea.neighborhoodExtent; longitudeIndex <= ImportArea.neighborhoodExtent; longitudeIndex++) {
-				if (latitudeIndex != 0 && longitudeIndex != 0) {
-					const requiredNeighbor = new Point(this.center.latitude + ImportArea.size * latitudeIndex, this.center.longitude + ImportArea.size * longitudeIndex);
+				if (latitudeIndex != 0 || longitudeIndex != 0) {
+					const requiredNeighbor = ImportArea.clampPointToArea(new Point(this.center.latitude + ImportArea.size * latitudeIndex, this.center.longitude + ImportArea.size * longitudeIndex));
+					neighbors.push(requiredNeighbor.toString());
+
 					const existingImport = importedAreas.find(importedArea => requiredNeighbor.latitude == importedArea.center.latitude && requiredNeighbor.longitude == importedArea.center.longitude);
 			
 					if (!existingImport) {
@@ -30,6 +33,8 @@ export class ImportArea {
 				}
 			}
 		}
+
+		console.log(`[import area] center ${this.center} with neighbors: ${neighbors.join('; ')}`);
 
 		return missingNeighbors;
 	}
@@ -42,8 +47,8 @@ export class ImportArea {
 		const length = this.size.toString().length - 2;
 
 		return new Point(
-			+Math.round((point.latitude / this.size) * this.size).toFixed(length),
-			+Math.round((point.longitude / this.size) * this.size).toFixed(length)
+			parseFloat((Math.round((point.latitude / this.size)) * this.size).toFixed(length)),
+			parseFloat((Math.round((point.longitude / this.size)) * this.size).toFixed(length))
 		);
 	}
 
