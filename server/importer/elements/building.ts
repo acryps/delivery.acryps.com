@@ -5,16 +5,14 @@ import { Building } from "../../managed/database";
 import { ImportArea } from "../import-area";
 
 export class BuildingImporter extends Importer {
-	importedBuildingIds: string[];
+	importedBuildingImporterIds: string[];
 
 	async import() {
-		const importedBuildings = await this.database.building.includeTree({ id: true }).toArray();
-		this.importedBuildingIds = importedBuildings.map(building => building.id);
+		const importedBuildings = await this.database.building.includeTree({ importerId: true }).toArray();
+		this.importedBuildingImporterIds = importedBuildings.map(building => building.importerId);
 
-		console.log('[import building] importing buildings');
 		const buildings = this.map.findByTag('building');
-		
-		console.log('[import building] found ' + buildings.length + ' buildings');
+		console.debug('[import building] loading ' + buildings?.length + ' buildings');
 
 		const skipped = [];
 		const added = [];
@@ -22,7 +20,7 @@ export class BuildingImporter extends Importer {
 		for (let source of buildings) {
 			let openStreetMapId = source._attributes.id;
 
-			if (this.importedBuildingIds.includes(openStreetMapId)) {
+			if (this.importedBuildingImporterIds.includes(openStreetMapId)) {
 				skipped.push(source);
 			} else {
 				const building = new Building();
@@ -45,22 +43,34 @@ export class BuildingImporter extends Importer {
 			}
 		};
 
-		this.guessMissingAddresses();
+		await this.guessMissingAddresses();
 
 		return { skipped, added };
 	}
 
 	private async guessMissingAddresses() {
+		console.log(`[import building] guessing missing addresses`);
 		const radius = ImportArea.size * 2;
 
-		const localBuildingsQuery = this.database.building
+		const unaddressedBuildings: Building[] = await this.database.building
 			.where(building => building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + radius).valueOf())
 			.where(building => building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - radius).valueOf())
 			.where(building => building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + radius).valueOf())
-			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf());
+			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf())
+			.where(building => building.address == null).toArray();
 
-		const unaddressedBuildings: Building[] = await localBuildingsQuery.where(building => building.address == null).toArray();
-		const addressSources: Building[] = await localBuildingsQuery.where(building => building.address == null).toArray();
+		const addressSources: Building[] = await this.database.building
+			.where(building => building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + radius).valueOf())
+			.where(building => building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - radius).valueOf())
+			.where(building => building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + radius).valueOf())
+			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf())
+			.where(building => building.address != null).toArray();
+
+		console.log(`[import building] found ${unaddressedBuildings.length} unaddressed buildings, found ${addressSources.length} address sources`);
+
+		if (addressSources.length == 0) {
+			console.warn(`[import] WARNING: could not guess missing addresses!`);
+		}
 		
 		for (let unaddressedBuilding of unaddressedBuildings) {
 			const center = new Point(unaddressedBuilding.centerLatitude, unaddressedBuilding.centerLongitude);
@@ -92,22 +102,30 @@ export class BuildingImporter extends Importer {
 	}
 
 	private async extractAddress(building) {
-		let buildingNodes = building.nd;
+		try {
+			let buildingNodes = building.nd;
 
-		if (buildingNodes) {
-			buildingNodes = Array.isArray(buildingNodes) ? buildingNodes : [buildingNodes];
-
-			for (let buildingNode of buildingNodes) {
-				let buildingNodeTags = this.map.findNodeById(buildingNode._attributes.ref).tag;
-				let address = this.addressFromTags(buildingNodeTags);
-
-				if (address) {
-					return address;
+			if (buildingNodes) {
+				buildingNodes = Array.isArray(buildingNodes) ? buildingNodes : [buildingNodes];
+	
+				for (let buildingNode of buildingNodes) {
+					let buildingNodeTags = this.map.findNodeById(buildingNode._attributes.ref).tag;
+					let address = this.addressFromTags(buildingNodeTags);
+	
+					if (address) {
+						return address;
+					}
 				}
 			}
-		}
 
-		return this.addressFromTags(building.tag);
+			const address = this.addressFromTags(building.tag);
+			return address;
+		}
+		catch (error) {
+			console.error(`[import building] failed to extract address: ${error}`);
+			throw new Error(`Failed to extract address: ${error}`);
+		}
+		
 	}
 
 	private addressFromTags(tags): string {
