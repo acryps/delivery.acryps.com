@@ -52,19 +52,8 @@ export class BuildingImporter extends Importer {
 		console.log(`[import building] guessing missing addresses`);
 		const radius = ImportArea.size * 2;
 
-		const unaddressedBuildings: Building[] = await this.database.building
-			.where(building => building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + radius).valueOf())
-			.where(building => building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - radius).valueOf())
-			.where(building => building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + radius).valueOf())
-			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf())
-			.where(building => building.address == null).toArray();
-
-		const addressSources: Building[] = await this.database.building
-			.where(building => building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + radius).valueOf())
-			.where(building => building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - radius).valueOf())
-			.where(building => building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + radius).valueOf())
-			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf())
-			.where(building => building.address != null).toArray();
+		const unaddressedBuildings: Building[] = await this.getLocalBuildingsQuery(radius).where(building => building.address == null).toArray();
+		const addressSources: Building[] = await this.getLocalBuildingsQuery(radius).where(building => building.address != null).toArray();
 
 		console.log(`[import building] found ${unaddressedBuildings.length} unaddressed buildings, found ${addressSources.length} address sources`);
 
@@ -82,6 +71,14 @@ export class BuildingImporter extends Importer {
 				await unaddressedBuilding.update();
 			}
 		}
+	}
+
+	private getLocalBuildingsQuery(radius: number) {
+		return this.database.building
+			.where(building => building.centerLatitude.valueOf() < (this.loadingArea.center.latitude + radius).valueOf())
+			.where(building => building.centerLatitude.valueOf() > (this.loadingArea.center.latitude - radius).valueOf())
+			.where(building => building.centerLongitude.valueOf() < (this.loadingArea.center.longitude + radius).valueOf())
+			.where(building => building.centerLongitude.valueOf() > (this.loadingArea.center.longitude - radius).valueOf());
 	}
 
 	private findNearestBuilding(origin: Point, buildings: Building[]): Building {
