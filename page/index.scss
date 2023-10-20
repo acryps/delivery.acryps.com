@@ -51,21 +51,28 @@ ui-create-game {
 
 	border: 1px solid var(--page-color);
 
-	ui-location ui-title,
-	ui-radii ui-title {
-		display: block;
-		margin-bottom: 0.25rem;
+	ui-location,
+	ui-radii,
+	ui-durations {
+		margin-bottom: 1rem;
 
-		font-size: 0.8rem;
+		ui-title {
+			display: block;
+			margin-bottom: 0.25rem;
+	
+			font-size: 0.8rem;
+		}
 	}
 
 	ui-location {
 		display: block;
-		margin-bottom: 1rem;
 	}
 
-	ui-radii {
-		ui-radius {
+	ui-radii,
+	ui-durations {
+		ui-radius,
+		ui-duration {
+			padding-inline: 0.25rem;
 			margin-right: 1rem;
 
 			cursor: pointer;

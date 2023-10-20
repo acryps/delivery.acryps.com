@@ -7,7 +7,8 @@ export class CreateGameComponent extends Component {
 		longitude
 	}
 
-	radius = gameConfiguration.radii[2];
+	radius = gameConfiguration.radii[gameConfiguration.defaultRadiusIndex];
+	duration = gameConfiguration.durationMinutes[gameConfiguration.defaultDurationIndex];
 
 	render() {
 		return <ui-create-game>
@@ -33,6 +34,20 @@ export class CreateGameComponent extends Component {
 				</ui-radius>)}
 			</ui-radii>
 
+			<ui-durations>
+				<ui-title>
+					Duration
+				</ui-title>
+
+				{gameConfiguration.durationMinutes.map(duration => <ui-duration ui-active={duration == this.duration} ui-click={() => {
+					this.duration = duration;
+
+					this.update();
+				}}>
+					{duration}'
+				</ui-duration>)}
+			</ui-durations>
+
 			<ui-action ui-create ui-click-text='Preparing Game...' ui-click={async () => {
 				const token = await fetch('/game', {
 					method: 'post',
@@ -44,7 +59,8 @@ export class CreateGameComponent extends Component {
 							latitude: +this.parameters.latitude,
 							longitude: +this.parameters.longitude
 						},
-						radius: this.radius
+						radius: this.radius,
+						duration: this.duration
 					})
 				}).then(response => response.json());
 

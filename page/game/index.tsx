@@ -5,7 +5,7 @@ import { DeliveryIndicator } from "./delivery";
 import { Player } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { Point } from "../../shared/point";
-import { TargetTracker } from "./target";
+import { TargetTrackerComponent } from "./target";
 import { Delivery } from "../../shared/delivery";
 import { Map } from "../../shared/map";
 import { StatsComponent } from "./stats";
@@ -24,10 +24,11 @@ export class GameComponent extends Component {
 	deliveryIndicator = new DeliveryIndicator();
 	stats = new StatsComponent();
 
-	targetTracker = new TargetTracker();
+	targetTracker = new TargetTrackerComponent();
 	status = new StatusComponent();
 
 	map: Map;
+	durationMinutes: number;
 
 	center: Point;
 	radius: number;
@@ -54,6 +55,7 @@ export class GameComponent extends Component {
 
 	async onload() {
 		const map = await fetch(`/map/${this.parameters.token}`).then(response => response.json());
+		this.durationMinutes = await fetch(`/duration/${this.parameters.token}`).then(response => response.json());
 
 		if (!map) {
 			this.navigate('/');
@@ -91,6 +93,7 @@ export class GameComponent extends Component {
 
 				if ('start' in data) {
 					this.lobby.remove();
+					this.stats.startCountdown(this.durationMinutes);
 				}
 
 				if ('assigned' in data) {

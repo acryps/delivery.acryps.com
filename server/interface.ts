@@ -16,9 +16,14 @@ export function registerInterface(app, database: DbContext) {
 	app.post('/game', async (request, response) => {
 		const center = new Point(request.body.center.latitude, request.body.center.longitude);
 		let radius = request.body.radius;
+		let duration = request.body.duration;
 
 		if (!(radius in gameConfiguration.radii)) {
 			radius = gameConfiguration.radii[gameConfiguration.defaultRadiusIndex];
+		}
+
+		if (!(duration in gameConfiguration.durationMinutes)) {
+			duration = gameConfiguration.durationMinutes[gameConfiguration.defaultDurationIndex];
 		}
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
@@ -57,7 +62,7 @@ export function registerInterface(app, database: DbContext) {
 			))
 		);
 
-		const game = new Game(map);
+		const game = new Game(map, duration);
 		games.push(game);
 		
 		game.onStop = () => games.splice(games.indexOf(game), 1);
@@ -83,6 +88,16 @@ export function registerInterface(app, database: DbContext) {
 		}
 
 		response.json(game.map);
+	});
+
+	app.get('/duration/:token', async (request, response) => {
+		const game = games.find(game => game.token == request.params.token.toLowerCase());
+
+		if (!game) {
+			return response.json(null);
+		}
+
+		response.json(game.durationMinutes);
 	});
 
 	app.ws('/join/:token', (socket, request) => {

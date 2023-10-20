@@ -14,6 +14,7 @@ export class Game {
 	readonly token: string;
 
 	map: Map;
+	durationMinutes: number;
 	
 	players: PlayerController[] = [];
 	deliveries: Delivery[] = [];
@@ -26,9 +27,10 @@ export class Game {
 		return !!this.gameLoop;
 	}
 
-	constructor(map: Map) {
+	constructor(map: Map, durationMinutes: number) {
 		this.players = [];
 		this.map = map;
+		this.durationMinutes = durationMinutes;
 		this.token = Math.random().toString(36).substring(2, 2 + tokenLength);
 
 		console.log(`game '${this.token}' created`);
@@ -79,8 +81,6 @@ export class Game {
 		this.broadcast({
 			start: true
 		});
-
-		console.log(`started game ${this.token}`);
 
 		let lastTick = Date.now();
 
@@ -141,6 +141,10 @@ export class Game {
 				lastTick = Date.now();
 			}
 		});
+
+		setTimeout(() => this.stop(), this.durationMinutes * 60 * 1000);
+
+		console.log(`started game ${this.token}`);
 	}
 
 	private assignPackage(player: PlayerController) {
@@ -182,10 +186,12 @@ export class Game {
 	}
 
 	private stop() {
-		clearInterval(this.gameLoop);
-		console.log(`stopped game ${this.token}`);
-
-		this.onStop();
+		if (this.gameLoop) {
+			clearInterval(this.gameLoop);
+			console.log(`stopped game ${this.token}`);
+	
+			this.onStop();
+		}
 	}
 
 	private isHost(player: PlayerController) {
