@@ -3,7 +3,7 @@ import { Rectangle } from '../../shared/rectangle';
 import { Import } from '../managed/database';
 
 export class ImportArea {
-	static readonly size = 0.005;
+	static readonly size = 0.003;
 	static readonly neighborhoodExtent = 1; // how many tiles we should go up / left / right / down
 
 	center: Point;
