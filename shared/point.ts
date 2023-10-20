@@ -8,8 +8,16 @@ export class Point {
 		public longitude: number
 	) {}
 
-	static from(points) {
-		return new Point(points.latitude, points.longitude);
+	static from(point) {
+		return new Point(point.latitude, point.longitude);
+	}
+
+	static pack(points: Point[]) {
+		return points.map(point => `${point.latitude},${point.longitude}`).join(';');
+	}
+
+	static unpack(packed: string) {
+		return packed.split(';').map(part => part.split(',')).map(parts => new Point(+parts[0], +parts[1]));
 	}
 
 	walk(angle: number, distance: number) {

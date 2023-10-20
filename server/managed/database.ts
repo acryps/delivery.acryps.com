@@ -32,38 +32,6 @@ export class Street extends Entity<StreetQueryProxy> {
 	};
 }
 			
-export class WaterBodyQueryProxy extends QueryProxy {
-	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-	get name(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
-}
-
-export class WaterBody extends Entity<WaterBodyQueryProxy> {
-	declare id: string;
-	centerLatitude: number;
-	centerLongitude: number;
-	polygon: string;
-	name: string;
-	
-
-	$$meta = {
-		source: "water_body",
-
-		columns: {
-			id: { type: "uuid", name: "id" },
-			centerLatitude: { type: "float4", name: "center_latitude" },
-			centerLongitude: { type: "float4", name: "center_longitude" },
-			polygon: { type: "text", name: "polygon" },
-			name: { type: "text", name: "name" }
-		},
-
-		get set(): DbSet<WaterBody, WaterBodyQueryProxy> { 
-			return new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, null);
-		}
-	};
-}
-			
 export class BuildingQueryProxy extends QueryProxy {
 	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
 	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
@@ -98,6 +66,41 @@ export class Building extends Entity<BuildingQueryProxy> {
 
 		get set(): DbSet<Building, BuildingQueryProxy> { 
 			return new DbSet<Building, BuildingQueryProxy>(Building, null);
+		}
+	};
+}
+			
+export class WaterBodyQueryProxy extends QueryProxy {
+	get centerLatitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get centerLongitude(): Partial<QueryNumber> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get polygon(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get name(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+	get importerId(): Partial<QueryString> { throw new Error("Invalid use of QueryModels. QueryModels cannot be used during runtime"); }
+}
+
+export class WaterBody extends Entity<WaterBodyQueryProxy> {
+	declare id: string;
+	centerLatitude: number;
+	centerLongitude: number;
+	polygon: string;
+	name: string;
+	importerId: string;
+	
+
+	$$meta = {
+		source: "water_body",
+
+		columns: {
+			id: { type: "uuid", name: "id" },
+			centerLatitude: { type: "float4", name: "center_latitude" },
+			centerLongitude: { type: "float4", name: "center_longitude" },
+			polygon: { type: "text", name: "polygon" },
+			name: { type: "text", name: "name" },
+			importerId: { type: "text", name: "importer_id" }
+		},
+
+		get set(): DbSet<WaterBody, WaterBodyQueryProxy> { 
+			return new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, null);
 		}
 	};
 }
@@ -213,16 +216,16 @@ export class Tree extends Entity<TreeQueryProxy> {
 
 export class DbContext {
 	street: DbSet<Street, StreetQueryProxy>;
-	waterBody: DbSet<WaterBody, WaterBodyQueryProxy>;
 	building: DbSet<Building, BuildingQueryProxy>;
+	waterBody: DbSet<WaterBody, WaterBodyQueryProxy>;
 	railway: DbSet<Railway, RailwayQueryProxy>;
 	import: DbSet<Import, ImportQueryProxy>;
 	tree: DbSet<Tree, TreeQueryProxy>;
 
 	constructor(private runContext: RunContext) {
 		this.street = new DbSet<Street, StreetQueryProxy>(Street, this.runContext);
-		this.waterBody = new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, this.runContext);
 		this.building = new DbSet<Building, BuildingQueryProxy>(Building, this.runContext);
+		this.waterBody = new DbSet<WaterBody, WaterBodyQueryProxy>(WaterBody, this.runContext);
 		this.railway = new DbSet<Railway, RailwayQueryProxy>(Railway, this.runContext);
 		this.import = new DbSet<Import, ImportQueryProxy>(Import, this.runContext);
 		this.tree = new DbSet<Tree, TreeQueryProxy>(Tree, this.runContext);

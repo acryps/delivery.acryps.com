@@ -1,55 +1,48 @@
-import { Point } from "../../shared/point";
-import { DbContext, Import } from "../managed/database";
-import { LoadingArea } from "./loading-area";
-import { MapReader } from "./map-reader";
+import { Point } from '../../shared/point';
+import { DbContext, Import } from '../managed/database';
+import { ImportArea } from './import-area';
+import { MapReader } from './map-reader';
 
 export class AreaLoader {
-
 	constructor(
 		private database: DbContext
-	){}
+	) {}
 
 	/**
 	 * loads the area surrounding the start-location into the database (if not loaded already)
-	 * @param startLocation 
 	 */
-	async loadArea(startLocation: Point) {
+	async importArea(location: Point) {
+		console.log(`[import] STARTING IMPORT:`)
+		console.log(`[import] importing area around location ${location}, clamp location to ${ImportArea.clampPointToArea(location)}`);
+		location = ImportArea.clampPointToArea(location);
+		const importedNeighbors: ImportArea[] = await this.getNeighboringImportAreas(location);
+		let center = importedNeighbors.find(area => area.getBoundingBox().contains(location));
 
-		let loadingAreasAroundStart: LoadingArea[] = await this.getSurroundingLoadingAreas(startLocation);
+		if (!center) {
+			console.log(`[import] need to load start-area at ${location}`);
+			center = new ImportArea(location);
 
-		let startArea: LoadingArea;
+			try {
+				const startAreaLoader = new MapReader(this.database, center);
 
-		loadingAreasAroundStart.forEach(loadingArea => {
-			if (loadingArea.getBoundingBox().contains(startLocation)) {
-				startArea = loadingArea;
-			}
-		});
+				await startAreaLoader.import();
+			} catch (error) {
+				console.warn(`[import] could not import map ${location}`, error);
 
-		if (startArea === null || startArea === undefined) {
-			console.debug("[import] need to load start-area");
-
-			startArea = LoadingArea.defineNewArea(startLocation);
-			let startAreaLoader = new MapReader(this.database, startArea);
-
-			if (await startAreaLoader.loadMap()) {
-				await this.database.import.create(startArea.toImport());
-			} else {
-				console.warn("[import] could not correctly load map");
+				throw new Error(`Could not import map for ${location}`);
 			}
 		}
 
-		let areasToLoad: LoadingArea[] = startArea.missingNeighbors(loadingAreasAroundStart);
+		const missingNeighbors: ImportArea[] = center.findMissingNeighbors(importedNeighbors);
+		console.log(`[import] need to load ${missingNeighbors.length} areas around start-area`);
 
-		console.debug("[import] need to load "+ areasToLoad.length + " areas around start-area");
+		for (let missingNeighbor of missingNeighbors) {
+			console.log('[import] loading missing neighbor: ' + missingNeighbor.center);
+			const reader = new MapReader(this.database, missingNeighbor);
 
-		for (let areaToLoad of areasToLoad) {
-			let areaLoader = new MapReader(this.database, areaToLoad);
-
-			areaLoader.loadMap().then(successful => {
-				if (successful) {
-					this.database.import.create(areaToLoad.toImport());
-				}
-			}).catch(error => {
+			// load missing neighbor in background to reduce loading speed
+			// this might not load all buildings visible outside the games map, which does not impact gameplay
+			reader.import().catch(error => {
 				console.warn(`[import] could not load map: ${error}`);
 			});
 		}
@@ -60,17 +53,21 @@ export class AreaLoader {
 	 * @param location 
 	 * @returns 
 	 */
-	private async getSurroundingLoadingAreas(location: Point): Promise<LoadingArea[]> {
-		const range = LoadingArea.size * 10;
+	private async getNeighboringImportAreas(location: Point) {
+		const range = ImportArea.size * (1 + ImportArea.neighborhoodExtent * 2);
+		const sideLength = range / 2;
 
-		let sideLength = range/2;
-		let importsSurroundingLocation: Import[] = await this.database.import.where(importObject => 
-			importObject.centerLatitude.valueOf() < (location.latitude + sideLength).valueOf() && 
-			importObject.centerLatitude.valueOf() > (location.latitude - sideLength).valueOf() && 
-			importObject.centerLongitude.valueOf() < (location.longitude + sideLength).valueOf() &&
-			importObject.centerLongitude.valueOf() > (location.longitude - sideLength).valueOf()
-			).toArray();
+		console.log(`[import] searching for imported neighbors in range lat = [${(location.latitude - sideLength)}, ${location.latitude + sideLength}], long = [${(location.longitude - sideLength)}, ${location.longitude + sideLength}]`);
 
-		return LoadingArea.fromImportsArray(importsSurroundingLocation);
+		const neighboringImports = await this.database.import
+			.where(area => area.centerLatitude.valueOf() < (location.latitude + sideLength).valueOf())
+			.where(area => area.centerLatitude.valueOf() > (location.latitude - sideLength).valueOf())
+			.where(area => area.centerLongitude.valueOf() < (location.longitude + sideLength).valueOf())
+			.where(area => area.centerLongitude.valueOf() > (location.longitude - sideLength).valueOf())
+			.toArray();
+
+		console.log(`[import] found ${neighboringImports.length} imported areas around location ${location}`);
+
+		return neighboringImports.map(neighbor => new ImportArea(new Point(neighbor.centerLatitude, neighbor.centerLongitude)));
 	}
 }

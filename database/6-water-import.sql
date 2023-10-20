@@ -1,0 +1,1 @@
+ALTER TABLE water_body ADD importer_id TEXT;
