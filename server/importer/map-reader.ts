@@ -4,7 +4,7 @@ import { ImportArea } from './import-area';
 import { RailwayImporter } from './elements/railways';
 import { BuildingImporter } from './elements/building';
 import { WaterBodyImporter } from './elements/water-body';
-import { MapDocument } from './map-manager';
+import { MapDocument } from './map-document';
 
 export class MapReader {
 	static importers = [

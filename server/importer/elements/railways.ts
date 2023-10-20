@@ -2,7 +2,7 @@ import { Importer } from ".";
 import { Point } from "../../../shared/point";
 import { Rectangle } from "../../../shared/rectangle";
 import { Railway } from "../../managed/database";
-import { MapDocumentNode } from "../map-manager";
+import { MapDocumentNode } from "../map-document";
 
 export class RailwayImporter extends Importer {
 	async import() {

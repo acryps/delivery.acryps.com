@@ -1,6 +1,6 @@
 import { DbContext } from "../../managed/database";
 import { ImportArea } from "../import-area";
-import { MapDocument } from "../map-manager";
+import { MapDocument } from "../map-document";
 
 export class Importer {
 	constructor(

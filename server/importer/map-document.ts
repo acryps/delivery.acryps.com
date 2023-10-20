@@ -34,12 +34,10 @@ export class MapDocument {
 		} catch (error) {
 			throw new Error(`Failed to find member ${member}: ${error}`);
 		}
-		
 	}
 
 	findNodeById(id: string) {
 		try {
-			
 			const node = this.nodes.filter(element => element._attributes.id === id);
 
 			if (!node) {
@@ -51,11 +49,9 @@ export class MapDocument {
 			}
 
 			return node[0];
-
 		} catch (error) {
 			throw new Error(`Failed to find node with id ${id}: ${error}`);
 		}
-		
 	}
 
 	findWayById(id: string) {

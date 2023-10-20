@@ -6,7 +6,7 @@ import { ClientMessage } from "../shared/messages";
 import { BuildingViewModel } from "../shared/building";
 import { Map } from "../shared/map";
 import { Rectangle } from "../shared/rectangle";
-import { AreaLoader } from "./importer/area-loader";
+import { Importer } from "./importer";
 import { Railway } from "../shared/railway";
 import { gameConfiguration } from "../shared/constants";
 
@@ -27,8 +27,9 @@ export function registerInterface(app, database: DbContext) {
 		}
 
 		const boundingBox = Rectangle.fromCenterRadius(center, radius);
-		let areaLoader = new AreaLoader(database);
-		await areaLoader.importArea(center);
+
+		// import map
+		await new Importer(database).import(center);
 
 		// get all buildings in a way larger the area
 		// then take all buildings that touch the bounding box

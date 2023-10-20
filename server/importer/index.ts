@@ -3,15 +3,15 @@ import { DbContext, Import } from '../managed/database';
 import { ImportArea } from './import-area';
 import { MapReader } from './map-reader';
 
-export class AreaLoader {
+export class Importer {
 	constructor(
 		private database: DbContext
 	) {}
 
 	/**
-	 * loads the area surrounding the start-location into the database (if not loaded already)
+	 * imports the area surrounding the start-location into the database (if not loaded already)
 	 */
-	async importArea(location: Point) {
+	async import(location: Point) {
 		console.log(`[import] STARTING IMPORT:`)
 		console.log(`[import] importing area around location ${location}, clamp location to ${ImportArea.clampPointToArea(location)}`);
 		location = ImportArea.clampPointToArea(location);
@@ -50,8 +50,6 @@ export class AreaLoader {
 
 	/**
 	 * returns the loading-areas surrounding the given location, which are already loaded in the database
-	 * @param location 
-	 * @returns 
 	 */
 	private async getNeighboringImportAreas(location: Point) {
 		const range = ImportArea.size * (1 + ImportArea.neighborhoodExtent * 2);
