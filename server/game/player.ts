@@ -19,7 +19,7 @@ export class PlayerController {
 	assigned: Delivery;
 	pickedUp: Delivery;
 
-	score: number;
+	score: number = 0;
 
 	constructor (
 		public socket: WebSocket,
@@ -49,6 +49,8 @@ export class PlayerController {
 		}
 
 		if (this.pickedUp?.destination == building) {
+			this.score += this.pickedUp.worth;
+
 			onDeliver(this.pickedUp);
 
 			return;

@@ -112,7 +112,8 @@ export class Game {
 								if (victim.pickedUp) {
 									const distance = thief.position.distance(victim.position);
 
-									if (distance < this.stealingDistance) {
+									if (distance <= this.stealingDistance) {
+										victim.pickedUp.carrier = thief;
 										thief.pickedUp = victim.pickedUp;
 
 										this.broadcast({ 
@@ -148,11 +149,8 @@ export class Game {
 	}
 
 	private assignPackage(player: PlayerController) {
-		if (player.pickedUp) {
-			player.score += player.pickedUp.worth;
-			player.pickedUp = null;
-		}
-
+		player.pickedUp = null;
+		
 		const usedBuildings: BuildingViewModel[] = []; 
 
 		for (let player of this.players) {
@@ -193,7 +191,7 @@ export class Game {
 	}
 
 	private close() {
-		console.log(`stopped game '${this.token}'`)
+		console.log(`closed game '${this.token}'`)
 		this.onclose();
 	}
 

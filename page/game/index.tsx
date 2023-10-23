@@ -46,7 +46,7 @@ export class GameComponent extends Component {
 	}
 
 	get highscore() {
-		return this.players.sort((a, b) => a.score - b.score)[0]?.score;
+		return this.players.sort((a, b) => b.score - a.score)[0]?.score;
 	}
 
 	onrouteleave() {
@@ -99,10 +99,6 @@ export class GameComponent extends Component {
 				if ('assigned' in data) {
 					const player = this.players.find(player => player.id == data.assigned.assignee);
 
-					if (this.player.delivery) {
-						this.player.updateScore();
-					}
-
 					player.delivery = Delivery.from(data.assigned, this.players, this.map);
 
 					this.deliveryIndicator.update();
@@ -131,11 +127,21 @@ export class GameComponent extends Component {
 					const thief = this.players.find(player => player.id == data.steal.thief);
 					const victim = this.players.find(player => player.id == data.steal.victim);
 
+					victim.delivery.carrier = thief;
 					thief.delivery = victim.delivery;
+
 					this.deliveryIndicator.update();
 					this.stats.update();
 
 					this.status.show(thief, ' stole ', victim, '`s package');
+				}
+
+				if ('delivered' in data) {
+					const deliverer = this.players.find(player => player.delivery?.id == data.delivered);
+
+					if (deliverer) {
+						deliverer.updateScore();
+					}
 				}
 			};
 		};

@@ -15,14 +15,14 @@ export function registerInterface(app, database: DbContext) {
 
 	app.post('/game', async (request, response) => {
 		const center = new Point(request.body.center.latitude, request.body.center.longitude);
-		let radius = request.body.radius;
-		let duration = request.body.duration;
+		let radius = +request.body.radius;
+		let duration = +request.body.duration;
 
-		if (!(radius in gameConfiguration.radii)) {
+		if (!gameConfiguration.radii.includes(radius)) {
 			radius = gameConfiguration.radii[gameConfiguration.defaultRadiusIndex];
 		}
 
-		if (!(duration in gameConfiguration.durationMinutes)) {
+		if (!gameConfiguration.durationMinutes.includes(duration)) {
 			duration = gameConfiguration.durationMinutes[gameConfiguration.defaultDurationIndex];
 		}
 
