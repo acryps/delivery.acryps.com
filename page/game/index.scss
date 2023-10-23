@@ -95,6 +95,13 @@ ui-game {
 
 			text-align: end;
 
+			ui-timer {
+				&[ui-final-seconds] {
+					transform-origin: 100% 0%;
+					animation: timer 1s;
+				}
+			}
+
 			ui-score {
 				position: relative;
 				flex: 1;
@@ -263,5 +270,21 @@ ui-game {
 
 		transform: rotate(var(--angle));
 		transform-origin: center;
+	}
+}
+
+@keyframes timer {
+	0% {
+		transform: scale(1);
+		color: var(--player-color);
+	}
+
+	25% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+		color: var(--page-color);
 	}
 }

@@ -4,6 +4,8 @@ import { GameComponent } from ".";
 export class StatsComponent extends Component {
 	declare parent: GameComponent;
 
+	readonly finalSeconds: number = 10;
+
 	private countdownSeconds: number = 0;
 	private countdownInterval: number;
 	
@@ -36,7 +38,7 @@ export class StatsComponent extends Component {
 
 	render() {
 		return <ui-stats>
-			<ui-timer>{this.minutes}:{this.seconds}</ui-timer>
+			<ui-timer ui-final-seconds={this.countdownSeconds <= this.finalSeconds}>{this.minutes}:{this.seconds}</ui-timer>
 
 			{this.parent.player && <ui-score>
 				<ui-current>{this.parent.player.score}</ui-current>
