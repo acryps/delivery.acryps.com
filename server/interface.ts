@@ -65,7 +65,7 @@ export function registerInterface(app, database: DbContext) {
 		const game = new Game(map, duration);
 		games.push(game);
 		
-		game.onStop = () => games.splice(games.indexOf(game), 1);
+		game.onclose = () => games.splice(games.indexOf(game), 1);
 
 		response.json(game.token);
 	});

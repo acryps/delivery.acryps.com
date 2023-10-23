@@ -3,7 +3,6 @@ import { PlayerController } from "./player";
 import { ServerMessage } from "../../shared/messages";
 import { BuildingViewModel } from "../../shared/building";
 import { tokenLength } from "../../shared/constants";
-import { Rectangle } from "../../shared/rectangle";
 import { Delivery } from "../../shared/delivery";
 
 export class Game {
@@ -19,7 +18,7 @@ export class Game {
 	players: PlayerController[] = [];
 	deliveries: Delivery[] = [];
 
-	onStop: () => void;
+	onclose: () => void;
 
 	private gameLoop: NodeJS.Timeout;
 
@@ -63,8 +62,9 @@ export class Game {
 		if (!this.players.length) {
 			console.log(playerLeaveMessage);
 			this.stop();
+			this.close();
 		} else {
-			console.log(`${playerLeaveMessage}, '${this.players[0].name} is now host'`);
+			console.log(`${playerLeaveMessage}, '${this.players[0].name}' is now host`);
 		}
 	}
 
@@ -188,10 +188,13 @@ export class Game {
 	private stop() {
 		if (this.gameLoop) {
 			clearInterval(this.gameLoop);
-			console.log(`stopped game ${this.token}`);
-	
-			this.onStop();
+			console.log(`stopped game '${this.token}'`);
 		}
+	}
+
+	private close() {
+		console.log(`stopped game '${this.token}'`)
+		this.onclose();
 	}
 
 	private isHost(player: PlayerController) {
