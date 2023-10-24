@@ -50,6 +50,7 @@
 	background: var(--page-background);
 
 	cursor: pointer;
+	user-select: none;
 
 	&:hover {
 		border-color: var(--page-color-dimmed);
@@ -67,4 +68,17 @@
 	text-align: center;
 	color: var(--page-background);
 	background: var(--page-color-dimmed);
+}
+
+@mixin text-field {
+	all: initial;
+
+	flex-grow: 1;
+	max-width: 20rem;
+	margin-right: 1rem;
+	padding: 1rem;
+
+	font: inherit;
+	background: var(--page-background);
+	border: 2px solid var(--primary-contrast-color);
 }

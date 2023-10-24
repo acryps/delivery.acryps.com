@@ -1,0 +1,150 @@
+ui-home {
+	display: block;
+	margin: 0 auto;
+	padding: 2rem;
+	max-width: var(--page-width);
+
+	ui-section {
+		display: block;
+		margin-bottom: 2rem;
+
+		> ui-title {
+			font-size: 1.75rem;
+			font-weight: bold;
+		}
+	}
+
+	ui-join {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 1rem;
+		padding: 1rem;
+
+		background: var(--primary-color);
+
+		input {
+			@include text-field;
+		}
+
+		ui-action {
+			@include primary-action;
+		}
+	}
+
+	ui-panel {
+		display: block;
+
+		background: var(--panel-background);
+
+		> ui-title {
+			display: block;
+			padding: 2rem;
+
+			font-size: 2.5rem;
+			font-weight: bold;
+		}
+
+		ui-create-game {
+			display: block;
+			padding: 2rem;
+
+			> ui-location,
+			> ui-radius,
+			> ui-duration {
+				display: block;
+				margin-bottom: 2rem;
+
+				> ui-title {
+					display: block;
+					margin-bottom: 0.5rem;
+
+					font-weight: bold;
+				}
+			}
+
+			> ui-location {
+				ui-form {
+					display: flex;
+
+					input {
+						@include text-field;
+						
+						width: 50%;
+					}
+				}
+
+				ui-presets {
+					display: block;
+					margin-top: 0.5rem;
+					margin-inline: -0.5rem;
+
+					ui-action {
+						display: inline-block;
+						margin: 0.5rem;
+						padding: 0.5rem 0.75rem;
+
+						color: var(--secondary-contrast-color);
+						background: var(--secondary-color);
+						cursor: pointer;
+
+						&:hover {
+							background-color: vaR(--primary-color);
+						}
+
+						&[ui-current-location] {
+							font-weight: bold;
+						}
+					}
+				}
+			}
+
+			> ui-radius,
+			> ui-duration {
+				ui-radii,
+				ui-durations {
+					display: block;
+					margin-top: 0.5rem;
+					margin-inline: -0.5rem;
+
+					ui-radius,
+					ui-duration {
+						display: inline-block;
+						margin: 0.5rem;
+						padding: 0.5rem 0.75rem;
+
+						color: var(--page-color);
+						background: var(--page-background);
+						cursor: pointer;
+
+						&:hover {
+							background-color: vaR(--primary-color);
+						}
+
+						&[ui-active] {
+							background: var(--primary-color);
+						}
+					}
+				}
+			}
+
+			ui-action[ui-create] {
+				@include primary-action;
+
+				display: inline-block;
+			}
+		}
+
+		@media (min-width: 900px) {
+			display: flex;
+
+			> ui-title {
+				width: 30%;
+				padding-block: 4rem;
+			}
+
+			ui-create-game {
+				flex-grow: 1;
+			}
+		}
+	}
+}
