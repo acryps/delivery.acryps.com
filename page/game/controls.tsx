@@ -24,6 +24,8 @@ export class Controls {
 		let leftActive = false;
 		let rightActive = false;
 
+		let wasMoving = false;
+
 		setInterval(() => {
 			if (leftActive) {
 				this.direction += Controls.keyboardRotationSpeed;
@@ -35,7 +37,9 @@ export class Controls {
 
 			if (forwardActive || leftActive || rightActive) {
 				this.onMove(this.direction);
-			} else {
+
+				wasMoving = true;
+			} else if (wasMoving) {
 				this.onStop();
 			}
 		}, Controls.keyboardRepeatingInterval);
