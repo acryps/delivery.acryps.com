@@ -44,6 +44,8 @@ ui-navigation {
 	top: 0;
 
 	display: block;
+
+	background: var(--page-background);
 	border-bottom: var(--page-border);
 
 	ui-container {

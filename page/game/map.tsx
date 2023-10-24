@@ -6,13 +6,14 @@ import { RenderStyle } from "./style";
 import { Railway } from "../../shared/railway";
 
 import crown from "url:../assets/crown.svg";
+import { Controls } from "./controls";
 
 export class MapComponent extends Component {
 	declare parent: GameComponent;
 
 	static readonly playerSize = 20;
 
-	playerViewLocation = { x: 0.5, y: 0.9 };
+	playerMapPosition = { x: 0.5, y: 0.9 };
 
 	realMapHeight = 150; // meters
 
@@ -29,6 +30,8 @@ export class MapComponent extends Component {
 	notchStyle: RenderStyle;
 	railwayGravelStyle: RenderStyle;
 	railwayRailStyle: RenderStyle;
+
+	keyboardEventRepeater = setTimeout(() => {});
 
 	private crownImage: HTMLImageElement;
 
@@ -60,8 +63,6 @@ export class MapComponent extends Component {
 
 			this.scale = this.height / this.realMapHeight;
 
-			let startTouch;
-
 			const style = getComputedStyle(mapCanvas);
 
 			this.buildingStyle = new RenderStyle('building', style);
@@ -70,37 +71,24 @@ export class MapComponent extends Component {
 			this.railwayGravelStyle = new RenderStyle('railway-gravel', style);
 			this.railwayRailStyle = new RenderStyle('railway-rail', style);
 			
-			mapCanvas.ontouchstart = event => {
-				startTouch = {
-					direction: this.parent.direction,
-					angle: Math.atan2(
-						this.width * this.playerViewLocation.x - event.touches[0].clientX, 
-						this.height * this.playerViewLocation.y - event.touches[0].clientY
-					)
-				};
+			new Controls(
+				this.parent.direction,
+				mapCanvas,
+				this.playerMapPosition,
+				document,
 
-				this.parent.socket.send(JSON.stringify({ moveAngle: Math.PI - this.parent.direction + Math.PI / 2 }));
-			};
+				direction => {
+					this.parent.direction = direction;
 
-			mapCanvas.ontouchmove = event => {
-				event.preventDefault();
-
-				this.parent.direction = startTouch.direction + startTouch.angle - Math.atan2(
-					this.width * this.playerViewLocation.x - event.touches[0].clientX, 
-					this.height * this.playerViewLocation.y - event.touches[0].clientY
-				);
-
-				this.parent.socket.send(JSON.stringify({ moveAngle: Math.PI - this.parent.direction + Math.PI / 2 }));
-			};
-
-			mapCanvas.ontouchend = mapCanvas.ontouchcancel = () => {
-				this.parent.socket.send(JSON.stringify({ moveAngle: null }));
-			};
+					this.parent.socket.send(JSON.stringify({ moveAngle: direction }));
+				},
+				() => this.parent.socket.send(JSON.stringify({ moveAngle: null }))
+			);
 
 			const context = mapCanvas.getContext('2d');
 
 			// center to player view
-			context.translate(this.width * this.playerViewLocation.x, this.height * this.playerViewLocation.y);
+			context.translate(this.width * this.playerMapPosition.x, this.height * this.playerMapPosition.y);
 
 			this.renderFrame(context);
 		});

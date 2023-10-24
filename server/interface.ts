@@ -128,7 +128,11 @@ export function registerInterface(app, database: DbContext) {
 			}
 
 			if ('moveAngle' in gameMessage) {
-				player.moveAngle = gameMessage.moveAngle;
+				if (gameMessage.moveAngle == null) {
+					player.moveAngle = null;
+				} else {
+					player.moveAngle = Math.PI - gameMessage.moveAngle + Math.PI / 2;
+				}
 			}
 		});
 

@@ -36,8 +36,8 @@ export class TargetTrackerComponent extends Component {
 	render() {
 		return <ui-tracker style={`
 			--player-size: ${MapComponent.playerSize}px;
-			--offset-x: ${this.parent.mapRenderer.playerViewLocation.x};
-			--offset-y: ${this.parent.mapRenderer.playerViewLocation.y};
+			--offset-x: ${this.parent.mapRenderer.playerMapPosition.x};
+			--offset-y: ${this.parent.mapRenderer.playerMapPosition.y};
 		`}></ui-tracker>;
 	}
 }

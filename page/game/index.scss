@@ -1,6 +1,6 @@
 :root {
 	--lobby-width: min(calc(100vw - 2rem), 30rem);
-	--lobby-height: min(calc(100vh - 2rem), 50rem);
+	--lobby-height: min(calc(100svh - 8rem), 50rem);
 }
 
 ui-game {
