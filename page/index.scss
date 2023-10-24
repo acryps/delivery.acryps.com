@@ -1,13 +1,28 @@
 @import './components.scss';
 
 @import './assets/font/index.scss';
+
 @import './game/index.scss';
+@import './home/index.scss';
 
 :root {
-	--page-color: #fff;
-	--page-color-dimmed: #ddd;
-	--page-background: #000;
+	--primary-color: #fc0;
+	--primary-contrast-color: #333;
+
+	--secondary-color: #dfd6c5;
+	--secondary-contrast-color: #000;
+
+	--page-color: #000;
+	--page-color-dimmed: #222;
+	--page-background: #fff;
 	--page-error: #ff5a5a;
+
+	--page-border-color: #e5e5e5;
+	--page-border: 1px solid var(--page-border-color);
+
+	--page-width: 1500px;
+
+	--panel-background: #f4f3f1;
 }
 
 body {
@@ -24,123 +39,25 @@ ui-page {
 	display: block;
 }
 
-ui-home {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+ui-navigation {
+	position: sticky;
+	top: 0;
 
-	position: fixed;
-	inset: 0;
+	display: block;
 
-	ui-action {
-		@include action;
+	background: var(--page-background);
+	border-bottom: var(--page-border);
 
-		margin: 1rem;
-		padding-block: 1rem;
-	}
-}
-
-ui-create-game {
-	display: flex;
-	flex-direction: column;
-	padding: 1rem;
-
-	position: fixed;
-	inset: 1rem;
-
-	border: 1px solid var(--page-color);
-
-	ui-location,
-	ui-radii,
-	ui-durations {
-		margin-bottom: 1rem;
-
-		ui-title {
-			display: block;
-			margin-bottom: 0.25rem;
-	
-			font-size: 0.8rem;
-		}
-	}
-
-	ui-location {
+	ui-container {
 		display: block;
-	}
+		max-width: var(--page-width);
+		margin: 0 auto;
 
-	ui-radii,
-	ui-durations {
-		ui-radius,
-		ui-duration {
-			padding-inline: 0.25rem;
-			margin-right: 1rem;
+		font-size: 0;
+		border-right: var(--page-border);
 
-			cursor: pointer;
-
-			&[ui-active] {
-				color: var(--page-background);
-				background: var(--page-color);
-			}
-		}
-	}
-
-	ui-action {
-		&[ui-create] {
-			@include primary-action;
-
-			margin-top: auto;
-		}
-
-		&[ui-back] {
-			@include action;
-
-			margin-top: 1rem;
-		}
-	}
-}
-
-ui-join {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	row-gap: 1rem;
-
-	position: fixed;
-	inset: 0;
-
-	text-align: center;
-
-	input {
-		all: unset;
-
-		display: block;
-		width: 8rem;
-		padding: 1rem;
-
-		border: 2px solid var(--page-color);
-		background: var(--page-background);
-		color: var(--page-color);
-
-		text-transform: uppercase;
-
-		&[ui-error] {
-			border-color: var(--page-error);
-			animation: shake 0.3s;
-		}
-	}
-
-	ui-action {
-		width: 8rem;
-		
-		&[ui-join] {
-			@include primary-action;
-
-			margin-bottom: 1rem;
-		}
-
-		&[ui-back] {
-			@include action;
+		img {
+			height: 3.5rem;
 		}
 	}
 }

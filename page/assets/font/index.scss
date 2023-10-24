@@ -1,15 +1,21 @@
 :root {
-	--font-family: tomorrow;
+	--font-family: frutiger-neue-post;
 }
 
 @font-face {
-	font-family: tomorrow;
+	font-family: frutiger-neue-post;
+	font-weight: light;
+	src: url('./assets/font/light.woff2');
+}
+
+@font-face {
+	font-family: frutiger-neue-post;
 	font-weight: regular;
-	src: url('./assets/font/regular.ttf');
+	src: url('./assets/font/regular.woff2');
 }
 
 @font-face {
-	font-family: tomorrow;
+	font-family: frutiger-neue-post;
 	font-weight: bold;
-	src: url('./assets/font/bold.ttf');
+	src: url('./assets/font/bold.woff2');
 }
