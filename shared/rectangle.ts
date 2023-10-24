@@ -49,7 +49,7 @@ export class Rectangle {
 	}
 
 	static fromCenterRadius(center: Point, radius: number) {
-		const centerLatRad = (center.latitude * Math.PI) / 180;
+		const centerLatitudeRad = (center.latitude * Math.PI) / 180;
 		
 		// Calculate the angular distance in radians
 		const angularDistance = radius / Point.earthRadius;
@@ -58,7 +58,7 @@ export class Rectangle {
 		return this.fromCenter(
 			center, 
 			(angularDistance * 180) / Math.PI,
-			(angularDistance * 180) / (Math.PI * Math.cos(centerLatRad))
+			(angularDistance * 180) / (Math.PI * Math.cos(centerLatitudeRad))
 		);
 	}
 

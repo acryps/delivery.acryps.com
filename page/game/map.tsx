@@ -103,27 +103,6 @@ export class MapComponent extends Component {
 		context.rotate(this.parent.direction - this.renderedRotation);
 		this.renderedRotation = this.parent.direction;
 
-		// prepare frame
-		const trackGravelPaths = new Map<number, Path2D>();
-
-		for (let railway of this.visibleRailways) {
-			let path = trackGravelPaths.get(railway.gauge);
-
-			if (!path) {
-				path = new Path2D();
-
-				trackGravelPaths.set(railway.gauge, path);
-			}
-
-			for (let pathIndex = 0; pathIndex < railway.path.length; pathIndex++) {
-				if (pathIndex == 0) {
-					path.moveTo(...this.transform(railway.path[pathIndex]));
-				} else {
-					path.lineTo(...this.transform(railway.path[pathIndex]));
-				}
-			}
-		}
-
 		const buildingsPath = new Path2D();
 		const packageSourcePath = new Path2D();
 
@@ -168,25 +147,43 @@ export class MapComponent extends Component {
 
 		this.mapStyle.render(context);
 
-		this.railwayGravelStyle.apply(context);
-
 		// render railways
-		for (let [gauge, path] of trackGravelPaths) {
-			const lineWidth = (gauge / 1000) * this.scale;
+		const visibleRails = this.visibleRailways;
+
+		for (let rail of visibleRails) {
+			const lineWidth = (rail.gauge / 1000) * this.scale;
+			const gravelPath = new Path2D();
+
+			for (let pathIndex = 0; pathIndex < rail.path.length; pathIndex++) {
+				if (pathIndex == 0) {
+					gravelPath.moveTo(...this.transform(rail.path[pathIndex]));
+				} else {
+					gravelPath.lineTo(...this.transform(rail.path[pathIndex]));
+				}
+			}
 
 			// add track bed
+			this.railwayGravelStyle.apply(context);
 			context.lineWidth = lineWidth + Railway.padding * 2 * this.scale;
-			context.stroke(path);
+			context.stroke(gravelPath);
+		}
+
+		for (let rail of visibleRails) {
+			const railPath = new Path2D();
+
+			for (let path of [rail.leftRail, rail.rightRail]) {
+				for (let pathIndex = 0; pathIndex < path.length; pathIndex++) {
+					if (pathIndex == 0) {
+						railPath.moveTo(...this.transform(path[pathIndex]));
+					} else {
+						railPath.lineTo(...this.transform(path[pathIndex]));
+					}
+				}
+			}
 
 			// add rails
 			this.railwayRailStyle.apply(context);
-			context.lineWidth = lineWidth + this.railwayRailStyle.stroke.size * 2;
-			context.stroke(path);
-
-			// add inner track bed
-			this.railwayGravelStyle.apply(context); // will be reused by the next outer track bed
-			context.lineWidth = lineWidth;
-			context.stroke(path);
+			context.stroke(railPath);
 		}
 
 		// draw buildings
@@ -248,7 +245,7 @@ export class MapComponent extends Component {
 	}
 
 	get viewport() {
-		return Rectangle.fromCenter(this.position, 0.0025, 0.0025);
+		return Rectangle.fromCenterRadius(this.position, this.realMapHeight * 2);
 	}
 
 	get visibleBuildings() {
@@ -257,10 +254,9 @@ export class MapComponent extends Component {
 		return this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
 	}
 
+	// TODO: filter for visible rails
 	get visibleRailways() {
-		const viewport = this.viewport;
-		
-		return this.parent.map.railways.filter(railway => viewport.touches(railway.boundingBox));
+		return this.parent.map.railways;
 	}
 
 	transform(point: Point): [number, number] {
