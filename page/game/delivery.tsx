@@ -36,7 +36,7 @@ export class DeliveryIndicator extends Component {
 				</ui-prompt>
 
 				<ui-location>
-					{this.parent.player.delivery.source.address.trim()}
+					{this.parent.player.delivery.source.address?.trim()}
 				</ui-location>
 			</ui-delivery>
 		}
