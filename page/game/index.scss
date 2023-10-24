@@ -1,16 +1,21 @@
+:root {
+	--lobby-width: min(calc(100vw - 2rem), 30rem);
+	--lobby-height: min(calc(100vh - 2rem), 50rem);
+}
+
 ui-game {
 	--building-stroke-size: 2;
-	--building-stroke-color: #fff;
-	--building-fill-color: #fff4;
+	--building-stroke-color: #444;
+	--building-fill-color: #b6b6af;
 
-	--railway-gravel-stroke-color: #111;
+	--railway-gravel-stroke-color: #d5d6d1;
 
 	--railway-rail-stroke-size: 1;
-	--railway-rail-stroke-color: #888;
+	--railway-rail-stroke-color: #222;
 
 	--map-stroke-size: 2;
-	--map-stroke-color: #222;
-	--map-fill-color: #000;
+	--map-stroke-color: #888;
+	--map-fill-color: #fff;
 
 	--notch-stroke-size: 4;
 	--notch-stroke-color: #ccc;
@@ -20,6 +25,10 @@ ui-game {
 
 	user-select: none;
 	-webkit-touch-callout: none;
+
+	&:has(ui-lobby) > *:not(ui-lobby) {
+		filter: contrast(0.1) brightness(2);
+	}
 
 	ui-map {
 		display: block;
@@ -32,10 +41,10 @@ ui-game {
 
 			// pattern background
 			background: linear-gradient(45deg, 
-				#000 calc(50% - (var(--map-stroke-size) * 1px / 2)), 
+				var(--map-fill-color) calc(50% - (var(--map-stroke-size) * 1px / 2)), 
 				var(--map-stroke-color) calc(50% - (var(--map-stroke-size) * 1px / 2)), 
 				var(--map-stroke-color) calc(50% + (var(--map-stroke-size) * 1px / 2)), 
-				#000 calc(50% + (var(--map-stroke-size) * 1px / 2))
+				var(--map-fill-color) calc(50% + (var(--map-stroke-size) * 1px / 2))
 			);
 
 			background-size: 1rem 1rem;
@@ -146,13 +155,19 @@ ui-game {
 
 	ui-lobby {
 		position: fixed;
-		inset: 1rem;
+		inset-inline: calc((100vw - var(--lobby-width)) / 2);
+		inset-block: calc((100vh - var(--lobby-height)) / 2);
+		z-index: 1;
+
+		width: var(--lobby-width);
+		height: var(--lobby-height);
 
 		display: flex;
 		flex-direction: column;
 
 		background: var(--page-background);
-		border: 1px solid var(--page-color);
+		border: 2px solid var(--primary-contrast-color);
+		box-shadow: 0 1rem 5rem #0002;
 
 		ui-invite {
 			flex-shrink: 0;
@@ -163,9 +178,9 @@ ui-game {
 
 			padding: 1rem;
 
-			background: var(--page-color);
-			color: var(--page-background);
-			font-size: 4rem;
+			color: var(--page-color);
+			background: var(--primary-color);
+			border-bottom: var(--page-border);
 
 			ui-token {
 				display: block;
@@ -177,10 +192,12 @@ ui-game {
 
 			img {
 				width: 10rem;
+				padding: 1rem;
 				margin-bottom: 1rem;
 				aspect-ratio: 1;
 
 				image-rendering: pixelated;
+				background: #fff;
 			}
 		}
 
@@ -191,7 +208,7 @@ ui-game {
 			overflow-x: hidden;
 			overflow-y: auto;
 
-			border-bottom: 1px solid var(--page-color);
+			border-bottom: var(--page-border);
 
 			ui-player {
 				display: flex;
@@ -200,7 +217,7 @@ ui-game {
 				align-items: center;
 				line-height: 1;
 
-				border-bottom: 1px dotted var(--page-color);
+				border-bottom: var(--page-border);
 
 				&::before {
 					content: '';
