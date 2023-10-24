@@ -1,7 +1,7 @@
 import { Component } from "@acryps/page";
 import { Point } from "../../shared/point";
 import { tokenLength } from "../../shared/constants";
-import { CreateGameComponent } from "../create";
+import { CreateGameComponent } from "./create";
 
 export class HomeComponent extends Component {
 	private token = '';
@@ -29,7 +29,15 @@ export class HomeComponent extends Component {
 				<ui-join>
 					<input $ui-value={this.token} maxlength={tokenLength} placeholder='Code' ui-error={this.invalidToken} />
 
-					<ui-action ui-join ui-click-text='Joining...' ui-click={async () => this.token.length && this.join()}>
+					<ui-action ui-join ui-click-text='Joining...' ui-click={async () => {
+						if (this.token.length == tokenLength) {
+							this.join();
+						} else {
+							this.invalidToken = true;
+
+							this.update();
+						}
+					}}>
 						Beitreten
 					</ui-action>
 				</ui-join>

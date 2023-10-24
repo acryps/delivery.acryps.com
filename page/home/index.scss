@@ -24,6 +24,12 @@ ui-home {
 
 		input {
 			@include text-field;
+
+			&[ui-error] {
+				animation: 0.2s shake;
+
+				border-color: var(--page-error);
+			}
 		}
 
 		ui-action {

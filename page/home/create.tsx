@@ -1,9 +1,9 @@
 import { Component } from "@acryps/page";
-import { gameConfiguration } from "../shared/constants";
-import { Point } from "../shared/point";
+import { gameConfiguration } from "../../shared/constants";
+import { Point } from "../../shared/point";
 
 export class CreateGameComponent extends Component {
-	position = new Point(47.3731429, 8.5239003);
+	center = new Point(47.3731429, 8.5239003);
 
 	positionPresets = [
 		new LocationPreset('Acryps Zürich', new Point(47.3731429, 8.5239003)),
@@ -24,8 +24,8 @@ export class CreateGameComponent extends Component {
 				</ui-title>
 
 				<ui-form>
-					<input type='number' $ui-value={this.position.latitude} />
-					<input type='number' $ui-value={this.position.longitude} />
+					<input type='number' $ui-value={this.center.latitude} />
+					<input type='number' $ui-value={this.center.longitude} />
 				</ui-form>
 
 				<ui-presets>
@@ -33,7 +33,7 @@ export class CreateGameComponent extends Component {
 						const position = await this.getCurrentLocation();
 
 						if (position) {
-							this.position = position;
+							this.center = position;
 
 							this.update();
 						}
@@ -42,7 +42,7 @@ export class CreateGameComponent extends Component {
 					</ui-action>
 
 					{this.positionPresets.map(preset => <ui-action ui-preset ui-click={() => {
-						this.position = preset.location;
+						this.center = preset.location;
 
 						this.update();
 					}}>
@@ -91,8 +91,8 @@ export class CreateGameComponent extends Component {
 					},
 					body: JSON.stringify({
 						center: {
-							latitude: +this.parameters.latitude,
-							longitude: +this.parameters.longitude
+							latitude: +this.center.latitude,
+							longitude: +this.center.longitude
 						},
 						radius: this.radius,
 						duration: this.duration
