@@ -9,6 +9,7 @@ import { Rectangle } from "../shared/rectangle";
 import { AreaLoader } from "./importer/area-loader";
 import { Railway } from "../shared/railway";
 import { gameConfiguration } from "../shared/constants";
+import { WaterBody } from "../shared/water-body";
 
 export function registerInterface(app, database: DbContext) {
 	const games: Game[] = [];
@@ -48,6 +49,9 @@ export function registerInterface(app, database: DbContext) {
 			.where(railway => railway.maxLongitude.valueOf() < doubleBoundingBox.maxLongitude)
 			.toArray();
 
+		// TODO add water finder
+		const waterBodies = await database.waterBody.toArray();
+
 		const map = new Map(
 			center, 
 			radius, 
@@ -59,6 +63,9 @@ export function registerInterface(app, database: DbContext) {
 			railways.map(railway => new Railway(
 				Point.unpack(railway.path),
 				railway.gauge
+			)),
+			waterBodies.map(waterBody => new WaterBody(
+				Point.unpack(waterBody.polygon)
 			))
 		);
 

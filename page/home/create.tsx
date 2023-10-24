@@ -9,7 +9,8 @@ export class CreateGameComponent extends Component {
 		new LocationPreset('Acryps Zürich', new Point(47.3731429, 8.5239003)),
 		new LocationPreset('Acryps Luzern', new Point(47.04981, 8.30086)),
 		new LocationPreset('Niederdorf', new Point(47.37184, 8.54381)),
-		new LocationPreset('London Marylebone', new Point(51.51901, 0.15836))
+		new LocationPreset('London Marylebone', new Point(51.51901, 0.15836)),
+		new LocationPreset('Luzern', new Point(47.05070, 8.30895))
 	];
 
 	radius = gameConfiguration.radii[gameConfiguration.defaultRadiusIndex];

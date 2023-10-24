@@ -30,6 +30,7 @@ export class MapComponent extends Component {
 	notchStyle: RenderStyle;
 	railwayGravelStyle: RenderStyle;
 	railwayRailStyle: RenderStyle;
+	waterBodyStyle: RenderStyle;
 
 	keyboardEventRepeater = setTimeout(() => {});
 
@@ -70,6 +71,7 @@ export class MapComponent extends Component {
 			this.notchStyle = new RenderStyle('notch', style);
 			this.railwayGravelStyle = new RenderStyle('railway-gravel', style);
 			this.railwayRailStyle = new RenderStyle('railway-rail', style);
+			this.waterBodyStyle = new RenderStyle('water-body', style);
 			
 			new Controls(
 				this.parent.direction,
@@ -132,6 +134,21 @@ export class MapComponent extends Component {
 			context.closePath();
 		}
 
+		// prepare water bodies
+		const waterBodiesPath = new Path2D();
+
+		for (let waterBody of this.visibleWaterBodies) {
+			for (let pointIndex = 0; pointIndex < waterBody.polygon.length; pointIndex++) {
+				if (pointIndex == 0) {
+					waterBodiesPath.moveTo(...this.transform(waterBody.polygon[pointIndex]));
+				} else {
+					waterBodiesPath.lineTo(...this.transform(waterBody.polygon[pointIndex]));
+				}
+			}
+
+			waterBodiesPath.closePath();
+		}
+
 		// clear last frame
 		context.save();
 		context.resetTransform();
@@ -146,6 +163,9 @@ export class MapComponent extends Component {
 		context.rect(...topLeft, bottomRight[0] - topLeft[0], bottomRight[1] - topLeft[1]);
 
 		this.mapStyle.render(context);
+
+		// render water bodies
+		this.waterBodyStyle.render(context, waterBodiesPath);
 
 		// render railways
 		const visibleRails = this.visibleRailways;
@@ -252,6 +272,12 @@ export class MapComponent extends Component {
 		const viewport = this.viewport;
 		
 		return this.parent.map.buildings.filter(building => viewport.touches(building.boundingBox));
+	}
+
+	get visibleWaterBodies() {
+		const viewport = this.viewport;
+		
+		return this.parent.map.waterBodies //.filter(waterBody => viewport.touches(waterBody.boundingBox));
 	}
 
 	// TODO: filter for visible rails
