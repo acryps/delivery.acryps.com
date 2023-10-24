@@ -248,7 +248,7 @@ export class MapComponent extends Component {
 	}
 
 	get viewport() {
-		return Rectangle.fromCenter(this.position, 0.0025, 0.0025);
+		return Rectangle.fromCenterRadius(this.position, this.realMapHeight * 2);
 	}
 
 	get visibleBuildings() {
