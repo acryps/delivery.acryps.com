@@ -6,7 +6,7 @@
 ui-game {
 	--building-stroke-size: 2;
 	--building-stroke-color: #444;
-	--building-fill-color: #b6b6af;
+	--building-fill-color: #b6b6afcc;
 
 	--railway-gravel-stroke-color: #d5d6d1;
 
@@ -18,7 +18,7 @@ ui-game {
 	--map-fill-color: #fff;
 
 	--notch-stroke-size: 4;
-	--notch-stroke-color: #ccc;
+	--notch-stroke-color: #000;
 
 	position: fixed;
 	inset: 0;
@@ -87,7 +87,7 @@ ui-game {
 				position: absolute;
 				left: 0;
 				right: calc(100% - 100% * var(--progress));
-				bottom: 1px;
+				bottom: 0;
 
 				height: 0.25rem;
 				background: var(--player-color);
@@ -113,20 +113,11 @@ ui-game {
 
 			ui-score {
 				position: relative;
-				flex: 1;
+				flex-grow: 1;
 
 				ui-current {
 					color: var(--player-color);
 					font-size: 4rem;
-				}
-
-				ui-delivery-worth {
-					position: absolute;
-					right: 0;
-					bottom: 5%;
-
-					border-radius: 50%;
-					background: rgba(0,0,0,0.5);
 				}
 			}
 		}
@@ -139,8 +130,8 @@ ui-game {
 				width: calc(100% - 2 * var(--inline-padding));
 				padding: 0.5rem var(--inline-padding);
 
-				color: var(--page-background);
-				background: var(--page-color);
+				color: var(--primary-contrast-color);
+				background: var(--primary-color);
 
 				font-size: 0.8rem;
 
