@@ -3,6 +3,7 @@ import { Delivery } from "./delivery";
 import { Point } from "./point";
 import { Railway } from "./railway";
 import { Rectangle } from "./rectangle";
+import { WaterBody } from "./water-body";
 
 export class Map {
 	readonly maximalSearchedBuildingArea = 1000;
@@ -13,7 +14,8 @@ export class Map {
 		public center: Point,
 		public radius: number,
 		public buildings: BuildingViewModel[],
-		public railways: Railway[]
+		public railways: Railway[],
+		public waterBodies: WaterBody[]
 	) {
 		this.boundingBox = Rectangle.fromCenterRadius(center, radius);
 	}
@@ -23,7 +25,8 @@ export class Map {
 			Point.from(serialized.center),
 			serialized.radius,
 			serialized.buildings.map(building => BuildingViewModel.from(building)),
-			serialized.railways.map(railway => Railway.from(railway))
+			serialized.railways.map(railway => Railway.from(railway)),
+			serialized.waterBodies.map(waterBody => WaterBody.from(waterBody))
 		);
 	}
 
