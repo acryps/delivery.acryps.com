@@ -1,12 +1,6 @@
 # Delivery
-
-# TEMPLATE
-1. Create project directory
-2. `git init && git pull git@github.com:acryps/template.git`
-3. Replace `{{APPLICATION}}` and `{{PORT}}` everywhere
-4. Replace favicon
-5. Create project on git remote
-6. Remove this section
+A game developed by the entire team on our trip to Ljubljana 2023.
+Not affiliated with Swiss Post, it's just a joke.
 
 ## Server
 Backend
